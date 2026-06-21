@@ -53,7 +53,7 @@ style="border-radius:10px;">
 
 <p>Stock: ${data.Stock}</p>
 
-<button>
+<button onclick='addToCart(${JSON.stringify(data)})'>
 Add to Cart
 </button>
 
