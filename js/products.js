@@ -8,37 +8,50 @@ from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
 
 const productsDiv =
-document.getElementById("Products");
+document.getElementById("products");
+
 
 async function loadProducts(){
 
-const querySnapshot =
+try{
+
+productsDiv.innerHTML="<h3>Loading...</h3>";
+
+const querySnapshot=
 await getDocs(
 collection(db,"Products")
 );
+
+productsDiv.innerHTML="";
 
 querySnapshot.forEach((doc)=>{
 
 const data=doc.data();
 
-productsDiv.innerHTML +=`
+productsDiv.innerHTML += `
 
 <div style="
 padding:15px;
-margin:10px;
+margin:15px;
 border:1px solid #ddd;
 border-radius:10px;
+background:white;
 ">
 
 <img
-src="${data.image}"
-width="150">
+src="${data.Image}"
+width="150"
+style="border-radius:10px;">
 
 <h3>${data.name}</h3>
 
-<p>₹${data.price}</p>
+<p><b>₹${data.price}</b></p>
 
 <p>${data.description}</p>
+
+<p>Category: ${data.category}</p>
+
+<p>Stock: ${data.Stock}</p>
 
 <button>
 Add to Cart
@@ -49,6 +62,16 @@ Add to Cart
 `;
 
 });
+
+}
+catch(error){
+
+productsDiv.innerHTML=
+`<p>${error.message}</p>`;
+
+console.log(error);
+
+}
 
 }
 
