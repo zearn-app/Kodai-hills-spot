@@ -1,5 +1,7 @@
 import { db } from "./firebase.js";
 
+import "./cart.js";
+
 import {
 collection,
 getDocs
