@@ -1,0 +1,68 @@
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Arial;
+}
+
+body{
+background:#f5f5f5;
+}
+
+.navbar{
+display:flex;
+justify-content:space-between;
+align-items:center;
+padding:15px;
+background:#2e7d32;
+color:white;
+}
+
+.logo{
+font-size:22px;
+font-weight:bold;
+}
+
+.menu a{
+color:white;
+margin:10px;
+text-decoration:none;
+}
+
+.hero{
+text-align:center;
+padding:80px 20px;
+}
+
+.hero h1{
+font-size:32px;
+margin-bottom:10px;
+}
+
+.hero button{
+padding:10px 20px;
+border:none;
+border-radius:8px;
+}
+
+.categories{
+padding:30px;
+}
+
+.category-box{
+display:grid;
+grid-template-columns:repeat(2,1fr);
+gap:10px;
+}
+
+.category-box div{
+background:white;
+padding:20px;
+border-radius:10px;
+text-align:center;
+}
+
+footer{
+text-align:center;
+padding:20px;
+}
