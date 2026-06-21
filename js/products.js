@@ -8,7 +8,7 @@ from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
 
 const productsDiv =
-document.getElementById("products");
+document.getElementById("Products");
 
 async function loadProducts(){
 
