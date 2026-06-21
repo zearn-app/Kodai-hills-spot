@@ -14,7 +14,7 @@ async function loadProducts(){
 
 const querySnapshot =
 await getDocs(
-collection(db,"products")
+collection(db,"Products")
 );
 
 querySnapshot.forEach((doc)=>{
