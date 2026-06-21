@@ -1,102 +1,100 @@
-import { auth } from "./firebase.js";
+import { auth,db } from "./firebase.js";
 
 import {
+
 createUserWithEmailAndPassword,
-signInWithEmailAndPassword,
-GoogleAuthProvider,
-signInWithPopup
+signInWithEmailAndPassword
+
 }
 
 from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
 
 
-const signupBtn=document.getElementById("signupBtn");
+import {
 
-const loginBtn=document.getElementById("loginBtn");
+doc,
+setDoc
 
-const googleBtn=document.getElementById("googleBtn");
+}
 
-
-signupBtn.onclick=()=>{
-
-const email=document.getElementById("email").value;
-
-const password=document.getElementById("password").value;
+from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
 
-createUserWithEmailAndPassword(
+
+signupBtn.onclick=async()=>{
+
+try{
+
+const user=
+
+await createUserWithEmailAndPassword(
+
 auth,
-email,
-password
-)
 
-.then(()=>{
+name.value,
 
-alert("Signup successful");
+password.value
 
-})
+);
 
-.catch((error)=>{
+
+await setDoc(
+
+doc(
+db,
+"users",
+user.user.uid
+),
+
+{
+
+name:name.value,
+phone:phone.value,
+address:address.value,
+email:email.value
+
+}
+
+);
+
+alert("Signup Success");
+
+window.location="index.html";
+
+}
+
+catch(error){
 
 alert(error.message);
 
-});
+}
 
 };
 
 
-loginBtn.onclick=()=>{
+loginBtn.onclick=async()=>{
 
-const email=document.getElementById("email").value;
+try{
 
-const password=document.getElementById("password").value;
+await signInWithEmailAndPassword(
 
-
-signInWithEmailAndPassword(
 auth,
-email,
-password
-)
 
-.then(()=>{
+loginEmail.value,
+loginPassword.value
 
-alert("Login successful");
+);
+
+alert("Login Success");
 
 window.location="index.html";
 
-})
+}
 
-.catch((error)=>{
-
-alert(error.message);
-
-});
-
-};
-
-
-googleBtn.onclick=()=>{
-
-const provider=
-new GoogleAuthProvider();
-
-signInWithPopup(
-auth,
-provider
-)
-
-.then(()=>{
-
-alert("Google Login Success");
-
-window.location="index.html";
-
-})
-
-.catch((error)=>{
+catch(error){
 
 alert(error.message);
 
-});
+}
 
 };
