@@ -1,3 +1,77 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport"
+content="width=device-width,initial-scale=1">
+
+<title>My Orders</title>
+
+<style>
+
+body{
+background:#f5f5f5;
+padding:20px;
+font-family:Arial;
+padding-bottom:90px;
+}
+
+h1{
+color:#2e7d32;
+margin-bottom:20px;
+}
+
+input{
+width:100%;
+padding:14px;
+margin-bottom:10px;
+border:none;
+border-radius:12px;
+box-shadow:0 2px 10px rgba(0,0,0,.1);
+}
+
+.order{
+
+background:white;
+padding:15px;
+margin-top:15px;
+border-radius:15px;
+box-shadow:0 2px 10px rgba(0,0,0,.1);
+
+}
+
+.order img{
+
+width:100%;
+height:150px;
+object-fit:cover;
+border-radius:10px;
+
+}
+
+.status{
+
+padding:8px;
+border-radius:8px;
+display:inline-block;
+margin-top:10px;
+font-weight:bold;
+background:#f1f1f1;
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<h1>
+📦 My Orders
+</h1>
+
 <input
 id="search"
 placeholder="Search products">
@@ -8,4 +82,171 @@ type="date">
 
 <div id="orders">
 
+Loading...
+
 </div>
+
+<script type="module">
+
+import {db,auth}
+from "./js/firebase.js";
+
+import {
+
+collection,
+query,
+where,
+getDocs
+
+}
+
+from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
+
+import {
+
+onAuthStateChanged
+
+}
+
+from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
+
+
+let allOrders=[];
+
+
+onAuthStateChanged(
+
+auth,
+
+async(user)=>{
+
+if(!user){
+
+location="login.html";
+return;
+
+}
+
+const q=query(
+
+collection(
+db,
+"Orders"
+),
+
+where(
+"uid",
+"==",
+user.uid
+)
+
+);
+
+const snapshot=
+await getDocs(q);
+
+allOrders=[];
+
+snapshot.forEach((doc)=>{
+
+allOrders.push({
+
+id:doc.id,
+
+...doc.data()
+
+});
+
+});
+
+showOrders();
+
+});
+
+
+function showOrders(){
+
+const search=
+
+document.getElementById(
+"search"
+).value.toLowerCase();
+
+const date=
+
+document.getElementById(
+"date"
+).value;
+
+orders.innerHTML="";
+
+
+allOrders.forEach(item=>{
+
+if(
+
+item.name.toLowerCase()
+.includes(search)
+
+&&
+
+(date=="" ||
+
+item.orderDate
+?.includes(date))
+
+){
+
+orders.innerHTML+=`
+
+<div class="order">
+
+<img src="${item.image}">
+
+<h3>
+
+${item.name}
+
+</h3>
+
+<p>
+
+₹${item.price}
+
+</p>
+
+<p>
+
+Qty :
+${item.quantity}
+
+</p>
+
+<div class="status">
+
+${item.status}
+
+</div>
+
+</div>
+
+`;
+
+}
+
+});
+
+}
+
+
+search.oninput=
+showOrders;
+
+date.onchange=
+showOrders;
+
+</script>
+
+</body>
+
+</html>
