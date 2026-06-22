@@ -2,26 +2,20 @@ import { auth, db }
 from "./firebase.js";
 
 import {
-
-onAuthStateChanged
-
-}
-
-from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
-
-import {
-
 collection,
 addDoc,
 getDocs,
 deleteDoc,
 doc,
-updateDoc,
-getCountFromServer
-
+getCountFromServer,
+updateDoc
 }
-
 from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
+
+import {
+onAuthStateChanged
+}
+from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
 
 
 const productsDiv=
@@ -37,13 +31,13 @@ document.getElementById(
 let selectedOrderId=null;
 
 
-/* Admin Authentication */
+/* Admin authentication */
 
 onAuthStateChanged(
 
 auth,
 
-async(user)=>{
+(user)=>{
 
 if(!user){
 
@@ -54,15 +48,9 @@ return;
 
 }
 
-
-/* Replace with your admin Gmail */
-
 if(
-
-user.email!==
-
+user.email !==
 "kodaihillsspot@gmail.com"
-
 ){
 
 alert(
@@ -76,30 +64,13 @@ return;
 
 }
 
-
 loadStats();
-
 loadProducts();
-
 loadOrders();
 
 }
 
 );
-
-
-/* User Page Button */
-
-document.getElementById(
-"userBtn"
-)
-
-.onclick=()=>{
-
-window.location=
-"srkxditit.html";
-
-};
 
 
 /* Add Product */
@@ -112,6 +83,49 @@ document.getElementById(
 
 async()=>{
 
+try{
+
+const name=
+document.getElementById(
+"name"
+).value.trim();
+
+const price=
+document.getElementById(
+"price"
+).value.trim();
+
+const category=
+document.getElementById(
+"category"
+).value;
+
+const image=
+document.getElementById(
+"image"
+).value.trim();
+
+const description=
+document.getElementById(
+"description"
+).value.trim();
+
+
+if(
+!name ||
+!price ||
+!image ||
+!description
+){
+
+alert(
+"Fill all fields"
+);
+
+return;
+
+}
+
 await addDoc(
 
 collection(
@@ -121,39 +135,51 @@ db,
 
 {
 
-name:
-name.value,
-
-price:
-price.value,
-
-category:
-category.value,
-
-Image:
-image.value,
-
-description:
-description.value
+name,
+price,
+category,
+Image:image,
+description
 
 }
 
 );
 
 alert(
-"Product Added"
+"Product Added Successfully"
 );
 
-location.reload();
+
+/* Clear form */
+
+name.value="";
+price.value="";
+image.value="";
+description.value="";
+
+
+loadProducts();
+loadStats();
+
+}
+
+catch(error){
+
+alert(
+error.message
+);
+
+}
 
 };
 
 
-/* Load Products */
+/* Product list */
 
 async function loadProducts(){
 
-productsDiv.innerHTML="";
+productsDiv.innerHTML=
+"Loading...";
 
 const snapshot=
 
@@ -166,6 +192,7 @@ db,
 
 );
 
+productsDiv.innerHTML="";
 
 snapshot.forEach((item)=>{
 
@@ -177,7 +204,12 @@ productsDiv.innerHTML +=`
 <div class="product">
 
 <img
-src="${data.Image}">
+src="${data.Image}"
+style="
+width:100%;
+height:150px;
+object-fit:cover;
+border-radius:10px;">
 
 <h3>
 
@@ -198,11 +230,13 @@ ${data.category}
 </p>
 
 <button
-class="delete"
-
-onclick="deleteProduct(
-'${item.id}'
-)">
+onclick="deleteProduct('${item.id}')"
+style="
+background:red;
+color:white;
+border:none;
+padding:10px;
+border-radius:10px;">
 
 Delete
 
@@ -217,7 +251,7 @@ Delete
 }
 
 
-/* Delete Product */
+/* Delete product */
 
 window.deleteProduct=
 
@@ -233,16 +267,18 @@ id
 
 );
 
-location.reload();
+loadProducts();
+
+loadStats();
 
 };
 
 
-/* Dashboard Stats */
+/* Dashboard stats */
 
 async function loadStats(){
 
-const products=
+const productCount=
 
 await getCountFromServer(
 
@@ -253,18 +289,52 @@ db,
 
 );
 
+const orderCount=
+
+await getCountFromServer(
+
+collection(
+db,
+"Orders"
+)
+
+);
+
 document.getElementById(
 "totalProducts"
 )
 
 .innerText=
 
-products.data().count;
+productCount.data().count;
+
+
+document.getElementById(
+"totalOrders"
+)
+
+.innerText=
+
+orderCount.data().count;
 
 }
 
 
-/* Load Orders */
+/* User page button */
+
+document.getElementById(
+"userBtn"
+)
+
+.onclick=()=>{
+
+window.location=
+"srkxditit.html";
+
+};
+
+
+/* Orders */
 
 async function loadOrders(){
 
@@ -281,32 +351,15 @@ db,
 
 );
 
-
-document.getElementById(
-"totalOrders"
-)
-
-.innerText=
-
-snapshot.size;
-
-
-snapshot.forEach((docItem)=>{
+snapshot.forEach((item)=>{
 
 const data=
-docItem.data();
+item.data();
 
-ordersDiv.innerHTML +=`
+ordersDiv.innerHTML+=`
 
-<div
-class="product"
-
-onclick="openPopup(
-'${docItem.id}'
-)">
-
-<img
-src="${data.image}">
+<div class="product"
+onclick="openPopup('${item.id}')">
 
 <h3>
 
@@ -328,15 +381,8 @@ ${data.email||""}
 
 <p>
 
-Qty :
-${data.quantity}
-
-</p>
-
-<p>
-
-Status :
-${data.status}
+Status:
+${data.status||"Pending"}
 
 </p>
 
@@ -349,9 +395,10 @@ ${data.status}
 }
 
 
-/* Open Popup */
+/* Popup */
 
-window.openPopup=(id)=>{
+window.openPopup=
+(id)=>{
 
 selectedOrderId=id;
 
@@ -365,9 +412,8 @@ document.getElementById(
 };
 
 
-/* Close Popup */
-
-window.closePopup=()=>{
+window.closePopup=
+()=>{
 
 document.getElementById(
 "statusPopup"
@@ -379,37 +425,32 @@ document.getElementById(
 };
 
 
-/* Status Change */
-
 statusSelect.onchange=()=>{
 
-if(
-
-statusSelect.value
-==="Approved"
-
-){
-
 trackingId.style.display=
-"block";
 
-}
+statusSelect.value==="Approved"
 
-else{
+?
 
-trackingId.style.display=
+"block"
+
+:
+
 "none";
-
-}
 
 };
 
 
-/* Update Status */
-
 updateBtn.onclick=
 
 async()=>{
+
+const status=
+statusSelect.value;
+
+const tracking=
+trackingId.value;
 
 await updateDoc(
 
@@ -421,11 +462,19 @@ selectedOrderId
 
 {
 
-status:
-statusSelect.value,
+status:status,
 
 trackingId:
-trackingId.value
+
+status==="Approved"
+
+?
+
+tracking
+
+:
+
+""
 
 }
 
