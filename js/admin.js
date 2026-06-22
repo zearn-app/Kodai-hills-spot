@@ -44,7 +44,7 @@ return;
 
 if(
 user.email !==
-"youradmin@gmail.com"
+"kodaihillsspot@gmail.com"
 ){
 
 alert(
