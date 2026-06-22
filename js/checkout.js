@@ -1,50 +1,44 @@
 import { db, auth } from "./firebase.js";
 
-import {
+import{
 doc,
 getDoc,
+setDoc,
 collection,
 addDoc
 }
-
 from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
-import {
+import{
 onAuthStateChanged
 }
-
 from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
 
 
-const params=
-new URLSearchParams(
+const params=new URLSearchParams(
 window.location.search
 );
 
-const productId=
-params.get("id");
+const productId=params.get("id");
 
-const qty=
-parseInt(
+const qty=parseInt(
 params.get("qty")
 )||1;
 
 let currentUser=null;
 let currentProduct=null;
+let savedAddress=null;
 
-
-/* Auth check */
 
 onAuthStateChanged(
 
 auth,
 
-(user)=>{
+async(user)=>{
 
 if(!user){
 
-window.location=
-"login.html";
+window.location="login.html";
 
 return;
 
@@ -52,83 +46,119 @@ return;
 
 currentUser=user;
 
+await loadSavedAddress();
+
 loadProduct();
 
 });
 
 
-async function loadProduct(){
-
-try{
+async function loadSavedAddress(){
 
 const snapshot=
-
 await getDoc(
 
+doc(
+db,
+"Users",
+currentUser.uid
+)
+
+);
+
+if(snapshot.exists()){
+
+const data=
+snapshot.data();
+
+if(data.address){
+
+savedAddress=
+data.address;
+
+document.getElementById(
+"savedAddress"
+).classList.remove(
+"hidden"
+);
+
+document.getElementById(
+"addressForm"
+).classList.add(
+"hidden"
+);
+
+document.getElementById(
+"addressText"
+).innerHTML=`
+
+<b>${savedAddress.name}</b><br>
+
+${savedAddress.phone}<br>
+
+${savedAddress.area},
+${savedAddress.street}<br>
+
+${savedAddress.district},
+${savedAddress.state}
+-${savedAddress.pincode}
+
+`;
+
+}
+
+}
+
+}
+
+
+async function loadProduct(){
+
+const snapshot=
+await getDoc(
 doc(
 db,
 "Products",
 productId
 )
-
 );
-
-
-if(!snapshot.exists()){
-
-document.body.innerHTML=
-"<h2>Product not found</h2>";
-
-return;
-
-}
-
 
 currentProduct=
 snapshot.data();
-
 
 document.getElementById(
 "productImage"
 ).src=
 currentProduct.Image;
 
-
 document.getElementById(
 "productName"
 ).innerText=
 currentProduct.name;
 
-
 document.getElementById(
 "productPrice"
 ).innerText=
-"₹"+currentProduct.price;
-
+"₹"+
+currentProduct.price;
 
 document.getElementById(
 "productQty"
 ).innerText=
 "Qty : "+qty;
 
-
 const subtotal=
-
 Number(
 currentProduct.price
 )*qty;
 
-const delivery=40;
-
 const total=
-subtotal+delivery;
-
+subtotal+40;
 
 document.getElementById(
 "subtotal"
 ).innerText=
 "₹"+subtotal;
-
 
 document.getElementById(
 "total"
@@ -137,17 +167,7 @@ document.getElementById(
 
 }
 
-catch(error){
 
-console.log(error);
-
-}
-
-}
-
-
-
-/* Place order */
 
 document.getElementById(
 "placeOrder"
@@ -157,39 +177,59 @@ document.getElementById(
 
 async()=>{
 
-const name=
+
+if(!savedAddress){
+
+savedAddress={
+
+name:
 document.getElementById(
 "name"
-).value;
+).value,
 
-const phone=
+phone:
 document.getElementById(
 "phone"
-).value;
+).value,
 
-const address=
+state:
 document.getElementById(
-"address"
-).value;
+"state"
+).value,
 
-const payment=
+district:
 document.getElementById(
-"payment"
-).value;
+"district"
+).value,
+
+area:
+document.getElementById(
+"area"
+).value,
+
+street:
+document.getElementById(
+"street"
+).value,
+
+pincode:
+document.getElementById(
+"pincode"
+).value
+
+};
 
 
 if(
 
-name=="" ||
-
-phone=="" ||
-
-address==""
+Object.values(
+savedAddress
+).includes("")
 
 ){
 
 alert(
-"Fill all details"
+"Fill all address fields"
 );
 
 return;
@@ -197,8 +237,38 @@ return;
 }
 
 
-const subtotal=
+await setDoc(
 
+doc(
+db,
+"Users",
+currentUser.uid
+),
+
+{
+
+address:
+savedAddress
+
+},
+
+{
+
+merge:true
+
+}
+
+);
+
+}
+
+
+const payment=
+document.getElementById(
+"payment"
+).value;
+
+const subtotal=
 Number(
 currentProduct.price
 )*qty;
@@ -206,8 +276,6 @@ currentProduct.price
 const total=
 subtotal+40;
 
-
-try{
 
 await addDoc(
 
@@ -234,13 +302,13 @@ quantity:
 qty,
 
 customerName:
-name,
+savedAddress.name,
 
 phone:
-phone,
+savedAddress.phone,
 
 address:
-address,
+savedAddress,
 
 payment:
 payment,
@@ -259,21 +327,12 @@ new Date()
 
 );
 
+
 alert(
 "Order placed successfully"
 );
 
 window.location=
 "orders.html";
-
-}
-
-catch(error){
-
-alert(
-error.message
-);
-
-}
 
 };
