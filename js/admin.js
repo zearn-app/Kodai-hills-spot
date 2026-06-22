@@ -1,3 +1,140 @@
+import {
+
+updateDoc
+
+}
+
+from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
+
+
+async function loadOrders(){
+
+const orderDiv=
+document.getElementById(
+"allOrders"
+);
+
+orderDiv.innerHTML="";
+
+const snapshot=
+await getDocs(
+collection(
+db,
+"Orders"
+)
+);
+
+
+document.getElementById(
+"totalOrders"
+).innerText=
+snapshot.size;
+
+
+snapshot.forEach((docItem)=>{
+
+const data=
+docItem.data();
+
+orderDiv.innerHTML+=`
+
+<div class="product">
+
+<img src="${data.image}">
+
+<h3>
+
+${data.name}
+
+</h3>
+
+<p>
+
+${data.email}
+
+</p>
+
+<p>
+
+₹${data.price}
+
+</p>
+
+<p>
+
+Qty :
+${data.quantity}
+
+</p>
+
+<select
+onchange="changeStatus(
+'${docItem.id}',
+this.value
+)">
+
+<option
+${data.status=="Pending"?"selected":""}>
+
+Pending
+
+</option>
+
+<option
+${data.status=="Approved"?"selected":""}>
+
+Approved
+
+</option>
+
+<option
+${data.status=="Delivered"?"selected":""}>
+
+Delivered
+
+</option>
+
+</select>
+
+</div>
+
+`;
+
+});
+
+}
+
+
+window.changeStatus=
+
+async(id,status)=>{
+
+await updateDoc(
+
+doc(
+db,
+"Orders",
+id
+),
+
+{
+
+status:status
+
+}
+
+);
+
+alert(
+"Status Updated"
+);
+
+};
+
+
+loadOrders();
+
+
 import { auth, db }
 from "./firebase.js";
 
