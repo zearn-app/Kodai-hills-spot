@@ -130,6 +130,47 @@ location.reload();
 
 
 
+const orders=
+
+await getDocs(
+collection(
+db,
+"Orders"
+)
+);
+
+orders.forEach((doc)=>{
+
+const data=
+doc.data();
+
+document.getElementById(
+"allOrders"
+)
+
+.innerHTML +=`
+
+<div class="product">
+
+<h3>
+
+${data.email}
+
+</h3>
+
+<p>
+
+${data.status}
+
+</p>
+
+</div>
+
+`;
+
+});
+
+
 async function loadProducts(){
 
 productsDiv.innerHTML="";
