@@ -3,8 +3,9 @@ from "./firebase.js";
 
 import {
 
-createUserWithEmailAndPassword,
-signInWithEmailAndPassword
+RecaptchaVerifier,
+signInWithPhoneNumber,
+createUserWithEmailAndPassword
 
 }
 
@@ -12,78 +13,91 @@ from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
 
 import {
 
-setDoc,
-doc
+doc,
+setDoc
 
 }
 
 from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
 
-/* Signup */
+let confirmationResult;
 
-document.getElementById(
-"signupBtn"
-)
 
-.onclick=async()=>{
+/* Recaptcha */
 
-try{
+window.recaptchaVerifier=
 
-const email=
-document.getElementById(
-"email"
-).value;
-
-const password=
-document.getElementById(
-"password"
-).value;
-
-const userCredential=
-
-await createUserWithEmailAndPassword(
+new RecaptchaVerifier(
 
 auth,
-email,
-password
-
-);
-
-await setDoc(
-
-doc(
-db,
-"Users",
-userCredential.user.uid
-),
-
+"recaptcha-container",
 {
 
-name:
-document.getElementById(
-"name"
-).value,
-
-phone:
-document.getElementById(
-"phone"
-).value,
-
-email:email,
-
-address:""
+size:"invisible"
 
 }
 
 );
 
+
+/* Send OTP */
+
+signupBtn.onclick=
+
+async()=>{
+
+try{
+
+const phone=
+
+document.getElementById(
+"phone"
+).value.trim();
+
+
+if(phone.length!=10){
+
 alert(
-"Signup Successful"
+"Enter valid phone number"
 );
 
-window.location=
-"index.html";
+return;
+
+}
+
+
+const appVerifier=
+
+window.recaptchaVerifier;
+
+
+confirmationResult=
+
+await signInWithPhoneNumber(
+
+auth,
+
+"+91"+phone,
+
+appVerifier
+
+);
+
+
+alert(
+"OTP sent successfully"
+);
+
+
+otp.style.display=
+"block";
+
+verifyOtpBtn.style.display=
+"block";
+
+signupBtn.style.display=
+"none";
 
 }
 
@@ -99,28 +113,53 @@ error.message
 
 
 
-/* Login */
+/* Verify OTP */
 
-document.getElementById(
-"loginBtn"
-)
+verifyOtpBtn.onclick=
 
-.onclick=async()=>{
+async()=>{
 
 try{
 
+const code=
+
+otp.value;
+
+
+await confirmationResult.confirm(
+code
+);
+
+
+const user=
+
+auth.currentUser;
+
+
+const name=
+document.getElementById(
+"name"
+).value;
+
 const email=
 document.getElementById(
-"loginEmail"
+"email"
 ).value;
 
 const password=
 document.getElementById(
-"loginPassword"
+"password"
+).value;
+
+const phone=
+document.getElementById(
+"phone"
 ).value;
 
 
-await signInWithEmailAndPassword(
+/* Create email account */
+
+await createUserWithEmailAndPassword(
 
 auth,
 email,
@@ -129,29 +168,34 @@ password
 );
 
 
-/* Admin redirect */
+/* Save user */
 
-if(
+await setDoc(
 
-email.toLowerCase()
+doc(
+db,
+"Users",
+user.uid
+),
 
-===
+{
 
-"kodaihillsspot@gmail.com"
-
-){
-
-window.location=
-"admin.html";
+name:name,
+email:email,
+phone:phone
 
 }
 
-else{
+);
+
+
+alert(
+"Signup successful"
+);
+
 
 window.location=
 "index.html";
-
-}
 
 }
 
