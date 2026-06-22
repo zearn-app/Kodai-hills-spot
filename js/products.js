@@ -1,62 +1,74 @@
 import { db } from "./firebase.js";
 
-import "./cart.js";
-
 import {
 collection,
 getDocs
 }
 from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
-
-const productsDiv =
+const productsDiv=
 document.getElementById("products");
+
+const searchInput=
+document.getElementById("searchInput");
+
+const categoryFilter=
+document.getElementById("categoryFilter");
+
+let allProducts=[];
 
 
 async function loadProducts(){
 
-try{
-
-productsDiv.innerHTML="<h3>Loading...</h3>";
-
 const querySnapshot=
 await getDocs(
-collection(db,"Products")
+collection(
+db,
+"Products"
+)
 );
 
-productsDiv.innerHTML="";
+allProducts=[];
 
 querySnapshot.forEach((doc)=>{
 
-const data=doc.data();
+allProducts.push(
+doc.data()
+);
 
-productsDiv.innerHTML += `
+});
 
-<div style="
-padding:15px;
-margin:15px;
-border:1px solid #ddd;
-border-radius:10px;
-background:white;
-">
+showProducts(allProducts);
 
-<img
-src="${data.Image}"
-width="150"
-style="border-radius:10px;">
+}
+
+
+function showProducts(products){
+
+productsDiv.innerHTML="";
+
+products.forEach(data=>{
+
+productsDiv.innerHTML +=`
+
+<div class="card">
+
+<img src="${data.Image}">
 
 <h3>${data.name}</h3>
 
-<p><b>₹${data.price}</b></p>
+<div class="price">
 
-<p>${data.description}</p>
+₹${data.price}
 
-<p>Category: ${data.category}</p>
+</div>
 
-<p>Stock: ${data.Stock}</p>
+<button
+class="btn"
+onclick='addToCart(${JSON.stringify(data)})'>
 
-<button onclick='addToCart(${JSON.stringify(data)})'>
 Add to Cart
+
 </button>
 
 </div>
@@ -66,15 +78,53 @@ Add to Cart
 });
 
 }
-catch(error){
 
-productsDiv.innerHTML=
-`<p>${error.message}</p>`;
 
-console.log(error);
+searchInput.addEventListener(
+"input",
+filterProducts
+);
+
+categoryFilter.addEventListener(
+"change",
+filterProducts
+);
+
+
+function filterProducts(){
+
+let search=
+searchInput.value.toLowerCase();
+
+let category=
+categoryFilter.value;
+
+
+let filtered=
+
+allProducts.filter(product=>{
+
+let matchSearch=
+
+product.name
+.toLowerCase()
+.includes(search);
+
+let matchCategory=
+
+category==="" ||
+
+product.category===category;
+
+return matchSearch &&
+matchCategory;
+
+});
+
+
+showProducts(filtered);
 
 }
 
-}
 
 loadProducts();
