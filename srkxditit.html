@@ -4,8 +4,7 @@
 <head>
 
 <meta charset="UTF-8">
-<meta name="viewport"
-content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 
 <title>Kodai Hills Spot Users</title>
 
@@ -24,7 +23,6 @@ padding:20px;
 }
 
 .navbar{
-
 background:white;
 padding:15px;
 border-radius:15px;
@@ -33,47 +31,37 @@ align-items:center;
 gap:10px;
 box-shadow:0 2px 10px rgba(0,0,0,.1);
 margin-bottom:20px;
-
 }
 
 .logo{
-
 width:50px;
 height:50px;
 border-radius:50%;
 border:2px solid #2e7d32;
-
 }
 
 .title{
-
 font-size:22px;
 font-weight:bold;
 color:#2e7d32;
-
 }
 
 .stats{
-
 background:white;
 padding:20px;
 border-radius:15px;
 margin-bottom:20px;
 text-align:center;
 box-shadow:0 2px 10px rgba(0,0,0,.1);
-
 }
 
 .count{
-
 font-size:35px;
 font-weight:bold;
 color:#2e7d32;
-
 }
 
 .search{
-
 width:100%;
 padding:15px;
 border:none;
@@ -81,35 +69,28 @@ border-radius:12px;
 margin-bottom:20px;
 outline:none;
 box-shadow:0 2px 10px rgba(0,0,0,.1);
-
 }
 
 .user{
-
 background:white;
 padding:15px;
 border-radius:15px;
 margin-bottom:15px;
 box-shadow:0 2px 10px rgba(0,0,0,.1);
-
 }
 
 .user h3{
-
 color:#2e7d32;
 margin-bottom:10px;
-
 }
 
 .info{
-
 margin-top:8px;
-color:#666;
-
+color:#555;
+word-break:break-word;
 }
 
 .delete{
-
 width:100%;
 padding:12px;
 margin-top:15px;
@@ -117,7 +98,7 @@ border:none;
 border-radius:10px;
 background:#e53935;
 color:white;
-
+cursor:pointer;
 }
 
 </style>
@@ -125,6 +106,7 @@ color:white;
 </head>
 
 <body>
+
 
 <div class="navbar">
 
@@ -143,9 +125,7 @@ Users Management
 
 <div class="stats">
 
-<div>
-Total Users
-</div>
+<div>Total Users</div>
 
 <div
 class="count"
@@ -161,11 +141,10 @@ id="totalUsers">
 <input
 class="search"
 id="searchInput"
-
 placeholder="🔍 Search users">
 
 
-<div id="Users">
+<div id="users">
 
 Loading...
 
@@ -193,8 +172,15 @@ from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
 let allUsers=[];
 
+const usersDiv=
+document.getElementById("users");
 
-/* Admin protection */
+const totalUsers=
+document.getElementById("totalUsers");
+
+const searchInput=
+document.getElementById("searchInput");
+
 
 onAuthStateChanged(
 
@@ -211,8 +197,10 @@ return;
 
 }
 
+
 if(
-user.email!=="kodaihillsspot@gmail.com"
+user.email!==
+"kodaihillsspot@gmail.com"
 ){
 
 alert(
@@ -226,7 +214,7 @@ return;
 
 }
 
-await loadUsers();
+loadUsers();
 
 }
 
@@ -236,27 +224,26 @@ await loadUsers();
 
 async function loadUsers(){
 
-const usersDiv=
-document.getElementById(
-"users"
-);
+try{
 
 usersDiv.innerHTML=
 "Loading...";
 
 
-try{
-
 const snapshot=
 
 await getDocs(
+
 collection(
 db,
 "Users"
 )
+
 );
 
+
 allUsers=[];
+
 
 snapshot.forEach((docItem)=>{
 
@@ -271,23 +258,21 @@ id:docItem.id,
 });
 
 
-document.getElementById(
-"totalUsers"
-).innerText=
-
+totalUsers.innerText=
 allUsers.length;
 
 
 showUsers();
 
 }
+
 catch(error){
+
+console.log(error);
 
 usersDiv.innerHTML=
 
 "Failed loading users";
-
-console.log(error);
 
 }
 
@@ -299,41 +284,40 @@ function showUsers(){
 
 const search=
 
-document.getElementById(
-"searchInput"
-)
-
-.value.toLowerCase();
-
-const usersDiv=
-
-document.getElementById(
-"users"
-);
+searchInput.value
+.toLowerCase();
 
 usersDiv.innerHTML="";
 
 
-const filteredUsers=
+const filtered=
 
 allUsers.filter(user=>{
 
 const name=
+
 (user.name||"")
 .toLowerCase();
 
 const email=
+
 (user.email||"")
 .toLowerCase();
 
-return name.includes(search)
+return(
+
+name.includes(search)
+
 ||
-email.includes(search);
+
+email.includes(search)
+
+);
 
 });
 
 
-if(filteredUsers.length===0){
+if(filtered.length===0){
 
 usersDiv.innerHTML=`
 
@@ -350,15 +334,15 @@ return;
 }
 
 
-filteredUsers.forEach((user)=>{
+filtered.forEach((user)=>{
 
 
-let addressText="-";
+let address="-";
 
 
 if(user.address){
 
-addressText=`
+address=`
 
 ${user.address.street||""},
 
@@ -367,6 +351,10 @@ ${user.address.area||""},
 ${user.address.district||""},
 
 ${user.address.state||""}
+
+-
+
+${user.address.pincode||""}
 
 `;
 
@@ -385,28 +373,25 @@ ${user.name||"No Name"}
 
 <div class="info">
 
-📧
-${user.email||"-"}
+📧 ${user.email||"-"}
 
 </div>
 
 <div class="info">
 
-📱
-${user.phone||"-"}
+📱 ${user.phone||"-"}
 
 </div>
 
 <div class="info">
 
-🏠
-${addressText}
+🏠 ${address}
 
 </div>
 
 <button
 class="delete"
-data-id="${user.id}">
+onclick="deleteUser('${user.id}')">
 
 Delete User
 
@@ -418,28 +403,25 @@ Delete User
 
 });
 
+}
 
-document
-.querySelectorAll(
-".delete"
-)
 
-.forEach(btn=>{
 
-btn.onclick=
-async()=>{
+window.deleteUser=
 
-const id=
-btn.dataset.id;
+async(id)=>{
 
 const ok=
 
 confirm(
-"Delete user?"
+"Delete User?"
 );
 
 if(!ok)
 return;
+
+
+try{
 
 await deleteDoc(
 
@@ -453,22 +435,23 @@ id
 
 loadUsers();
 
-};
+}
 
-});
+catch(error){
+
+alert(
+error.message
+);
 
 }
 
+};
 
-document.getElementById(
-"searchInput"
-)
 
-.oninput=
+searchInput.oninput=
 showUsers;
 
 </script>
 
 </body>
-
 </html>
