@@ -13,7 +13,9 @@ setDoc
 
 let confirmationResult;
 
-/* RECAPTCHA */
+/* ---------------- INIT RECAPTCHA (FIXED) ---------------- */
+function setupRecaptcha() {
+if (!window.recaptchaVerifier) {
 window.recaptchaVerifier = new RecaptchaVerifier(
 auth,
 "recaptcha-container",
@@ -22,18 +24,30 @@ size: "invisible"
 }
 );
 
-/* SEND OTP */
+window.recaptchaVerifier.render();
+}
+}
+
+/* run after page load */
+window.onload = setupRecaptcha;
+
+/* ---------------- SEND OTP ---------------- */
 document.getElementById("signupBtn").onclick = async () => {
 try {
 
 const phone = document.getElementById("phone").value.trim();
 
-if (phone.length !== 10) {
+if (!phone || phone.length !== 10) {
 alert("Enter valid 10-digit phone number");
 return;
 }
 
 const appVerifier = window.recaptchaVerifier;
+
+if (!appVerifier) {
+alert("Recaptcha not ready. Refresh page.");
+return;
+}
 
 confirmationResult = await signInWithPhoneNumber(
 auth,
@@ -48,15 +62,21 @@ document.getElementById("verifyOtpBtn").style.display = "block";
 alert("OTP sent successfully");
 
 } catch (error) {
+console.log(error);
 alert(error.message);
 }
 };
 
-/* VERIFY OTP + CREATE ACCOUNT */
+/* ---------------- VERIFY OTP ---------------- */
 document.getElementById("verifyOtpBtn").onclick = async () => {
 try {
 
 const code = document.getElementById("otp").value;
+
+if (!confirmationResult) {
+alert("Send OTP first");
+return;
+}
 
 if (!code) {
 alert("Enter OTP");
@@ -71,7 +91,7 @@ const email = document.getElementById("email").value;
 const password = document.getElementById("password").value;
 const phone = document.getElementById("phone").value;
 
-/* CREATE EMAIL ACCOUNT */
+/* EMAIL ACCOUNT */
 const userCredential = await createUserWithEmailAndPassword(
 auth,
 email,
@@ -80,7 +100,7 @@ password
 
 const user = userCredential.user;
 
-/* SAVE USER */
+/* SAVE TO FIRESTORE */
 await setDoc(doc(db, "Users", user.uid), {
 name,
 email,
@@ -93,6 +113,7 @@ alert("Signup successful");
 window.location.href = "index.html";
 
 } catch (error) {
+console.log(error);
 alert(error.message);
 }
 };
