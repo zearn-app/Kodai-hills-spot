@@ -19,13 +19,28 @@ onAuthStateChanged
 from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
 
 
-let currentUser=null;
+const params=
+new URLSearchParams(
+window.location.search
+);
+
+const id=params.get("id");
+const qty=params.get("qty");
+
+
+document.getElementById(
+"placeOrder"
+)
+
+.onclick=
+
+()=>{
 
 onAuthStateChanged(
 
 auth,
 
-(user)=>{
+async(user)=>{
 
 if(!user){
 
@@ -36,20 +51,6 @@ return;
 
 }
 
-currentUser=user;
-
-});
-
-
-document.getElementById(
-"placeOrder"
-)
-
-.onclick=
-
-async()=>{
-
-try{
 
 await addDoc(
 
@@ -60,38 +61,33 @@ db,
 
 {
 
-uid:
-currentUser.uid,
+uid:user.uid,
 
-name:
-document.getElementById(
-"name"
-).value,
+email:user.email,
 
-phone:
-document.getElementById(
-"phone"
-).value,
+productId:id,
+
+quantity:qty,
 
 address:
 document.getElementById(
 "address"
 ).value,
 
-payment:
+paymentMethod:
 document.getElementById(
 "payment"
 ).value,
 
-status:
-"Pending",
+status:"Pending",
 
-date:
-new Date().toLocaleString()
+orderDate:
+new Date()
 
 }
 
 );
+
 
 alert(
 "Order placed"
@@ -100,14 +96,6 @@ alert(
 window.location=
 "profile.html";
 
-}
-
-catch(error){
-
-alert(
-error.message
-);
-
-}
+});
 
 };
