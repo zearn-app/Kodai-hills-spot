@@ -1,151 +1,3 @@
-import {
-
-updateDoc
-
-}
-
-from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
-
-
-async function loadOrders(){
-
-const orderDiv=
-document.getElementById(
-"allOrders"
-);
-
-orderDiv.innerHTML="";
-
-const snapshot=
-await getDocs(
-collection(
-db,
-"Orders"
-)
-);
-
-
-document.getElementById(
-"totalOrders"
-).innerText=
-snapshot.size;
-
-
-
-document.getElementById(
-"userBtn"
-).onclick = () => {
-
-window.location =
-"srkxditit.html";
-
-};
-
-
-snapshot.forEach((docItem)=>{
-
-const data=
-docItem.data();
-
-orderDiv.innerHTML+=`
-
-<div class="product">
-
-<img src="${data.image}">
-
-<h3>
-
-${data.name}
-
-</h3>
-
-<p>
-
-${data.email}
-
-</p>
-
-<p>
-
-₹${data.price}
-
-</p>
-
-<p>
-
-Qty :
-${data.quantity}
-
-</p>
-
-<select
-onchange="changeStatus(
-'${docItem.id}',
-this.value
-)">
-
-<option
-${data.status=="Pending"?"selected":""}>
-
-Pending
-
-</option>
-
-<option
-${data.status=="Approved"?"selected":""}>
-
-Approved
-
-</option>
-
-<option
-${data.status=="Delivered"?"selected":""}>
-
-Delivered
-
-</option>
-
-</select>
-
-</div>
-
-`;
-
-});
-
-}
-
-
-window.changeStatus=
-
-async(id,status)=>{
-
-await updateDoc(
-
-doc(
-db,
-"Orders",
-id
-),
-
-{
-
-status:status
-
-}
-
-);
-
-alert(
-"Status Updated"
-);
-
-};
-
-
-loadOrders();
-
-
 import { auth, db }
 from "./firebase.js";
 
@@ -157,7 +9,6 @@ onAuthStateChanged
 
 from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
 
-
 import {
 
 collection,
@@ -165,12 +16,28 @@ addDoc,
 getDocs,
 deleteDoc,
 doc,
+updateDoc,
 getCountFromServer
 
 }
 
 from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
+
+const productsDiv=
+document.getElementById(
+"products"
+);
+
+const ordersDiv=
+document.getElementById(
+"allOrders"
+);
+
+let selectedOrderId=null;
+
+
+/* Admin Authentication */
 
 onAuthStateChanged(
 
@@ -191,8 +58,11 @@ return;
 /* Replace with your admin Gmail */
 
 if(
-user.email !==
+
+user.email!==
+
 "kodaihillsspot@gmail.com"
+
 ){
 
 alert(
@@ -211,23 +81,35 @@ loadStats();
 
 loadProducts();
 
+loadOrders();
+
 }
 
-
 );
 
 
-const productsDiv=
+/* User Page Button */
+
 document.getElementById(
-"products"
-);
+"userBtn"
+)
 
+.onclick=()=>{
+
+window.location=
+"srkxditit.html";
+
+};
+
+
+/* Add Product */
 
 document.getElementById(
 "addBtn"
 )
 
 .onclick=
+
 async()=>{
 
 await addDoc(
@@ -240,29 +122,19 @@ db,
 {
 
 name:
-document.getElementById(
-"name"
-).value,
+name.value,
 
 price:
-document.getElementById(
-"price"
-).value,
+price.value,
 
 category:
-document.getElementById(
-"category"
-).value,
+category.value,
 
 Image:
-document.getElementById(
-"image"
-).value,
+image.value,
 
 description:
-document.getElementById(
-"description"
-).value
+description.value
 
 }
 
@@ -277,47 +149,7 @@ location.reload();
 };
 
 
-
-const orders=
-
-await getDocs(
-collection(
-db,
-"Orders"
-)
-);
-
-orders.forEach((doc)=>{
-
-const data=
-doc.data();
-
-document.getElementById(
-"allOrders"
-)
-
-.innerHTML +=`
-
-<div class="product">
-
-<h3>
-
-${data.email}
-
-</h3>
-
-<p>
-
-${data.status}
-
-</p>
-
-</div>
-
-`;
-
-});
-
+/* Load Products */
 
 async function loadProducts(){
 
@@ -326,32 +158,51 @@ productsDiv.innerHTML="";
 const snapshot=
 
 await getDocs(
+
 collection(
 db,
 "Products"
 )
+
 );
+
 
 snapshot.forEach((item)=>{
 
 const data=
 item.data();
 
-productsDiv.innerHTML += `
+productsDiv.innerHTML +=`
 
 <div class="product">
 
-<img src="${data.Image}">
+<img
+src="${data.Image}">
 
-<h3>${data.name}</h3>
+<h3>
 
-<p>₹${data.price}</p>
+${data.name}
 
-<p>${data.category}</p>
+</h3>
+
+<p>
+
+₹${data.price}
+
+</p>
+
+<p>
+
+${data.category}
+
+</p>
 
 <button
 class="delete"
-onclick="deleteProduct('${item.id}')">
+
+onclick="deleteProduct(
+'${item.id}'
+)">
 
 Delete
 
@@ -366,7 +217,10 @@ Delete
 }
 
 
+/* Delete Product */
+
 window.deleteProduct=
+
 async(id)=>{
 
 await deleteDoc(
@@ -384,9 +238,11 @@ location.reload();
 };
 
 
+/* Dashboard Stats */
+
 async function loadStats(){
 
-const count=
+const products=
 
 await getCountFromServer(
 
@@ -402,6 +258,185 @@ document.getElementById(
 )
 
 .innerText=
-count.data().count;
+
+products.data().count;
 
 }
+
+
+/* Load Orders */
+
+async function loadOrders(){
+
+ordersDiv.innerHTML="";
+
+const snapshot=
+
+await getDocs(
+
+collection(
+db,
+"Orders"
+)
+
+);
+
+
+document.getElementById(
+"totalOrders"
+)
+
+.innerText=
+
+snapshot.size;
+
+
+snapshot.forEach((docItem)=>{
+
+const data=
+docItem.data();
+
+ordersDiv.innerHTML +=`
+
+<div
+class="product"
+
+onclick="openPopup(
+'${docItem.id}'
+)">
+
+<img
+src="${data.image}">
+
+<h3>
+
+${data.name}
+
+</h3>
+
+<p>
+
+${data.email||""}
+
+</p>
+
+<p>
+
+₹${data.price}
+
+</p>
+
+<p>
+
+Qty :
+${data.quantity}
+
+</p>
+
+<p>
+
+Status :
+${data.status}
+
+</p>
+
+</div>
+
+`;
+
+});
+
+}
+
+
+/* Open Popup */
+
+window.openPopup=(id)=>{
+
+selectedOrderId=id;
+
+document.getElementById(
+"statusPopup"
+)
+
+.style.display=
+"flex";
+
+};
+
+
+/* Close Popup */
+
+window.closePopup=()=>{
+
+document.getElementById(
+"statusPopup"
+)
+
+.style.display=
+"none";
+
+};
+
+
+/* Status Change */
+
+statusSelect.onchange=()=>{
+
+if(
+
+statusSelect.value
+==="Approved"
+
+){
+
+trackingId.style.display=
+"block";
+
+}
+
+else{
+
+trackingId.style.display=
+"none";
+
+}
+
+};
+
+
+/* Update Status */
+
+updateBtn.onclick=
+
+async()=>{
+
+await updateDoc(
+
+doc(
+db,
+"Orders",
+selectedOrderId
+),
+
+{
+
+status:
+statusSelect.value,
+
+trackingId:
+trackingId.value
+
+}
+
+);
+
+alert(
+"Updated Successfully"
+);
+
+closePopup();
+
+loadOrders();
+
+};
