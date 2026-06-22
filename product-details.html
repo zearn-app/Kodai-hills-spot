@@ -147,15 +147,6 @@ margin-bottom:15px;
 
 }
 
-.review{
-
-background:white;
-padding:15px;
-border-radius:15px;
-margin-bottom:10px;
-
-}
-
 .related{
 
 display:flex;
@@ -183,34 +174,6 @@ width:100%;
 height:100px;
 border-radius:10px;
 object-fit:cover;
-
-}
-
-select,textarea{
-
-width:100%;
-padding:12px;
-border:none;
-border-radius:10px;
-margin-top:10px;
-
-}
-
-textarea{
-
-height:90px;
-
-}
-
-.submit{
-
-width:100%;
-padding:15px;
-margin-top:10px;
-border:none;
-border-radius:10px;
-background:#2e7d32;
-color:white;
 
 }
 
@@ -276,50 +239,6 @@ id="buyBtn">
 </div>
 
 
-
-<div class="section">
-
-<div class="title">
-
-⭐ Reviews
-
-</div>
-
-<div id="reviews">
-
-Loading...
-
-</div>
-
-
-<select id="rating">
-
-<option>⭐</option>
-<option>⭐⭐</option>
-<option>⭐⭐⭐</option>
-<option>⭐⭐⭐⭐</option>
-<option>⭐⭐⭐⭐⭐</option>
-
-</select>
-
-<textarea
-id="comment"
-placeholder="Write review...">
-
-</textarea>
-
-<button
-class="submit"
-id="reviewBtn">
-
-Submit Review
-
-</button>
-
-</div>
-
-
-
 <div class="section">
 
 <div class="title">
@@ -348,9 +267,7 @@ doc,
 getDoc,
 collection,
 getDocs,
-addDoc,
-query,
-where
+addDoc
 
 }
 
@@ -417,29 +334,9 @@ document.getElementById(
 "buyBtn"
 );
 
-const reviewBtn=
-document.getElementById(
-"reviewBtn"
-);
-
-const reviewsDiv=
-document.getElementById(
-"reviews"
-);
-
 const relatedDiv=
 document.getElementById(
 "related"
-);
-
-const rating=
-document.getElementById(
-"rating"
-);
-
-const comment=
-document.getElementById(
-"comment"
 );
 
 
@@ -552,8 +449,6 @@ currentProduct.description;
 
 
 loadRelated();
-
-loadReviews();
 
 }
 
@@ -707,129 +602,6 @@ id+
 quantity;
 
 };
-
-
-
-/* Reviews */
-
-reviewBtn.onclick=
-
-async()=>{
-
-
-if(!currentUser){
-
-window.location=
-"login.html";
-
-return;
-
-}
-
-
-await addDoc(
-
-collection(
-db,
-"Reviews"
-),
-
-{
-
-uid:
-currentUser.uid,
-
-productId:id,
-
-rating:
-rating.value,
-
-comment:
-comment.value,
-
-date:
-new Date()
-
-}
-
-);
-
-
-comment.value="";
-
-loadReviews();
-
-};
-
-
-
-async function loadReviews(){
-
-reviewsDiv.innerHTML="";
-
-
-const q=
-
-query(
-
-collection(
-db,
-"Reviews"
-),
-
-where(
-"productId",
-"==",
-id
-)
-
-);
-
-
-const snapshot=
-
-await getDocs(q);
-
-
-if(snapshot.empty){
-
-reviewsDiv.innerHTML=
-
-"<p>No reviews yet</p>";
-
-return;
-
-}
-
-
-snapshot.forEach((item)=>{
-
-const data=
-item.data();
-
-reviewsDiv.innerHTML +=`
-
-<div class="review">
-
-<div>
-
-${data.rating}
-
-</div>
-
-<p>
-
-${data.comment}
-
-</p>
-
-</div>
-
-`;
-
-});
-
-}
 
 
 loadProduct();
