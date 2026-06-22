@@ -1,5 +1,14 @@
-import {db}
+import { auth, db }
 from "./firebase.js";
+
+import {
+
+onAuthStateChanged
+
+}
+
+from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
+
 
 import {
 
@@ -15,6 +24,51 @@ getCountFromServer
 from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
 
+onAuthStateChanged(
+
+auth,
+
+async(user)=>{
+
+if(!user){
+
+window.location=
+"admin-login.html";
+
+return;
+
+}
+
+
+/* Replace with your admin Gmail */
+
+if(
+user.email !==
+"youradmin@gmail.com"
+){
+
+alert(
+"Access Denied"
+);
+
+window.location=
+"index.html";
+
+return;
+
+}
+
+
+loadStats();
+
+loadProducts();
+
+}
+
+
+);
+
+
 const productsDiv=
 document.getElementById(
 "products"
@@ -25,9 +79,8 @@ document.getElementById(
 "addBtn"
 )
 
-.onclick=async()=>{
-
-try{
+.onclick=
+async()=>{
 
 await addDoc(
 
@@ -68,29 +121,20 @@ document.getElementById(
 );
 
 alert(
-"Product Added Successfully"
+"Product Added"
 );
 
 location.reload();
 
-}
-
-catch(error){
-
-alert(
-error.message
-);
-
-}
-
 };
+
 
 
 async function loadProducts(){
 
 productsDiv.innerHTML="";
 
-const querySnapshot=
+const snapshot=
 
 await getDocs(
 collection(
@@ -99,35 +143,22 @@ db,
 )
 );
 
-
-querySnapshot.forEach((item)=>{
+snapshot.forEach((item)=>{
 
 const data=
 item.data();
 
-productsDiv.innerHTML +=`
+productsDiv.innerHTML += `
 
 <div class="product">
 
 <img src="${data.Image}">
 
-<h3>
+<h3>${data.name}</h3>
 
-${data.name}
+<p>₹${data.price}</p>
 
-</h3>
-
-<p>
-
-₹${data.price}
-
-</p>
-
-<p>
-
-${data.category}
-
-</p>
+<p>${data.category}</p>
 
 <button
 class="delete"
@@ -164,10 +195,9 @@ location.reload();
 };
 
 
-
 async function loadStats(){
 
-const productCount=
+const count=
 
 await getCountFromServer(
 
@@ -183,13 +213,6 @@ document.getElementById(
 )
 
 .innerText=
-
-productCount.data().count;
-
+count.data().count;
 
 }
-
-
-loadStats();
-
-loadProducts();
