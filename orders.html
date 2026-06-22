@@ -1,65 +1,188 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
 
 <meta charset="UTF-8">
-<meta name="viewport"
-content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 
 <title>My Orders</title>
 
 <style>
 
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Arial,sans-serif;
+}
+
 body{
 background:#f5f5f5;
-padding:20px;
-font-family:Arial;
+padding:15px;
 padding-bottom:90px;
 }
 
-h1{
-color:#2e7d32;
+.header{
 margin-bottom:20px;
 }
 
-input{
-width:100%;
-padding:14px;
-margin-bottom:10px;
-border:none;
-border-radius:12px;
-box-shadow:0 2px 10px rgba(0,0,0,.1);
+.header h1{
+color:#2e7d32;
+margin-bottom:15px;
 }
 
-.order{
+.search-box{
+
+width:100%;
+padding:14px;
+border:none;
+border-radius:12px;
+margin-bottom:10px;
+box-shadow:0 2px 10px rgba(0,0,0,.1);
+
+}
+
+.order-card{
 
 background:white;
 padding:15px;
-margin-top:15px;
+margin-bottom:15px;
 border-radius:15px;
+display:flex;
+gap:15px;
 box-shadow:0 2px 10px rgba(0,0,0,.1);
+cursor:pointer;
 
 }
 
-.order img{
+.order-card img{
 
-width:100%;
-height:150px;
+width:100px;
+height:100px;
 object-fit:cover;
 border-radius:10px;
 
 }
 
+.details{
+flex:1;
+}
+
+.details h3{
+margin-bottom:5px;
+}
+
+.price{
+
+font-weight:bold;
+color:#2e7d32;
+margin-top:5px;
+
+}
+
 .status{
 
-padding:8px;
-border-radius:8px;
 display:inline-block;
+padding:6px 12px;
+border-radius:20px;
 margin-top:10px;
+font-size:14px;
 font-weight:bold;
-background:#f1f1f1;
 
+}
+
+.pending{
+background:#fff3cd;
+color:#856404;
+}
+
+.approved{
+background:#d4edda;
+color:#155724;
+}
+
+.delivered{
+background:#d1ecf1;
+color:#0c5460;
+}
+
+.track{
+
+margin-top:10px;
+font-size:14px;
+color:#555;
+}
+
+.review-btn{
+
+margin-top:10px;
+padding:10px;
+border:none;
+border-radius:10px;
+background:#2e7d32;
+color:white;
+
+}
+
+.popup{
+
+display:none;
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:rgba(0,0,0,.5);
+justify-content:center;
+align-items:center;
+z-index:999;
+
+}
+
+.popup-content{
+
+background:white;
+width:90%;
+padding:20px;
+border-radius:20px;
+
+}
+
+.close{
+
+float:right;
+font-size:25px;
+cursor:pointer;
+
+}
+
+.bottom-nav{
+
+position:fixed;
+bottom:0;
+left:0;
+width:100%;
+background:white;
+display:flex;
+justify-content:space-around;
+padding:15px;
+box-shadow:0 -2px 10px rgba(0,0,0,.1);
+
+}
+
+.bottom-nav a{
+
+text-decoration:none;
+color:black;
+font-size:14px;
+text-align:center;
+
+}
+
+.active{
+color:#2e7d32;
+font-weight:bold;
 }
 
 </style>
@@ -68,23 +191,85 @@ background:#f1f1f1;
 
 <body>
 
+<div class="header">
+
 <h1>
 📦 My Orders
 </h1>
 
 <input
+class="search-box"
 id="search"
-placeholder="Search products">
+placeholder="🔍 Search product">
 
 <input
+class="search-box"
 id="date"
 type="date">
+
+</div>
+
 
 <div id="orders">
 
 Loading...
 
 </div>
+
+
+<div class="popup" id="popup">
+
+<div class="popup-content">
+
+<span class="close"
+onclick="popup.style.display='none'">
+
+×
+
+</span>
+
+<div id="popupData">
+
+</div>
+
+</div>
+
+</div>
+
+
+<nav class="bottom-nav">
+
+<a href="index.html">
+
+🏠<br>
+Home
+
+</a>
+
+<a href="products.html">
+
+🛍️<br>
+Products
+
+</a>
+
+<a href="cart.html">
+
+🛒<br>
+Cart
+
+</a>
+
+<a href="profile.html"
+class="active">
+
+👤<br>
+Profile
+
+</a>
+
+</nav>
+
 
 <script type="module">
 
@@ -110,9 +295,12 @@ onAuthStateChanged
 
 from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
 
-
 let allOrders=[];
 
+const orderDiv=
+document.getElementById(
+"orders"
+);
 
 onAuthStateChanged(
 
@@ -122,7 +310,9 @@ async(user)=>{
 
 if(!user){
 
-location="login.html";
+window.location=
+"login.html";
+
 return;
 
 }
@@ -152,7 +342,6 @@ snapshot.forEach((doc)=>{
 allOrders.push({
 
 id:doc.id,
-
 ...doc.data()
 
 });
@@ -161,47 +350,68 @@ id:doc.id,
 
 showOrders();
 
-});
+}
+
+);
 
 
 function showOrders(){
 
-const search=
+const searchText=
 
 document.getElementById(
 "search"
-).value.toLowerCase();
+)
+
+.value.toLowerCase();
 
 const date=
 
 document.getElementById(
 "date"
-).value;
+)
 
-orders.innerHTML="";
+.value;
 
+orderDiv.innerHTML="";
 
 allOrders.forEach(item=>{
 
 if(
 
 item.name.toLowerCase()
-.includes(search)
+.includes(searchText)
 
 &&
 
-(date=="" ||
+(
 
-item.orderDate
-?.includes(date))
+date=="" ||
+
+item.orderDate?.includes(date)
+
+)
 
 ){
 
-orders.innerHTML+=`
+let statusClass="pending";
 
-<div class="order">
+if(item.status==="Approved")
+statusClass="approved";
+
+if(item.status==="Delivered")
+statusClass="delivered";
+
+
+orderDiv.innerHTML+=`
+
+<div class="order-card"
+
+onclick='showPopup(${JSON.stringify(item)})'>
 
 <img src="${item.image}">
+
+<div class="details">
 
 <h3>
 
@@ -209,22 +419,57 @@ ${item.name}
 
 </h3>
 
-<p>
+<div class="price">
 
 ₹${item.price}
 
-</p>
+</div>
 
 <p>
 
-Qty :
-${item.quantity}
+Qty : ${item.quantity}
 
 </p>
 
-<div class="status">
+<div class="status ${statusClass}">
 
-${item.status}
+${item.status||"Pending"}
+
+</div>
+
+${
+item.trackingId ?
+
+`<div class="track">
+
+Tracking ID:
+${item.trackingId}
+
+</div>`
+
+:
+
+""
+
+}
+
+${
+item.status==="Delivered"
+
+?
+
+`<button
+class="review-btn">
+
+⭐ Give Review
+
+</button>`
+
+:
+
+""
+
+}
 
 </div>
 
@@ -239,6 +484,65 @@ ${item.status}
 }
 
 
+window.showPopup=
+(item)=>{
+
+popup.style.display=
+"flex";
+
+document.getElementById(
+"popupData"
+)
+
+.innerHTML=`
+
+<img src="${item.image}"
+
+style="
+width:100%;
+height:200px;
+border-radius:15px;
+object-fit:cover">
+
+<h2>
+
+${item.name}
+
+</h2>
+
+<p>
+
+Price:
+₹${item.price}
+
+</p>
+
+<p>
+
+Quantity:
+${item.quantity}
+
+</p>
+
+<p>
+
+Status:
+${item.status}
+
+</p>
+
+<p>
+
+Address:
+${item.address||"Not available"}
+
+</p>
+
+`;
+
+};
+
+
 search.oninput=
 showOrders;
 
@@ -248,5 +552,4 @@ showOrders;
 </script>
 
 </body>
-
 </html>
