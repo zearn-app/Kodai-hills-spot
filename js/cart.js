@@ -1,33 +1,75 @@
 const cartItems=
-document.getElementById("cartItems");
 
-const total=
-document.getElementById("total");
+document.getElementById(
+"cartItems"
+);
+
+const totalDiv=
+document.getElementById(
+"total"
+);
+
 
 let cart=
+
 JSON.parse(
-localStorage.getItem("cart")
+
+localStorage.getItem(
+"cart"
+)
+
 )||[];
 
 
-let totalPrice=0;
+function loadCart(){
 
 cartItems.innerHTML="";
+
+let total=0;
+
+
+if(cart.length===0){
+
+cartItems.innerHTML=`
+
+<h2>
+
+Cart Empty
+
+</h2>
+
+`;
+
+return;
+
+}
 
 
 cart.forEach((item,index)=>{
 
-totalPrice+=Number(item.price);
+total +=
 
-cartItems.innerHTML+=`
+item.price*
+item.quantity;
 
-<div class="card">
 
-<img src="${item.Image}">
+cartItems.innerHTML +=`
+
+<div class="card"
+
+onclick="window.location='product-details.html?id=${item.productId}'"
+
+style="cursor:pointer">
+
+<img src="${item.image}">
 
 <div class="details">
 
-<h3>${item.name}</h3>
+<h3>
+
+${item.name}
+
+</h3>
 
 <div class="price">
 
@@ -35,9 +77,18 @@ cartItems.innerHTML+=`
 
 </div>
 
+<p>
+
+Quantity :
+${item.quantity}
+
+</p>
+
 <button
 class="remove"
-onclick="removeItem(${index})">
+
+onclick="event.stopPropagation();
+removeItem(${index})">
 
 Remove
 
@@ -52,19 +103,34 @@ Remove
 });
 
 
-total.innerText=
-"Total : ₹"+totalPrice;
+totalDiv.innerText=
 
-
-function removeItem(index){
-
-cart.splice(index,1);
-
-localStorage.setItem(
-"cart",
-JSON.stringify(cart)
-);
-
-location.reload();
+"Total : ₹"+total;
 
 }
+
+
+window.removeItem=
+(index)=>{
+
+cart.splice(
+index,
+1
+);
+
+localStorage.setItem(
+
+"cart",
+
+JSON.stringify(
+cart
+)
+
+);
+
+loadCart();
+
+};
+
+
+loadCart();
