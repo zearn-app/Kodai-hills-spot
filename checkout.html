@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport"
+content="width=device-width,initial-scale=1">
+
+<title>Checkout</title>
+
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Arial;
+}
+
+body{
+background:#f5f5f5;
+padding:20px;
+}
+
+.container{
+
+background:white;
+
+padding:20px;
+
+border-radius:20px;
+
+box-shadow:0 2px 15px rgba(0,0,0,.1);
+
+}
+
+h2{
+
+margin-bottom:20px;
+color:#2e7d32;
+
+}
+
+input,textarea{
+
+width:100%;
+
+padding:14px;
+
+margin:10px 0;
+
+border-radius:12px;
+
+border:1px solid #ddd;
+
+}
+
+button{
+
+width:100%;
+
+padding:15px;
+
+border:none;
+
+border-radius:12px;
+
+margin-top:10px;
+
+font-size:16px;
+
+}
+
+.order-btn{
+
+background:#2e7d32;
+
+color:white;
+
+}
+
+.whatsapp{
+
+background:#25D366;
+
+color:white;
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+<h2>
+Checkout
+</h2>
+
+<input
+id="customerName"
+placeholder="Full Name">
+
+<input
+id="customerPhone"
+placeholder="Phone Number">
+
+<textarea
+id="customerAddress"
+placeholder="Delivery Address">
+</textarea>
+
+<h3 id="total">
+Total: ₹0
+</h3>
+
+<button
+class="order-btn"
+id="placeOrder">
+
+Place Order
+
+</button>
+
+<button
+class="whatsapp"
+id="whatsappBtn">
+
+Order via WhatsApp
+
+</button>
+
+</div>
+
+<script src="js/checkout.js"></script>
+
+</body>
+</html>
