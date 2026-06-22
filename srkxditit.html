@@ -172,44 +172,37 @@ Loading...
 </div>
 
 
-
 <script type="module">
 
 import {auth,db}
 from "./js/firebase.js";
 
 import {
-
 onAuthStateChanged
-
 }
-
 from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
 
 import {
-
 collection,
 getDocs,
 deleteDoc,
 doc
-
 }
-
 from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
 
 let allUsers=[];
 
 
-/* Protect page */
+/* Admin protection */
 
 onAuthStateChanged(
 
 auth,
 
-async(User)=>{
+async(user)=>{
 
-if(!User){
+if(!user){
 
 window.location=
 "index.html";
@@ -218,14 +211,8 @@ return;
 
 }
 
-
-/* Admin Gmail check */
-
 if(
-
-User.email !==
-"kodaihillsspot@gmail.com"
-
+user.email!=="kodaihillsspot@gmail.com"
 ){
 
 alert(
@@ -239,27 +226,35 @@ return;
 
 }
 
-
-loadUsers();
+await loadUsers();
 
 }
 
 );
 
 
+
 async function loadUsers(){
+
+const usersDiv=
+document.getElementById(
+"users"
+);
+
+usersDiv.innerHTML=
+"Loading...";
+
+
+try{
 
 const snapshot=
 
 await getDocs(
-
 collection(
 db,
 "Users"
 )
-
 );
-
 
 allUsers=[];
 
@@ -278,14 +273,23 @@ id:docItem.id,
 
 document.getElementById(
 "totalUsers"
-)
-
-.innerText=
+).innerText=
 
 allUsers.length;
 
 
 showUsers();
+
+}
+catch(error){
+
+usersDiv.innerHTML=
+
+"Failed loading users";
+
+console.log(error);
+
+}
 
 }
 
@@ -301,7 +305,6 @@ document.getElementById(
 
 .value.toLowerCase();
 
-
 const usersDiv=
 
 document.getElementById(
@@ -311,26 +314,64 @@ document.getElementById(
 usersDiv.innerHTML="";
 
 
-allUsers.forEach((User)=>{
+const filteredUsers=
 
+allUsers.filter(user=>{
 
-if(
-
+const name=
 (user.name||"")
+.toLowerCase();
 
-.toLowerCase()
-
-.includes(search)
-
-||
-
+const email=
 (user.email||"")
+.toLowerCase();
 
-.toLowerCase()
+return name.includes(search)
+||
+email.includes(search);
 
-.includes(search)
+});
 
-){
+
+if(filteredUsers.length===0){
+
+usersDiv.innerHTML=`
+
+<div class="user">
+
+No users found
+
+</div>
+
+`;
+
+return;
+
+}
+
+
+filteredUsers.forEach((user)=>{
+
+
+let addressText="-";
+
+
+if(user.address){
+
+addressText=`
+
+${user.address.street||""},
+
+${user.address.area||""},
+
+${user.address.district||""},
+
+${user.address.state||""}
+
+`;
+
+}
+
 
 usersDiv.innerHTML+=`
 
@@ -345,7 +386,7 @@ ${user.name||"No Name"}
 <div class="info">
 
 📧
-${User.email||"-"}
+${user.email||"-"}
 
 </div>
 
@@ -359,14 +400,13 @@ ${user.phone||"-"}
 <div class="info">
 
 🏠
-${User.address||"-"}
+${addressText}
 
 </div>
 
 <button
 class="delete"
-
-onclick="deleteUser('${user.id}')">
+data-id="${user.id}">
 
 Delete User
 
@@ -376,28 +416,30 @@ Delete User
 
 `;
 
-}
-
 });
 
-}
 
+document
+.querySelectorAll(
+".delete"
+)
 
-/* Delete user */
+.forEach(btn=>{
 
-window.deleteUser=
+btn.onclick=
+async()=>{
 
-async(id)=>{
+const id=
+btn.dataset.id;
 
-const confirmDelete=
+const ok=
 
 confirm(
 "Delete user?"
 );
 
-if(!confirmDelete)
+if(!ok)
 return;
-
 
 await deleteDoc(
 
@@ -413,8 +455,16 @@ loadUsers();
 
 };
 
+});
 
-searchInput.oninput=
+}
+
+
+document.getElementById(
+"searchInput"
+)
+
+.oninput=
 showUsers;
 
 </script>
