@@ -7,8 +7,9 @@ signInWithPhoneNumber
 
 let confirmationResult;
 
-/* ---------------- SAFE INIT (IMPORTANT FIX) ---------------- */
-async function initRecaptcha() {
+/* SAFE INIT */
+function initRecaptcha() {
+try {
 window.recaptchaVerifier = new RecaptchaVerifier(
 auth,
 "recaptcha-container",
@@ -17,24 +18,48 @@ size: "invisible"
 }
 );
 
-await window.recaptchaVerifier.render();
+window.recaptchaVerifier.render();
+
+console.log("Recaptcha ready");
+} catch (e) {
+console.error("Recaptcha error:", e);
+}
 }
 
-document.addEventListener("DOMContentLoaded", initRecaptcha);
+/* WAIT FOR FULL PAGE LOAD */
+window.addEventListener("load", () => {
+initRecaptcha();
+attachEvents();
+});
 
-/* ---------------- SEND OTP ---------------- */
-document.getElementById("signupBtn").addEventListener("click", async () => {
+/* ATTACH BUTTON EVENTS SAFELY */
+function attachEvents() {
+
+const btn = document.getElementById("signupBtn");
+
+if (!btn) {
+console.error("Signup button not found");
+return;
+}
+
+btn.addEventListener("click", sendOTP);
+}
+
+/* SEND OTP */
+async function sendOTP() {
 try {
+
+console.log("Send OTP clicked");
 
 const phone = document.getElementById("phone").value.trim();
 
 if (!phone || phone.length !== 10) {
-alert("Enter valid 10-digit number");
+alert("Enter valid phone number");
 return;
 }
 
 if (!window.recaptchaVerifier) {
-alert("Recaptcha not ready. Reload page.");
+alert("Recaptcha not ready");
 return;
 }
 
@@ -47,15 +72,15 @@ window.recaptchaVerifier
 document.getElementById("otp").style.display = "block";
 document.getElementById("verifyOtpBtn").style.display = "block";
 
-alert("OTP Sent Successfully");
+alert("OTP sent successfully");
 
 } catch (error) {
-console.log(error);
-alert(error.message);
+console.error(error);
+alert("OTP Error: " + error.message);
 }
-});
+}
 
-/* ---------------- VERIFY OTP ---------------- */
+/* VERIFY OTP */
 document.getElementById("verifyOtpBtn").addEventListener("click", async () => {
 try {
 
@@ -68,10 +93,10 @@ return;
 
 await confirmationResult.confirm(code);
 
-alert("Phone Verified Successfully");
+alert("Phone Verified");
 
 } catch (error) {
-console.log(error);
+console.error(error);
 alert(error.message);
 }
 });
