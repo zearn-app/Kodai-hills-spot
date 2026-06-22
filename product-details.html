@@ -337,10 +337,9 @@ id="related">
 </div>
 
 
-
 <script type="module">
 
-import {db,auth}
+import { db, auth }
 from "./js/firebase.js";
 
 import {
@@ -366,18 +365,102 @@ onAuthStateChanged
 from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
 
 
+/* Elements */
+
+const imageEl=
+document.getElementById(
+"image"
+);
+
+const nameEl=
+document.getElementById(
+"name"
+);
+
+const priceEl=
+document.getElementById(
+"price"
+);
+
+const categoryEl=
+document.getElementById(
+"category"
+);
+
+const descriptionEl=
+document.getElementById(
+"description"
+);
+
+const countEl=
+document.getElementById(
+"count"
+);
+
+const plusBtn=
+document.getElementById(
+"plus"
+);
+
+const minusBtn=
+document.getElementById(
+"minus"
+);
+
+const cartBtn=
+document.getElementById(
+"cartBtn"
+);
+
+const buyBtn=
+document.getElementById(
+"buyBtn"
+);
+
+const reviewBtn=
+document.getElementById(
+"reviewBtn"
+);
+
+const reviewsDiv=
+document.getElementById(
+"reviews"
+);
+
+const relatedDiv=
+document.getElementById(
+"related"
+);
+
+const rating=
+document.getElementById(
+"rating"
+);
+
+const comment=
+document.getElementById(
+"comment"
+);
+
+
+/* Product id */
+
 const params=
 new URLSearchParams(
 window.location.search
 );
 
 const id=
-params.get("id");
+params.get(
+"id"
+);
 
 let quantity=1;
 let currentUser=null;
 let currentProduct=null;
 
+
+/* Login */
 
 onAuthStateChanged(
 
@@ -392,23 +475,25 @@ currentUser=user;
 );
 
 
-plus.onclick=()=>{
+/* Quantity */
+
+plusBtn.onclick=()=>{
 
 quantity++;
 
-count.innerText=
+countEl.innerText=
 quantity;
 
 };
 
 
-minus.onclick=()=>{
+minusBtn.onclick=()=>{
 
 if(quantity>1){
 
 quantity--;
 
-count.innerText=
+countEl.innerText=
 quantity;
 
 }
@@ -416,7 +501,10 @@ quantity;
 };
 
 
+
 async function loadProduct(){
+
+try{
 
 const snapshot=
 
@@ -430,25 +518,36 @@ id
 
 );
 
+
+if(!snapshot.exists()){
+
+nameEl.innerText=
+"Product Not Found";
+
+return;
+
+}
+
+
 currentProduct=
 snapshot.data();
 
 
-image.src=
+imageEl.src=
 currentProduct.Image;
 
-name.innerText=
+nameEl.innerText=
 currentProduct.name;
 
-price.innerText=
+priceEl.innerText=
 "₹"+
 currentProduct.price;
 
-category.innerText=
+categoryEl.innerText=
 "Category : "+
 currentProduct.category;
 
-description.innerText=
+descriptionEl.innerText=
 currentProduct.description;
 
 
@@ -458,8 +557,25 @@ loadReviews();
 
 }
 
+catch(error){
+
+console.log(error);
+
+nameEl.innerText=
+"Error loading product";
+
+}
+
+}
+
+
+
+/* Related products */
 
 async function loadRelated(){
+
+relatedDiv.innerHTML="";
+
 
 const querySnapshot=
 
@@ -473,21 +589,19 @@ db,
 );
 
 
-related.innerHTML="";
-
-
-querySnapshot.forEach((doc)=>{
+querySnapshot.forEach((item)=>{
 
 const data=
-doc.data();
+item.data();
 
-if(doc.id!=id){
+if(item.id!==id){
 
-related.innerHTML+=`
+relatedDiv.innerHTML +=`
 
-<div class="related-card"
+<div
+class="related-card"
 
-onclick="window.location='product-details.html?id=${doc.id}'">
+onclick="window.location='product-details.html?id=${item.id}'">
 
 <img src="${data.Image}">
 
@@ -514,9 +628,13 @@ ${data.name}
 }
 
 
+
+/* Add cart */
+
 cartBtn.onclick=
 
 async()=>{
+
 
 if(!currentUser){
 
@@ -551,11 +669,13 @@ currentProduct.price,
 image:
 currentProduct.Image,
 
-quantity:quantity
+quantity:
+quantity
 
 }
 
 );
+
 
 alert(
 "Added to Cart"
@@ -563,6 +683,9 @@ alert(
 
 };
 
+
+
+/* Buy */
 
 buyBtn.onclick=()=>{
 
@@ -579,15 +702,20 @@ window.location=
 
 "checkout.html?id="+
 id+
+
 "&qty="+
 quantity;
 
 };
 
 
+
+/* Reviews */
+
 reviewBtn.onclick=
 
 async()=>{
+
 
 if(!currentUser){
 
@@ -634,9 +762,10 @@ loadReviews();
 };
 
 
+
 async function loadReviews(){
 
-reviews.innerHTML="";
+reviewsDiv.innerHTML="";
 
 
 const q=
@@ -658,15 +787,27 @@ id
 
 
 const snapshot=
+
 await getDocs(q);
 
 
-snapshot.forEach((doc)=>{
+if(snapshot.empty){
+
+reviewsDiv.innerHTML=
+
+"<p>No reviews yet</p>";
+
+return;
+
+}
+
+
+snapshot.forEach((item)=>{
 
 const data=
-doc.data();
+item.data();
 
-reviews.innerHTML+=`
+reviewsDiv.innerHTML +=`
 
 <div class="review">
 
