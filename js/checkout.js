@@ -58,7 +58,7 @@ Total: ₹${total}
 
 window.open(
 
-`https://wa.me/91YOURNUMBER?text=${encodeURIComponent(message)}`
+`https://wa.me/918056721645?text=${encodeURIComponent(message)}`
 
 );
 
