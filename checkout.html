@@ -1,16 +1,79 @@
-<h2>Checkout</h2>
+<!DOCTYPE html>
+<html>
 
-<input id="name" placeholder="Name">
+<head>
 
-<input id="phone" placeholder="Phone">
+<title>Checkout</title>
 
-<textarea id="address"></textarea>
+<style>
+
+body{
+font-family:Arial;
+padding:20px;
+background:#f5f5f5;
+}
+
+.card{
+
+background:white;
+
+padding:20px;
+
+border-radius:20px;
+
+}
+
+input,select,button{
+
+width:100%;
+
+padding:15px;
+
+margin-top:15px;
+
+border-radius:12px;
+
+}
+
+button{
+
+background:#2e7d32;
+border:none;
+color:white;
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="card">
+
+<h2>
+
+Checkout
+
+</h2>
+
+<input
+id="address"
+placeholder="Delivery Address">
 
 <select id="payment">
 
-<option>Cash On Delivery</option>
+<option>
 
-<option>UPI</option>
+Cash On Delivery
+
+</option>
+
+<option>
+
+UPI
+
+</option>
 
 </select>
 
@@ -20,5 +83,13 @@ Place Order
 
 </button>
 
+</div>
+
+
 <script type="module"
-src="js/checkout.js"></script>
+src="js/checkout.js">
+</script>
+
+</body>
+
+</html>
