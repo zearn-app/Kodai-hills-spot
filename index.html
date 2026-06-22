@@ -53,8 +53,26 @@ font-weight:bold;
 color:#2e7d32;
 }
 
-.menu{
-font-size:25px;
+.top-right{
+display:flex;
+gap:10px;
+align-items:center;
+}
+
+.auth-btn{
+
+padding:10px 15px;
+
+border:none;
+
+border-radius:10px;
+
+background:#2e7d32;
+
+color:white;
+
+cursor:pointer;
+
 }
 
 .hero{
@@ -62,6 +80,7 @@ padding:20px;
 }
 
 .hero-card{
+
 background:linear-gradient(
 135deg,
 #2e7d32,
@@ -72,20 +91,25 @@ padding:30px;
 border-radius:25px;
 color:white;
 text-align:center;
-}
 
-.hero-card h1{
-margin-bottom:10px;
 }
 
 .shop-btn{
+
 margin-top:15px;
+
 padding:12px 25px;
+
 border:none;
+
 border-radius:30px;
+
 background:white;
+
 color:#2e7d32;
+
 font-weight:bold;
+
 }
 
 .search{
@@ -93,12 +117,17 @@ padding:20px;
 }
 
 .search input{
+
 width:100%;
+
 padding:14px;
+
 border:none;
+
 border-radius:15px;
-outline:none;
+
 box-shadow:0 2px 10px rgba(0,0,0,.1);
+
 }
 
 .section{
@@ -111,76 +140,87 @@ font-weight:bold;
 margin-bottom:15px;
 }
 
-.categories{
-display:grid;
-grid-template-columns:repeat(2,1fr);
-gap:10px;
-}
-
-.category{
-background:white;
-padding:20px;
-border-radius:15px;
-text-align:center;
-box-shadow:0 2px 10px rgba(0,0,0,.1);
-}
-
 .products{
-display:flex;
-overflow:auto;
-gap:15px;
-}
 
-.products::-webkit-scrollbar{
-display:none;
+display:flex;
+
+overflow:auto;
+
+gap:15px;
+
 }
 
 .card{
+
 background:white;
+
 min-width:180px;
+
 padding:10px;
+
 border-radius:15px;
+
 box-shadow:0 2px 10px rgba(0,0,0,.1);
+
 }
 
 .card img{
+
 width:100%;
 height:130px;
-object-fit:cover;
-border-radius:10px;
-}
 
-.card h3{
-margin-top:10px;
+object-fit:cover;
+
+border-radius:10px;
+
 }
 
 .price{
+
 color:#2e7d32;
 font-weight:bold;
+
 }
 
 .bottom-nav{
+
 position:fixed;
+
 bottom:0;
+
 left:0;
+
 width:100%;
+
 background:white;
+
 display:flex;
+
 justify-content:space-around;
+
 padding:15px;
+
 box-shadow:0 -2px 10px rgba(0,0,0,.1);
+
 }
 
 .bottom-nav a{
+
 text-decoration:none;
 color:black;
+
 font-size:14px;
+
 text-align:center;
+
 }
 
 .active{
+
 color:#2e7d32;
+
 font-weight:bold;
+
 }
 
 </style>
@@ -189,20 +229,37 @@ font-weight:bold;
 
 <body>
 
+
 <nav class="navbar">
 
 <div class="logo-box">
 
-<img src="logo.png" class="logo-img">
+<img src="assets/logo.png"
+class="logo-img">
 
 <div class="logo-text">
+
 Kodai Hills Spot
-</div>
 
 </div>
 
-<div class="menu">
-☰
+</div>
+
+
+<div class="top-right">
+
+<div id="userArea">
+
+<button
+class="auth-btn"
+onclick="window.location='login.html'">
+
+Login
+
+</button>
+
+</div>
+
 </div>
 
 </nav>
@@ -213,15 +270,21 @@ Kodai Hills Spot
 <div class="hero-card">
 
 <h1>
+
 Fresh Products From Kodaikanal
+
 </h1>
 
 <p>
+
 Natural products directly from Kodai Hills
+
 </p>
 
 <button class="shop-btn">
+
 Shop Now
+
 </button>
 
 </div>
@@ -229,33 +292,13 @@ Shop Now
 </section>
 
 
+
 <div class="search">
 
-<input id="searchBox"
+<input
 placeholder="🔍 Search products">
 
 </div>
-
-
-<section class="section">
-
-<div class="title">
-Categories
-</div>
-
-<div class="categories">
-
-<div class="category">🍫 Chocolates</div>
-
-<div class="category">🍯 Honey</div>
-
-<div class="category">🌿 Herbs</div>
-
-<div class="category">🧴 Oils</div>
-
-</div>
-
-</section>
 
 
 
@@ -267,10 +310,11 @@ Featured Products
 
 </div>
 
-<div class="products"
+<div
+class="products"
 id="products">
 
-Loading Products...
+Loading...
 
 </div>
 
@@ -308,15 +352,29 @@ class="active">
 </nav>
 
 
+
 <script type="module">
 
-import { db } from "./js/firebase.js";
+import { db,auth }
+from "./js/firebase.js";
 
 import {
+
 collection,
 getDocs
+
 }
+
 from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
+
+import {
+
+onAuthStateChanged,
+signOut
+
+}
+
+from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
 
 
 const productsDiv=
@@ -324,11 +382,13 @@ document.getElementById(
 "products"
 );
 
+
 async function loadProducts(){
 
 productsDiv.innerHTML="";
 
 const querySnapshot=
+
 await getDocs(
 collection(
 db,
@@ -336,12 +396,13 @@ db,
 )
 );
 
+
 querySnapshot.forEach((doc)=>{
 
 const data=
 doc.data();
 
-productsDiv.innerHTML += `
+productsDiv.innerHTML+=`
 
 <div class="card">
 
@@ -362,6 +423,61 @@ productsDiv.innerHTML += `
 });
 
 }
+
+
+onAuthStateChanged(
+
+auth,
+
+(user)=>{
+
+const userArea=
+document.getElementById(
+"userArea"
+);
+
+if(user){
+
+userArea.innerHTML=`
+
+<button
+class="auth-btn"
+onclick="window.location='profile.html'">
+
+👤 Profile
+
+</button>
+
+<button
+class="auth-btn"
+id="logoutBtn">
+
+Logout
+
+</button>
+
+`;
+
+document
+.getElementById(
+"logoutBtn"
+)
+
+.onclick=
+()=>{
+
+signOut(auth);
+
+location.reload();
+
+};
+
+}
+
+}
+
+);
+
 
 loadProducts();
 
