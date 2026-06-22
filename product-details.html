@@ -325,7 +325,7 @@ Loading...
 
 <script type="module">
 
-import {db}
+import {db,auth}
 
 from "./js/firebase.js";
 
@@ -334,11 +334,20 @@ import {
 doc,
 getDoc,
 collection,
-getDocs
+getDocs,
+addDoc
 
 }
 
 from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
+
+import {
+
+onAuthStateChanged
+
+}
+
+from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
 
 
 const params=
@@ -349,10 +358,27 @@ window.location.search
 const id=
 params.get("id");
 
-
 let quantity=1;
-let currentProduct;
+let currentProduct=null;
+let currentUser=null;
 
+
+/* Auth check */
+
+onAuthStateChanged(
+
+auth,
+
+(user)=>{
+
+currentUser=user;
+
+}
+
+);
+
+
+/* Quantity */
 
 document.getElementById(
 "plus"
@@ -368,7 +394,6 @@ document.getElementById(
 quantity;
 
 };
-
 
 
 document.getElementById(
@@ -415,25 +440,21 @@ document.getElementById(
 ).src=
 currentProduct.Image;
 
-
 document.getElementById(
 "name"
 ).innerText=
 currentProduct.name;
-
 
 document.getElementById(
 "price"
 ).innerText=
 "₹"+currentProduct.price;
 
-
 document.getElementById(
 "category"
 ).innerText=
-"Category: "+
+"Category : "+
 currentProduct.category;
-
 
 document.getElementById(
 "description"
@@ -445,6 +466,9 @@ loadRelated();
 
 }
 
+
+
+/* Related products */
 
 async function loadRelated(){
 
@@ -475,7 +499,7 @@ doc.data();
 
 if(doc.id!==id){
 
-relatedDiv.innerHTML+=`
+relatedDiv.innerHTML +=`
 
 <div
 class="related-card"
@@ -507,20 +531,81 @@ ${data.name}
 }
 
 
+
+/* Add cart */
+
 document.getElementById(
 "cartBtn"
 )
 
-.onclick=()=>{
+.onclick=
+
+async()=>{
+
+
+if(!currentUser){
+
+window.location=
+"login.html";
+
+return;
+
+}
+
+
+try{
+
+await addDoc(
+
+collection(
+db,
+"Cart"
+),
+
+{
+
+uid:
+currentUser.uid,
+
+productId:
+id,
+
+name:
+currentProduct.name,
+
+price:
+currentProduct.price,
+
+image:
+currentProduct.Image,
+
+quantity:
+quantity
+
+}
+
+);
+
 
 alert(
-"Added "+quantity+
-" item(s) to cart"
+"Added to cart"
 );
+
+}
+
+catch(error){
+
+alert(
+error.message
+);
+
+}
 
 };
 
 
+
+/* Buy now */
 
 document.getElementById(
 "buyBtn"
@@ -528,11 +613,27 @@ document.getElementById(
 
 .onclick=()=>{
 
+
+if(!currentUser){
+
 window.location=
-"checkout.html?id="+id+
-"&qty="+quantity;
+"login.html";
+
+return;
+
+}
+
+
+window.location=
+
+"checkout.html?id="+
+id+
+
+"&qty="+
+quantity;
 
 };
+
 
 
 loadProduct();
