@@ -165,7 +165,7 @@ id="searchInput"
 placeholder="🔍 Search users">
 
 
-<div id="users">
+<div id="Users">
 
 Loading...
 
@@ -207,9 +207,9 @@ onAuthStateChanged(
 
 auth,
 
-async(user)=>{
+async(User)=>{
 
-if(!user){
+if(!User){
 
 window.location=
 "index.html";
@@ -223,7 +223,7 @@ return;
 
 if(
 
-user.email !==
+User.email !==
 "kodaihillsspot@gmail.com"
 
 ){
@@ -311,7 +311,7 @@ document.getElementById(
 usersDiv.innerHTML="";
 
 
-allUsers.forEach((user)=>{
+allUsers.forEach((User)=>{
 
 
 if(
@@ -345,7 +345,7 @@ ${user.name||"No Name"}
 <div class="info">
 
 📧
-${user.email||"-"}
+${User.email||"-"}
 
 </div>
 
@@ -359,7 +359,7 @@ ${user.phone||"-"}
 <div class="info">
 
 🏠
-${user.address||"-"}
+${User.address||"-"}
 
 </div>
 
