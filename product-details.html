@@ -4,8 +4,7 @@
 <head>
 
 <meta charset="UTF-8">
-<meta name="viewport"
-content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 
 <title>Product Details</title>
 
@@ -15,12 +14,12 @@ content="width=device-width,initial-scale=1">
 margin:0;
 padding:0;
 box-sizing:border-box;
-font-family:Arial;
+font-family:Arial,sans-serif;
 }
 
 body{
 background:#f5f5f5;
-padding:20px;
+padding:15px;
 padding-bottom:100px;
 }
 
@@ -36,9 +35,9 @@ box-shadow:0 2px 15px rgba(0,0,0,.1);
 .image{
 
 width:100%;
-height:250px;
-object-fit:cover;
+height:260px;
 border-radius:15px;
+object-fit:cover;
 
 }
 
@@ -53,8 +52,8 @@ margin-top:15px;
 .price{
 
 font-size:24px;
-color:#2e7d32;
 font-weight:bold;
+color:#2e7d32;
 margin-top:10px;
 
 }
@@ -77,10 +76,9 @@ color:gray;
 .qty{
 
 display:flex;
-align-items:center;
 justify-content:center;
+align-items:center;
 gap:20px;
-
 margin-top:20px;
 
 }
@@ -93,13 +91,13 @@ border:none;
 border-radius:50%;
 background:#2e7d32;
 color:white;
-font-size:22px;
+font-size:20px;
 
 }
 
 .count{
 
-font-size:24px;
+font-size:22px;
 font-weight:bold;
 
 }
@@ -117,26 +115,28 @@ margin-top:20px;
 flex:1;
 padding:15px;
 border:none;
-border-radius:15px;
+border-radius:12px;
 font-size:16px;
+color:white;
 
 }
 
 .cart{
 
 background:#2e7d32;
-color:white;
+
 }
 
 .buy{
 
 background:#ff9800;
-color:white;
+
 }
 
 .section{
 
 margin-top:30px;
+
 }
 
 .title{
@@ -159,8 +159,8 @@ margin-bottom:10px;
 .related{
 
 display:flex;
-overflow:auto;
 gap:10px;
+overflow:auto;
 
 }
 
@@ -186,6 +186,34 @@ object-fit:cover;
 
 }
 
+select,textarea{
+
+width:100%;
+padding:12px;
+border:none;
+border-radius:10px;
+margin-top:10px;
+
+}
+
+textarea{
+
+height:90px;
+
+}
+
+.submit{
+
+width:100%;
+padding:15px;
+margin-top:10px;
+border:none;
+border-radius:10px;
+background:#2e7d32;
+color:white;
+
+}
+
 </style>
 
 </head>
@@ -195,58 +223,32 @@ object-fit:cover;
 
 <div class="card">
 
-<img
-id="image"
-class="image">
+<img id="image" class="image">
 
-<div
-class="name"
-id="name">
+<div class="name" id="name">
 
 Loading...
 
 </div>
 
-<div
-class="price"
-id="price">
+<div class="price" id="price"></div>
 
-</div>
+<div class="category" id="category"></div>
 
-<div
-class="category"
-id="category">
-
-</div>
-
-<div
-class="description"
-id="description">
-
-</div>
+<div class="description" id="description"></div>
 
 
 <div class="qty">
 
-<button id="minus">
+<button id="minus">−</button>
 
-−
-
-</button>
-
-<div
-class="count"
-id="count">
+<div id="count" class="count">
 
 1
 
 </div>
 
-<button id="plus">
-
-+
-
-</button>
+<button id="plus">+</button>
 
 </div>
 
@@ -283,23 +285,13 @@ id="buyBtn">
 
 </div>
 
-<div class="review">
+<div id="reviews">
 
-⭐⭐⭐⭐⭐
-
-Very good quality product
+Loading...
 
 </div>
 
-<div class="review">
 
-⭐⭐⭐⭐
-
-Fresh and natural
-
-</div>
-
-</div>
 <select id="rating">
 
 <option>⭐</option>
@@ -311,15 +303,20 @@ Fresh and natural
 </select>
 
 <textarea
-id="comment">
+id="comment"
+placeholder="Write review...">
 
 </textarea>
 
-<button id="reviewBtn">
+<button
+class="submit"
+id="reviewBtn">
 
 Submit Review
 
 </button>
+
+</div>
 
 
 
@@ -335,8 +332,6 @@ Related Products
 class="related"
 id="related">
 
-Loading...
-
 </div>
 
 </div>
@@ -346,7 +341,6 @@ Loading...
 <script type="module">
 
 import {db,auth}
-
 from "./js/firebase.js";
 
 import {
@@ -355,7 +349,9 @@ doc,
 getDoc,
 collection,
 getDocs,
-addDoc
+addDoc,
+query,
+where
 
 }
 
@@ -379,11 +375,9 @@ const id=
 params.get("id");
 
 let quantity=1;
-let currentProduct=null;
 let currentUser=null;
+let currentProduct=null;
 
-
-/* Auth check */
 
 onAuthStateChanged(
 
@@ -398,43 +392,28 @@ currentUser=user;
 );
 
 
-/* Quantity */
-
-document.getElementById(
-"plus"
-)
-
-.onclick=()=>{
+plus.onclick=()=>{
 
 quantity++;
 
-document.getElementById(
-"count"
-).innerText=
+count.innerText=
 quantity;
 
 };
 
 
-document.getElementById(
-"minus"
-)
-
-.onclick=()=>{
+minus.onclick=()=>{
 
 if(quantity>1){
 
 quantity--;
 
-document.getElementById(
-"count"
-).innerText=
+count.innerText=
 quantity;
 
 }
 
 };
-
 
 
 async function loadProduct(){
@@ -455,50 +434,32 @@ currentProduct=
 snapshot.data();
 
 
-document.getElementById(
-"image"
-).src=
+image.src=
 currentProduct.Image;
 
-document.getElementById(
-"name"
-).innerText=
+name.innerText=
 currentProduct.name;
 
-document.getElementById(
-"price"
-).innerText=
-"₹"+currentProduct.price;
+price.innerText=
+"₹"+
+currentProduct.price;
 
-document.getElementById(
-"category"
-).innerText=
+category.innerText=
 "Category : "+
 currentProduct.category;
 
-document.getElementById(
-"description"
-).innerText=
+description.innerText=
 currentProduct.description;
 
 
 loadRelated();
 
+loadReviews();
+
 }
 
 
-
-/* Related products */
-
 async function loadRelated(){
-
-const relatedDiv=
-document.getElementById(
-"related"
-);
-
-relatedDiv.innerHTML="";
-
 
 const querySnapshot=
 
@@ -512,17 +473,19 @@ db,
 );
 
 
+related.innerHTML="";
+
+
 querySnapshot.forEach((doc)=>{
 
 const data=
 doc.data();
 
-if(doc.id!==id){
+if(doc.id!=id){
 
-relatedDiv.innerHTML +=`
+related.innerHTML+=`
 
-<div
-class="related-card"
+<div class="related-card"
 
 onclick="window.location='product-details.html?id=${doc.id}'">
 
@@ -551,17 +514,9 @@ ${data.name}
 }
 
 
-
-/* Add cart */
-
-document.getElementById(
-"cartBtn"
-)
-
-.onclick=
+cartBtn.onclick=
 
 async()=>{
-
 
 if(!currentUser){
 
@@ -572,8 +527,6 @@ return;
 
 }
 
-
-try{
 
 await addDoc(
 
@@ -587,8 +540,7 @@ db,
 uid:
 currentUser.uid,
 
-productId:
-id,
+productId:id,
 
 name:
 currentProduct.name,
@@ -599,40 +551,43 @@ currentProduct.price,
 image:
 currentProduct.Image,
 
-quantity:
-quantity
+quantity:quantity
 
 }
 
 );
-
 
 alert(
-"Added to cart"
+"Added to Cart"
 );
-
-}
-
-catch(error){
-
-alert(
-error.message
-);
-
-}
 
 };
 
 
+buyBtn.onclick=()=>{
 
-/* Buy now */
+if(!currentUser){
 
-document.getElementById(
-"buyBtn"
-)
+window.location=
+"login.html";
 
-.onclick=()=>{
+return;
 
+}
+
+window.location=
+
+"checkout.html?id="+
+id+
+"&qty="+
+quantity;
+
+};
+
+
+reviewBtn.onclick=
+
+async()=>{
 
 if(!currentUser){
 
@@ -644,16 +599,96 @@ return;
 }
 
 
-window.location=
+await addDoc(
 
-"checkout.html?id="+
-id+
+collection(
+db,
+"Reviews"
+),
 
-"&qty="+
-quantity;
+{
+
+uid:
+currentUser.uid,
+
+productId:id,
+
+rating:
+rating.value,
+
+comment:
+comment.value,
+
+date:
+new Date()
+
+}
+
+);
+
+
+comment.value="";
+
+loadReviews();
 
 };
 
+
+async function loadReviews(){
+
+reviews.innerHTML="";
+
+
+const q=
+
+query(
+
+collection(
+db,
+"Reviews"
+),
+
+where(
+"productId",
+"==",
+id
+)
+
+);
+
+
+const snapshot=
+await getDocs(q);
+
+
+snapshot.forEach((doc)=>{
+
+const data=
+doc.data();
+
+reviews.innerHTML+=`
+
+<div class="review">
+
+<div>
+
+${data.rating}
+
+</div>
+
+<p>
+
+${data.comment}
+
+</p>
+
+</div>
+
+`;
+
+});
+
+}
 
 
 loadProduct();
@@ -661,5 +696,4 @@ loadProduct();
 </script>
 
 </body>
-
 </html>
