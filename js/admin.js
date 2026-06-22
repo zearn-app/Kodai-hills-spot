@@ -7,7 +7,8 @@ collection,
 addDoc,
 getDocs,
 deleteDoc,
-doc
+doc,
+getCountFromServer
 
 }
 
@@ -15,7 +16,9 @@ from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
 
 const productsDiv=
-document.getElementById("products");
+document.getElementById(
+"products"
+);
 
 
 document.getElementById(
@@ -23,6 +26,8 @@ document.getElementById(
 )
 
 .onclick=async()=>{
+
+try{
 
 await addDoc(
 
@@ -63,10 +68,20 @@ document.getElementById(
 );
 
 alert(
-"Product Added"
+"Product Added Successfully"
 );
 
 location.reload();
+
+}
+
+catch(error){
+
+alert(
+error.message
+);
+
+}
 
 };
 
@@ -76,12 +91,14 @@ async function loadProducts(){
 productsDiv.innerHTML="";
 
 const querySnapshot=
+
 await getDocs(
 collection(
 db,
 "Products"
 )
 );
+
 
 querySnapshot.forEach((item)=>{
 
@@ -94,11 +111,23 @@ productsDiv.innerHTML +=`
 
 <img src="${data.Image}">
 
-<h3>${data.name}</h3>
+<h3>
 
-<p>₹${data.price}</p>
+${data.name}
 
-<p>${data.category}</p>
+</h3>
+
+<p>
+
+₹${data.price}
+
+</p>
+
+<p>
+
+${data.category}
+
+</p>
 
 <button
 class="delete"
@@ -132,7 +161,35 @@ id
 
 location.reload();
 
+};
+
+
+
+async function loadStats(){
+
+const productCount=
+
+await getCountFromServer(
+
+collection(
+db,
+"Products"
+)
+
+);
+
+document.getElementById(
+"totalProducts"
+)
+
+.innerText=
+
+productCount.data().count;
+
+
 }
 
+
+loadStats();
 
 loadProducts();
