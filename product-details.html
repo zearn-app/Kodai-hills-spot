@@ -317,6 +317,13 @@ document.getElementById(
 "image"
 );
 
+
+const reviewsDiv=
+document.getElementById(
+"reviews"
+);
+
+
 const nameEl=
 document.getElementById(
 "name"
@@ -631,7 +638,67 @@ quantity;
 
 };
 
+async function loadReviews(){
 
+reviewsDiv.innerHTML="";
+
+const q=
+
+query(
+
+collection(
+db,
+"Reviews"
+),
+
+where(
+"productId",
+"==",
+id
+)
+
+);
+
+const snapshot=
+await getDocs(q);
+
+if(snapshot.empty){
+
+reviewsDiv.innerHTML=
+"<p>No reviews yet</p>";
+
+return;
+
+}
+
+snapshot.forEach((item)=>{
+
+const data=
+item.data();
+
+reviewsDiv.innerHTML +=`
+
+<div class="review">
+
+<div>
+
+${data.rating}
+
+</div>
+
+<p>
+
+${data.comment}
+
+</p>
+
+</div>
+
+`;
+
+});
+
+}
 loadProduct();
 
 </script>
