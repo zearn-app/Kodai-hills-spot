@@ -23,20 +23,27 @@ from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
 
 
-// Firebase Config
-const firebaseConfig = {
+// FIREBASE CONFIG
+
+const firebaseConfig={
 
 apiKey:"AIzaSyAXtM0DnYPTYbdQmvv93KAQwcqxty2C1vQ",
+
 authDomain:"kodaihillsspot-4a1b8.firebaseapp.com",
+
 projectId:"kodaihillsspot-4a1b8",
+
 storageBucket:"kodaihillsspot-4a1b8.firebasestorage.app",
+
 messagingSenderId:"396566428046",
+
 appId:"1:396566428046:web:c9bafa2143b34e7d64ccdf"
 
 };
 
 
-// Initialize
+// Initialize Firebase
+
 const app=initializeApp(firebaseConfig);
 
 const auth=getAuth(app);
@@ -44,28 +51,41 @@ const auth=getAuth(app);
 const db=getFirestore(app);
 
 
+// Recaptcha
 
-// Create Recaptcha
+window.onload=()=>{
+
 window.recaptchaVerifier=
+
 new RecaptchaVerifier(
+
 auth,
+
 "recaptcha-container",
+
 {
+
 size:"normal"
+
 }
+
 );
 
-const appVerifier=
-window.recaptchaVerifier;
+};
 
 
 
 // SIGNUP
+
 document.getElementById(
 "signupBtn"
-).addEventListener(
-"click",
+)
+
+.onclick=
+
 async()=>{
+
+try{
 
 const name=
 document.getElementById(
@@ -89,10 +109,12 @@ document.getElementById(
 
 
 if(
+
 !name||
 !phone||
 !email||
 !password
+
 ){
 
 alert(
@@ -104,13 +126,14 @@ return;
 }
 
 
-try{
-
 const userCredential=
+
 await createUserWithEmailAndPassword(
+
 auth,
 email,
 password
+
 );
 
 
@@ -119,27 +142,33 @@ userCredential.user;
 
 
 await setDoc(
+
 doc(
 db,
 "Users",
 user.uid
 ),
+
 {
 
+uid:user.uid,
+
 name:name,
+
 phone:"+91"+phone,
-email:email,
-uid:user.uid
+
+email:email
 
 }
+
 );
 
 
 alert(
-"Signup Successful"
+"Signup successful"
 );
 
-window.location.reload();
+location.reload();
 
 }
 
@@ -151,17 +180,24 @@ error.message
 
 }
 
-});
+};
 
 
 
 
-// LOGIN
+// LOGIN + SEND OTP
+
+
 document.getElementById(
 "loginBtn"
-).addEventListener(
-"click",
+)
+
+.onclick=
+
 async()=>{
+
+
+try{
 
 const email=
 document.getElementById(
@@ -175,12 +211,14 @@ document.getElementById(
 
 
 if(
+
 !email||
 !password
+
 ){
 
 alert(
-"Enter email/password"
+"Enter email and password"
 );
 
 return;
@@ -188,77 +226,78 @@ return;
 }
 
 
-try{
-
 await signInWithEmailAndPassword(
+
 auth,
 email,
 password
+
 );
 
 
-// Get phone from Firestore
+
 const q=
+
 query(
+
 collection(
 db,
 "Users"
 ),
+
 where(
 "email",
 "==",
 email
 )
+
 );
 
 
 const snapshot=
+
 await getDocs(q);
-
-
-if(
-snapshot.empty
-){
-
-alert(
-"User not found"
-);
-
-return;
-
-}
 
 
 let phone="";
 
 
-snapshot.forEach(doc=>{
+snapshot.forEach(item=>{
 
 phone=
-doc.data().phone;
+item.data().phone;
 
 });
 
 
+const appVerifier=
 
-// Send OTP
+window.recaptchaVerifier;
+
+
 const confirmationResult=
+
 await signInWithPhoneNumber(
+
 auth,
 phone,
 appVerifier
+
 );
 
 
 window.confirmationResult=
+
 confirmationResult;
 
 
-// Show OTP section
+// SHOW OTP
+
 document.getElementById(
 "otp"
 ).style.display=
 "block";
+
 
 document.getElementById(
 "verifyOtpBtn"
@@ -267,9 +306,8 @@ document.getElementById(
 
 
 alert(
-"OTP sent successfully"
+"OTP Sent"
 );
-
 
 }
 
@@ -283,20 +321,26 @@ error.message
 
 }
 
-});
+};
 
 
 
 
 // VERIFY OTP
+
 document.getElementById(
 "verifyOtpBtn"
-).addEventListener(
-"click",
+)
+
+.onclick=
+
 async()=>{
 
 
+try{
+
 const otp=
+
 document.getElementById(
 "otp"
 ).value.trim();
@@ -313,20 +357,37 @@ return;
 }
 
 
-try{
-
 await window.confirmationResult.confirm(
 otp
 );
 
 
 alert(
-"Login Successful"
+"Login Success"
 );
 
 
-window.location.href=
-"home.html";
+// Admin redirect
+
+if(
+
+auth.currentUser.email===
+
+"kodaihillsspot@gmail.com"
+
+){
+
+window.location=
+"admin.html";
+
+}
+
+else{
+
+window.location=
+"index.html";
+
+}
 
 
 }
@@ -339,5 +400,4 @@ alert(
 
 }
 
-
-});
+};
