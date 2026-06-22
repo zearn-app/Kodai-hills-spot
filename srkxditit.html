@@ -28,13 +28,10 @@ padding:20px;
 background:white;
 padding:15px;
 border-radius:15px;
-
 display:flex;
 align-items:center;
 gap:10px;
-
 box-shadow:0 2px 10px rgba(0,0,0,.1);
-
 margin-bottom:20px;
 
 }
@@ -43,9 +40,7 @@ margin-bottom:20px;
 
 width:50px;
 height:50px;
-
 border-radius:50%;
-
 border:2px solid #2e7d32;
 
 }
@@ -61,15 +56,10 @@ color:#2e7d32;
 .stats{
 
 background:white;
-
 padding:20px;
-
 border-radius:15px;
-
 margin-bottom:20px;
-
 text-align:center;
-
 box-shadow:0 2px 10px rgba(0,0,0,.1);
 
 }
@@ -77,8 +67,8 @@ box-shadow:0 2px 10px rgba(0,0,0,.1);
 .count{
 
 font-size:35px;
-color:#2e7d32;
 font-weight:bold;
+color:#2e7d32;
 
 }
 
@@ -86,28 +76,20 @@ font-weight:bold;
 
 width:100%;
 padding:15px;
-
 border:none;
 border-radius:12px;
-
 margin-bottom:20px;
-
-box-shadow:0 2px 10px rgba(0,0,0,.1);
-
 outline:none;
+box-shadow:0 2px 10px rgba(0,0,0,.1);
 
 }
 
 .user{
 
 background:white;
-
 padding:15px;
-
 border-radius:15px;
-
 margin-bottom:15px;
-
 box-shadow:0 2px 10px rgba(0,0,0,.1);
 
 }
@@ -129,17 +111,11 @@ color:#666;
 .delete{
 
 width:100%;
-
 padding:12px;
-
 margin-top:15px;
-
 border:none;
-
 border-radius:10px;
-
 background:#e53935;
-
 color:white;
 
 }
@@ -152,7 +128,8 @@ color:white;
 
 <div class="navbar">
 
-<img src="logo.png"
+<img
+src="logo.png"
 class="logo">
 
 <div class="title">
@@ -167,9 +144,7 @@ Users Management
 <div class="stats">
 
 <div>
-
 Total Users
-
 </div>
 
 <div
@@ -197,8 +172,250 @@ Loading...
 </div>
 
 
-<script type="module"
-src="js/srkxditit.js">
+
+<script type="module">
+
+import {auth,db}
+from "./js/firebase.js";
+
+import {
+
+onAuthStateChanged
+
+}
+
+from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
+
+import {
+
+collection,
+getDocs,
+deleteDoc,
+doc
+
+}
+
+from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
+
+
+let allUsers=[];
+
+
+/* Protect page */
+
+onAuthStateChanged(
+
+auth,
+
+async(user)=>{
+
+if(!user){
+
+window.location=
+"index.html";
+
+return;
+
+}
+
+
+/* Admin Gmail check */
+
+if(
+
+user.email !==
+"kodaihillsspot@gmail.com"
+
+){
+
+alert(
+"Access Denied"
+);
+
+window.location=
+"index.html";
+
+return;
+
+}
+
+
+loadUsers();
+
+}
+
+);
+
+
+async function loadUsers(){
+
+const snapshot=
+
+await getDocs(
+
+collection(
+db,
+"Users"
+)
+
+);
+
+
+allUsers=[];
+
+snapshot.forEach((docItem)=>{
+
+allUsers.push({
+
+id:docItem.id,
+
+...docItem.data()
+
+});
+
+});
+
+
+document.getElementById(
+"totalUsers"
+)
+
+.innerText=
+
+allUsers.length;
+
+
+showUsers();
+
+}
+
+
+
+function showUsers(){
+
+const search=
+
+document.getElementById(
+"searchInput"
+)
+
+.value.toLowerCase();
+
+
+const usersDiv=
+
+document.getElementById(
+"users"
+);
+
+usersDiv.innerHTML="";
+
+
+allUsers.forEach((user)=>{
+
+
+if(
+
+(user.name||"")
+
+.toLowerCase()
+
+.includes(search)
+
+||
+
+(user.email||"")
+
+.toLowerCase()
+
+.includes(search)
+
+){
+
+usersDiv.innerHTML+=`
+
+<div class="user">
+
+<h3>
+
+${user.name||"No Name"}
+
+</h3>
+
+<div class="info">
+
+📧
+${user.email||"-"}
+
+</div>
+
+<div class="info">
+
+📱
+${user.phone||"-"}
+
+</div>
+
+<div class="info">
+
+🏠
+${user.address||"-"}
+
+</div>
+
+<button
+class="delete"
+
+onclick="deleteUser('${user.id}')">
+
+Delete User
+
+</button>
+
+</div>
+
+`;
+
+}
+
+});
+
+}
+
+
+/* Delete user */
+
+window.deleteUser=
+
+async(id)=>{
+
+const confirmDelete=
+
+confirm(
+"Delete user?"
+);
+
+if(!confirmDelete)
+return;
+
+
+await deleteDoc(
+
+doc(
+db,
+"Users",
+id
+)
+
+);
+
+loadUsers();
+
+};
+
+
+searchInput.oninput=
+showUsers;
 
 </script>
 
