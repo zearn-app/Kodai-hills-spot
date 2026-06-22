@@ -31,6 +31,8 @@ background:white;
 padding:25px;
 border-radius:25px;
 box-shadow:0 5px 20px rgba(0,0,0,.1);
+max-height:95vh;
+overflow-y:auto;
 }
 
 .logo-container{
@@ -58,7 +60,7 @@ color:#2e7d32;
 margin-bottom:25px;
 }
 
-input{
+input,select{
 width:100%;
 padding:14px;
 margin:8px 0;
@@ -66,10 +68,19 @@ border:1px solid #ddd;
 border-radius:12px;
 font-size:16px;
 outline:none;
+background:white;
 }
 
-input:focus{
+input:focus,
+select:focus{
 border:1px solid #2e7d32;
+}
+
+.address-title{
+margin-top:10px;
+font-weight:bold;
+color:#2e7d32;
+font-size:17px;
 }
 
 button{
@@ -80,7 +91,7 @@ border-radius:12px;
 background:#2e7d32;
 color:white;
 font-size:18px;
-margin-top:10px;
+margin-top:15px;
 cursor:pointer;
 }
 
@@ -110,18 +121,86 @@ Kodai Hills Spot 🌿
 
 <div id="signupBox">
 
-<input id="name" placeholder="Full Name">
+<input 
+id="name" 
+placeholder="Full Name">
 
-<input id="phone" placeholder="Phone Number">
+<input 
+id="phone" 
+placeholder="Phone Number">
 
-<input id="address" placeholder="Address">
+<div class="address-title">
+Address Details
+</div>
 
-<input id="email" placeholder="Gmail">
+<select id="state">
 
-<input id="password" type="password" placeholder="Password">
+<option value="">
+Select State
+</option>
+
+<option>
+Tamil Nadu
+</option>
+
+<option>
+Kerala
+</option>
+
+<option>
+Karnataka
+</option>
+
+<option>
+Maharashtra
+</option>
+
+<option>
+Andhra Pradesh
+</option>
+
+</select>
+
+
+<input
+id="district"
+placeholder="District">
+
+
+<input
+id="city"
+placeholder="City / Village">
+
+
+<input
+id="pincode"
+placeholder="Pincode"
+type="number">
+
+
+<input
+id="landmark"
+placeholder="Landmark">
+
+
+<input
+id="house"
+placeholder="House No / Street Name">
+
+
+<input 
+id="email" 
+placeholder="Gmail">
+
+<input 
+id="password" 
+type="password" 
+placeholder="Password">
 
 <button id="signupBtn">
+
 Sign Up
+
 </button>
 
 </div>
@@ -129,14 +208,19 @@ Sign Up
 
 <div id="loginBox" style="display:none">
 
-<input id="loginEmail" placeholder="Gmail">
+<input 
+id="loginEmail" 
+placeholder="Gmail">
 
-<input id="loginPassword"
+<input 
+id="loginPassword"
 type="password"
 placeholder="Password">
 
 <button id="loginBtn">
+
 Login
+
 </button>
 
 </div>
@@ -151,6 +235,7 @@ Already have an account? Login
 </p>
 
 </div>
+
 
 <script>
 
@@ -168,6 +253,7 @@ document.getElementById("toggleText");
 if(signup.style.display==="none"){
 
 signup.style.display="block";
+
 login.style.display="none";
 
 text.innerText=
@@ -178,6 +264,7 @@ text.innerText=
 else{
 
 signup.style.display="none";
+
 login.style.display="block";
 
 text.innerText=
