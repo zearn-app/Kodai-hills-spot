@@ -13,7 +13,7 @@ setDoc
 
 let confirmationResult;
 
-/* ---------------- OTP SETUP ---------------- */
+/* RECAPTCHA */
 window.recaptchaVerifier = new RecaptchaVerifier(
 auth,
 "recaptcha-container",
@@ -22,7 +22,7 @@ size: "invisible"
 }
 );
 
-/* ---------------- SIGNUP (SEND OTP) ---------------- */
+/* SEND OTP */
 document.getElementById("signupBtn").onclick = async () => {
 try {
 
@@ -45,8 +45,6 @@ appVerifier
 document.getElementById("otp").style.display = "block";
 document.getElementById("verifyOtpBtn").style.display = "block";
 
-document.getElementById("signupBtn").style.display = "none";
-
 alert("OTP sent successfully");
 
 } catch (error) {
@@ -54,7 +52,7 @@ alert(error.message);
 }
 };
 
-/* ---------------- VERIFY OTP + CREATE ACCOUNT ---------------- */
+/* VERIFY OTP + CREATE ACCOUNT */
 document.getElementById("verifyOtpBtn").onclick = async () => {
 try {
 
@@ -65,16 +63,15 @@ alert("Enter OTP");
 return;
 }
 
-/* confirm OTP */
 await confirmationResult.confirm(code);
 
-/* get form values */
+/* GET DATA */
 const name = document.getElementById("name").value;
 const email = document.getElementById("email").value;
 const password = document.getElementById("password").value;
 const phone = document.getElementById("phone").value;
 
-/* create email account AFTER OTP success */
+/* CREATE EMAIL ACCOUNT */
 const userCredential = await createUserWithEmailAndPassword(
 auth,
 email,
@@ -83,17 +80,16 @@ password
 
 const user = userCredential.user;
 
-/* save to firestore */
+/* SAVE USER */
 await setDoc(doc(db, "Users", user.uid), {
-name: name,
-email: email,
-phone: phone,
+name,
+email,
+phone,
 createdAt: Date.now()
 });
 
 alert("Signup successful");
 
-/* redirect */
 window.location.href = "index.html";
 
 } catch (error) {
