@@ -19,14 +19,10 @@ from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
 
 
 const productsDiv=
-document.getElementById(
-"products"
-);
+document.getElementById("products");
 
 const ordersDiv=
-document.getElementById(
-"allOrders"
-);
+document.getElementById("allOrders");
 
 let selectedOrderId=null;
 
@@ -53,9 +49,7 @@ user.email !==
 "kodaihillsspot@gmail.com"
 ){
 
-alert(
-"Access Denied"
-);
+alert("Access Denied");
 
 window.location=
 "index.html";
@@ -85,37 +79,60 @@ async()=>{
 
 try{
 
-const name=
+
+/* Input elements */
+
+const nameInput=
 document.getElementById(
 "name"
-).value.trim();
+);
 
-const price=
+const priceInput=
 document.getElementById(
 "price"
-).value.trim();
+);
 
-const category=
+const categoryInput=
 document.getElementById(
 "category"
-).value;
+);
 
-const image=
+const imageInput=
 document.getElementById(
 "image"
-).value.trim();
+);
 
-const description=
+const descriptionInput=
 document.getElementById(
 "description"
-).value.trim();
+);
+
+
+/* Values */
+
+const name=
+nameInput.value.trim();
+
+const price=
+priceInput.value.trim();
+
+const category=
+categoryInput.value;
+
+const image=
+imageInput.value.trim();
+
+const description=
+descriptionInput.value.trim();
 
 
 if(
+
 !name ||
 !price ||
 !image ||
 !description
+
 ){
 
 alert(
@@ -126,6 +143,9 @@ return;
 
 }
 
+
+/* Add to Firebase */
+
 await addDoc(
 
 collection(
@@ -135,30 +155,41 @@ db,
 
 {
 
-name,
-price,
-category,
+name:name,
+
+price:price,
+
+category:category,
+
 Image:image,
-description
+
+description:description
 
 }
 
 );
+
 
 alert(
 "Product Added Successfully"
 );
 
 
-/* Clear form */
+/* Clear fields */
 
-name.value="";
-price.value="";
-image.value="";
-description.value="";
+nameInput.value="";
+
+priceInput.value="";
+
+categoryInput.selectedIndex=0;
+
+imageInput.value="";
+
+descriptionInput.value="";
 
 
 loadProducts();
+
 loadStats();
 
 }
@@ -181,6 +212,7 @@ async function loadProducts(){
 productsDiv.innerHTML=
 "Loading...";
 
+
 const snapshot=
 
 await getDocs(
@@ -192,24 +224,29 @@ db,
 
 );
 
+
 productsDiv.innerHTML="";
+
 
 snapshot.forEach((item)=>{
 
 const data=
 item.data();
 
-productsDiv.innerHTML +=`
+
+productsDiv.innerHTML+=`
 
 <div class="product">
 
 <img
 src="${data.Image}"
+
 style="
 width:100%;
 height:150px;
 object-fit:cover;
-border-radius:10px;">
+border-radius:10px;
+">
 
 <h3>
 
@@ -230,13 +267,16 @@ ${data.category}
 </p>
 
 <button
+
 onclick="deleteProduct('${item.id}')"
+
 style="
 background:red;
 color:white;
-border:none;
 padding:10px;
-border-radius:10px;">
+border:none;
+border-radius:10px;
+">
 
 Delete
 
@@ -251,7 +291,7 @@ Delete
 }
 
 
-/* Delete product */
+/* Delete Product */
 
 window.deleteProduct=
 
@@ -274,7 +314,7 @@ loadStats();
 };
 
 
-/* Dashboard stats */
+/* Dashboard Stats */
 
 async function loadStats(){
 
@@ -289,6 +329,7 @@ db,
 
 );
 
+
 const orderCount=
 
 await getCountFromServer(
@@ -299,6 +340,7 @@ db,
 )
 
 );
+
 
 document.getElementById(
 "totalProducts"
@@ -320,7 +362,7 @@ orderCount.data().count;
 }
 
 
-/* User page button */
+/* User page */
 
 document.getElementById(
 "userBtn"
@@ -340,6 +382,7 @@ async function loadOrders(){
 
 ordersDiv.innerHTML="";
 
+
 const snapshot=
 
 await getDocs(
@@ -351,6 +394,7 @@ db,
 
 );
 
+
 snapshot.forEach((item)=>{
 
 const data=
@@ -358,7 +402,8 @@ item.data();
 
 ordersDiv.innerHTML+=`
 
-<div class="product"
+<div
+class="product"
 onclick="openPopup('${item.id}')">
 
 <h3>
@@ -382,7 +427,7 @@ ${data.email||""}
 <p>
 
 Status:
-${data.status||"Pending"}
+${data.status || "Pending"}
 
 </p>
 
@@ -402,11 +447,7 @@ window.openPopup=
 
 selectedOrderId=id;
 
-document.getElementById(
-"statusPopup"
-)
-
-.style.display=
+statusPopup.style.display=
 "flex";
 
 };
@@ -415,17 +456,14 @@ document.getElementById(
 window.closePopup=
 ()=>{
 
-document.getElementById(
-"statusPopup"
-)
-
-.style.display=
+statusPopup.style.display=
 "none";
 
 };
 
 
-statusSelect.onchange=()=>{
+statusSelect.onchange=
+()=>{
 
 trackingId.style.display=
 
@@ -446,12 +484,6 @@ updateBtn.onclick=
 
 async()=>{
 
-const status=
-statusSelect.value;
-
-const tracking=
-trackingId.value;
-
 await updateDoc(
 
 doc(
@@ -462,15 +494,16 @@ selectedOrderId
 
 {
 
-status:status,
+status:
+statusSelect.value,
 
 trackingId:
 
-status==="Approved"
+statusSelect.value==="Approved"
 
 ?
 
-tracking
+trackingId.value
 
 :
 
@@ -481,7 +514,7 @@ tracking
 );
 
 alert(
-"Updated Successfully"
+"Status Updated"
 );
 
 closePopup();
