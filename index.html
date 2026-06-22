@@ -369,8 +369,7 @@ from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
 import {
 
-onAuthStateChanged,
-signOut
+onAuthStateChanged
 
 }
 
@@ -382,6 +381,11 @@ document.getElementById(
 "products"
 );
 
+const userArea=
+document.getElementById(
+"userArea"
+);
+
 
 async function loadProducts(){
 
@@ -390,25 +394,30 @@ productsDiv.innerHTML="";
 const querySnapshot=
 
 await getDocs(
+
 collection(
 db,
 "Products"
 )
-);
 
+);
 
 querySnapshot.forEach((doc)=>{
 
 const data=
 doc.data();
 
-productsDiv.innerHTML+=`
+productsDiv.innerHTML += `
 
 <div class="card">
 
 <img src="${data.Image}">
 
-<h3>${data.name}</h3>
+<h3>
+
+${data.name}
+
+</h3>
 
 <div class="price">
 
@@ -431,38 +440,30 @@ auth,
 
 (user)=>{
 
-const userArea=
-document.getElementById(
-"userArea"
-);
-
 if(user){
+
+userArea.innerHTML="";
+
+}
+
+else{
 
 userArea.innerHTML=`
 
 <button
 class="auth-btn"
-onclick="window.location='profile.html'">
+onclick="window.location='login.html'">
 
-👤 Profile
+Login
 
 </button>
 
-
-
-
-.onclick=
-()=>{
-
-signOut(auth);
-
-location.reload();
-
-};
+`;
 
 }
 
 }
+
 
 );
 
