@@ -31,6 +31,17 @@ document.getElementById(
 snapshot.size;
 
 
+
+document.getElementById(
+"userBtn"
+).onclick = () => {
+
+window.location =
+"srkxditit.html";
+
+};
+
+
 snapshot.forEach((docItem)=>{
 
 const data=
