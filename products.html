@@ -1,20 +1,278 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
 
+<meta charset="UTF-8">
+<meta name="viewport"
+content="width=device-width,initial-scale=1">
+
 <title>Products</title>
 
-<link rel="stylesheet"
-href="css/style.css">
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Arial,sans-serif;
+}
+
+body{
+background:#f5f5f5;
+padding:15px;
+padding-bottom:90px;
+}
+
+.header{
+
+display:flex;
+align-items:center;
+gap:10px;
+
+margin-bottom:20px;
+
+}
+
+.logo{
+
+width:50px;
+height:50px;
+
+border-radius:50%;
+border:2px solid #2e7d32;
+
+}
+
+.title{
+
+font-size:25px;
+font-weight:bold;
+color:#2e7d32;
+
+}
+
+.search{
+
+width:100%;
+padding:15px;
+
+border:none;
+border-radius:15px;
+
+margin-bottom:15px;
+
+box-shadow:0 2px 10px rgba(0,0,0,.1);
+
+}
+
+.filter{
+
+width:100%;
+
+padding:15px;
+
+border:none;
+
+border-radius:15px;
+
+margin-bottom:20px;
+
+box-shadow:0 2px 10px rgba(0,0,0,.1);
+
+}
+
+.products{
+
+display:grid;
+
+grid-template-columns:repeat(2,1fr);
+
+gap:15px;
+
+}
+
+.card{
+
+background:white;
+
+padding:10px;
+
+border-radius:15px;
+
+box-shadow:0 2px 10px rgba(0,0,0,.1);
+
+}
+
+.card img{
+
+width:100%;
+height:140px;
+
+object-fit:cover;
+
+border-radius:10px;
+
+}
+
+.card h3{
+
+margin-top:10px;
+
+font-size:16px;
+
+}
+
+.price{
+
+font-size:18px;
+
+font-weight:bold;
+
+color:#2e7d32;
+
+margin:5px 0;
+
+}
+
+.btn{
+
+width:100%;
+
+padding:10px;
+
+background:#2e7d32;
+
+border:none;
+
+border-radius:10px;
+
+color:white;
+
+}
+
+.bottom-nav{
+
+position:fixed;
+bottom:0;
+left:0;
+width:100%;
+
+background:white;
+
+display:flex;
+justify-content:space-around;
+
+padding:15px;
+
+box-shadow:0 -2px 10px rgba(0,0,0,.1);
+
+}
+
+.bottom-nav a{
+
+text-decoration:none;
+color:black;
+
+}
+
+.active{
+
+color:#2e7d32;
+
+}
+
+</style>
 
 </head>
 
 <body>
 
-<h1>Products</h1>
 
-<div id="products"></div>
+<div class="header">
+
+<img src="assets/logo.png"
+class="logo">
+
+<div class="title">
+
+Products
+
+</div>
+
+</div>
+
+
+<input
+class="search"
+id="searchInput"
+placeholder="🔍 Search products">
+
+
+<select
+class="filter"
+id="categoryFilter">
+
+<option value="">
+All Categories
+</option>
+
+<option>
+Chocolate
+</option>
+
+<option>
+Honey
+</option>
+
+<option>
+Herbs
+</option>
+
+<option>
+Oils
+</option>
+
+</select>
+
+
+<div
+class="products"
+id="products">
+
+Loading...
+
+</div>
+
+
+<nav class="bottom-nav">
+
+<a href="index.html">
+
+🏠<br>Home
+
+</a>
+
+<a href="products.html"
+class="active">
+
+🛍️<br>Products
+
+</a>
+
+<a href="cart.html">
+
+🛒<br>Cart
+
+</a>
+
+<a href="profile.html">
+
+👤<br>Profile
+
+</a>
+
+</nav>
 
 <script type="module"
 src="js/products.js"></script>
