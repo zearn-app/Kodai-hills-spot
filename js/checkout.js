@@ -1,79 +1,113 @@
-let cart=
-JSON.parse(
-localStorage.getItem("cart")
-)||[];
+import {db,auth}
+from "./firebase.js";
+
+import {
+
+collection,
+addDoc
+
+}
+
+from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
+
+import {
+
+onAuthStateChanged
+
+}
+
+from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
 
 
-let total=0;
+let currentUser=null;
 
-cart.forEach(item=>{
+onAuthStateChanged(
 
-total +=
-Number(item.price);
+auth,
+
+(user)=>{
+
+if(!user){
+
+window.location=
+"login.html";
+
+return;
+
+}
+
+currentUser=user;
 
 });
-
-document.getElementById(
-"total"
-).innerText=
-"Total : ₹"+total;
-
-
-
-document.getElementById(
-"whatsappBtn"
-)
-
-.onclick=()=>{
-
-let name=
-document.getElementById(
-"customerName"
-).value;
-
-let phone=
-document.getElementById(
-"customerPhone"
-).value;
-
-let address=
-document.getElementById(
-"customerAddress"
-).value;
-
-
-let message=
-
-`New Order
-
-Name: ${name}
-
-Phone: ${phone}
-
-Address: ${address}
-
-Total: ₹${total}
-`;
-
-
-window.open(
-
-`https://wa.me/918056721645?text=${encodeURIComponent(message)}`
-
-);
-
-};
-
 
 
 document.getElementById(
 "placeOrder"
 )
 
-.onclick=()=>{
+.onclick=
+
+async()=>{
+
+try{
+
+await addDoc(
+
+collection(
+db,
+"Orders"
+),
+
+{
+
+uid:
+currentUser.uid,
+
+name:
+document.getElementById(
+"name"
+).value,
+
+phone:
+document.getElementById(
+"phone"
+).value,
+
+address:
+document.getElementById(
+"address"
+).value,
+
+payment:
+document.getElementById(
+"payment"
+).value,
+
+status:
+"Pending",
+
+date:
+new Date().toLocaleString()
+
+}
+
+);
 
 alert(
-"Order placed successfully"
+"Order placed"
 );
+
+window.location=
+"profile.html";
+
+}
+
+catch(error){
+
+alert(
+error.message
+);
+
+}
 
 };
