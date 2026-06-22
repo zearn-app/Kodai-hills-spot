@@ -13,31 +13,54 @@ from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
 import {
 getFirestore,
 doc,
-setDoc
+setDoc,
+collection,
+query,
+where,
+getDocs
 }
 from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
 
-// Firebase config
+
+// Firebase Config
 const firebaseConfig = {
-  apiKey: "AIzaSyAXtM0DnYPTYbdQmvv93KAQwcqxty2C1vQ",
-  authDomain: "kodaihillsspot-4a1b8.firebaseapp.com",
-  projectId: "kodaihillsspot-4a1b8",
-  storageBucket: "kodaihillsspot-4a1b8.firebasestorage.app",
-  messagingSenderId: "396566428046",
-  appId: "1:396566428046:web:c9bafa2143b34e7d64ccdf",
-  measurementId: "G-BZ8MBZEJQ4"
+
+apiKey:"AIzaSyAXtM0DnYPTYbdQmvv93KAQwcqxty2C1vQ",
+authDomain:"kodaihillsspot-4a1b8.firebaseapp.com",
+projectId:"kodaihillsspot-4a1b8",
+storageBucket:"kodaihillsspot-4a1b8.firebasestorage.app",
+messagingSenderId:"396566428046",
+appId:"1:396566428046:web:c9bafa2143b34e7d64ccdf"
+
 };
 
+
 // Initialize
-const app = initializeApp(firebaseConfig);
+const app=initializeApp(firebaseConfig);
 
-const auth = getAuth(app);
+const auth=getAuth(app);
 
-const db = getFirestore(app);
+const db=getFirestore(app);
 
 
-// Signup
+
+// Create Recaptcha
+window.recaptchaVerifier=
+new RecaptchaVerifier(
+auth,
+"recaptcha-container",
+{
+size:"normal"
+}
+);
+
+const appVerifier=
+window.recaptchaVerifier;
+
+
+
+// SIGNUP
 document.getElementById(
 "signupBtn"
 ).addEventListener(
@@ -66,9 +89,9 @@ document.getElementById(
 
 
 if(
-!name ||
-!phone ||
-!email ||
+!name||
+!phone||
+!email||
 !password
 ){
 
@@ -90,11 +113,11 @@ email,
 password
 );
 
+
 const user=
 userCredential.user;
 
 
-// Store user data
 await setDoc(
 doc(
 db,
@@ -104,17 +127,16 @@ user.uid
 {
 
 name:name,
-phone:phone,
+phone:"+91"+phone,
 email:email,
-uid:user.uid,
-createdAt:
-new Date()
+uid:user.uid
 
 }
 );
 
+
 alert(
-"Signup successful"
+"Signup Successful"
 );
 
 window.location.reload();
@@ -133,7 +155,8 @@ error.message
 
 
 
-// Login
+
+// LOGIN
 document.getElementById(
 "loginBtn"
 ).addEventListener(
@@ -152,17 +175,18 @@ document.getElementById(
 
 
 if(
-!email ||
+!email||
 !password
 ){
 
 alert(
-"Enter email and password"
+"Enter email/password"
 );
 
 return;
 
 }
+
 
 try{
 
@@ -172,26 +196,52 @@ email,
 password
 );
 
-const phone=
-prompt(
-"Enter registered phone with country code\nExample:+919876543210"
+
+// Get phone from Firestore
+const q=
+query(
+collection(
+db,
+"Users"
+),
+where(
+"email",
+"==",
+email
+)
 );
 
 
-window.recaptchaVerifier=
-new RecaptchaVerifier(
-auth,
-"recaptcha-container",
-{
-size:"normal"
+const snapshot=
+await getDocs(q);
+
+
+if(
+snapshot.empty
+){
+
+alert(
+"User not found"
+);
+
+return;
+
 }
-);
 
 
-const appVerifier=
-window.recaptchaVerifier;
+let phone="";
 
 
+snapshot.forEach(doc=>{
+
+phone=
+doc.data().phone;
+
+});
+
+
+
+// Send OTP
 const confirmationResult=
 await signInWithPhoneNumber(
 auth,
@@ -204,7 +254,7 @@ window.confirmationResult=
 confirmationResult;
 
 
-// Show OTP box
+// Show OTP section
 document.getElementById(
 "otp"
 ).style.display=
@@ -215,13 +265,17 @@ document.getElementById(
 ).style.display=
 "block";
 
+
 alert(
-"OTP sent"
+"OTP sent successfully"
 );
+
 
 }
 
 catch(error){
+
+console.log(error);
 
 alert(
 error.message
@@ -234,17 +288,18 @@ error.message
 
 
 
-// Verify OTP
+// VERIFY OTP
 document.getElementById(
 "verifyOtpBtn"
 ).addEventListener(
 "click",
 async()=>{
 
+
 const otp=
 document.getElementById(
 "otp"
-).value;
+).value.trim();
 
 
 if(!otp){
@@ -257,20 +312,22 @@ return;
 
 }
 
+
 try{
 
 await window.confirmationResult.confirm(
 otp
 );
 
+
 alert(
-"Login successful"
+"Login Successful"
 );
 
 
-// redirect
 window.location.href=
 "home.html";
+
 
 }
 
@@ -281,5 +338,6 @@ alert(
 );
 
 }
+
 
 });
