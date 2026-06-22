@@ -1,19 +1,30 @@
-import { db } from "./firebase.js";
+import { db }
+from "./firebase.js";
 
 import {
+
 collection,
 getDocs
+
 }
+
 from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
+
 const productsDiv=
-document.getElementById("products");
+document.getElementById(
+"products"
+);
 
 const searchInput=
-document.getElementById("searchInput");
+document.getElementById(
+"searchInput"
+);
 
 const categoryFilter=
-document.getElementById("categoryFilter");
+document.getElementById(
+"categoryFilter"
+);
 
 let allProducts=[];
 
@@ -21,24 +32,35 @@ let allProducts=[];
 async function loadProducts(){
 
 const querySnapshot=
+
 await getDocs(
+
 collection(
 db,
 "Products"
 )
+
 );
+
 
 allProducts=[];
 
+
 querySnapshot.forEach((doc)=>{
 
-allProducts.push(
-doc.data()
-);
+allProducts.push({
+
+id:doc.id,
+...doc.data()
 
 });
 
-showProducts(allProducts);
+});
+
+
+showProducts(
+allProducts
+);
 
 }
 
@@ -47,27 +69,45 @@ function showProducts(products){
 
 productsDiv.innerHTML="";
 
-products.forEach(data=>{
 
-productsDiv.innerHTML +=`
+if(products.length===0){
 
-<div class="card">
+productsDiv.innerHTML=
+"<h3>No products found</h3>";
 
-<img src="${data.Image}">
+return;
 
-<h3>${data.name}</h3>
+}
+
+
+products.forEach((product)=>{
+
+productsDiv.innerHTML+=`
+
+<div class="card"
+
+onclick="window.location='product-details.html?id=${product.id}'"
+
+style="cursor:pointer">
+
+<img src="${product.Image}">
+
+<h3>
+
+${product.name}
+
+</h3>
 
 <div class="price">
 
-₹${data.price}
+₹${product.price}
 
 </div>
 
 <button
-class="btn"
-onclick='addToCart(${JSON.stringify(data)})'>
+class="btn">
 
-Add to Cart
+View Details
 
 </button>
 
@@ -76,6 +116,50 @@ Add to Cart
 `;
 
 });
+
+}
+
+
+function filterProducts(){
+
+const search=
+
+searchInput.value
+.toLowerCase();
+
+const category=
+
+categoryFilter.value;
+
+
+const filtered=
+
+allProducts.filter((item)=>{
+
+const matchesSearch=
+
+item.name
+.toLowerCase()
+.includes(search);
+
+
+const matchesCategory=
+
+category==="" ||
+
+item.category===category;
+
+
+return matchesSearch
+&&
+matchesCategory;
+
+});
+
+
+showProducts(
+filtered
+);
 
 }
 
@@ -89,42 +173,6 @@ categoryFilter.addEventListener(
 "change",
 filterProducts
 );
-
-
-function filterProducts(){
-
-let search=
-searchInput.value.toLowerCase();
-
-let category=
-categoryFilter.value;
-
-
-let filtered=
-
-allProducts.filter(product=>{
-
-let matchSearch=
-
-product.name
-.toLowerCase()
-.includes(search);
-
-let matchCategory=
-
-category==="" ||
-
-product.category===category;
-
-return matchSearch &&
-matchCategory;
-
-});
-
-
-showProducts(filtered);
-
-}
 
 
 loadProducts();
