@@ -1,98 +1,109 @@
-import {auth,db}
-from "./firebase.js";
+import { auth, db } from "./firebase.js";
 
 import {
-
 onAuthStateChanged,
 signOut
-
 }
-
 from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
 
-
 import {
-
 doc,
 getDoc
-
 }
-
 from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
 
-onAuthStateChanged(
+const nameEl=document.getElementById("name");
+const emailEl=document.getElementById("email");
+const phoneEl=document.getElementById("phone");
+const addressEl=document.getElementById("address");
 
-auth,
 
-async(user)=>{
+onAuthStateChanged(auth, async(user)=>{
 
-if(user){
+if(!user){
 
-const docRef=
+window.location="login.html";
+return;
 
+}
+
+try{
+
+const userRef=
 doc(
 db,
 "users",
 user.uid
 );
 
-const docSnap=
+const userSnap=
+await getDoc(userRef);
 
-await getDoc(
-docRef
-);
 
-if(docSnap.exists()){
+if(userSnap.exists()){
 
 const data=
-docSnap.data();
+userSnap.data();
 
-document.getElementById(
-"name"
-).innerText=
-data.name;
+nameEl.innerText=
+data.name || "No Name";
 
-document.getElementById(
-"email"
-).innerText=
-data.email;
+emailEl.innerText=
+data.email || user.email;
 
-document.getElementById(
-"phone"
-).innerText=
-data.phone;
+phoneEl.innerText=
+data.phone || "No Phone";
 
-document.getElementById(
-"address"
-).innerText=
-data.address;
-
-}
+addressEl.innerText=
+data.address || "No Address";
 
 }
 else{
 
-window.location=
-"login.html";
+nameEl.innerText=
+"User data not found";
 
-}
+emailEl.innerText=
+user.email;
 
-}
+phoneEl.innerText=
+"-";
 
+addressEl.innerText=
+"-";
 
+console.log(
+"No Firestore document"
 );
+
+}
+
+}
+
+catch(error){
+
+console.log(error);
+
+nameEl.innerText=
+"Error loading profile";
+
+}
+
+});
 
 
 document.getElementById(
 "logoutBtn"
 )
 
-.onclick=()=>{
+.addEventListener(
+"click",
+async()=>{
 
-signOut(auth);
+await signOut(auth);
 
 window.location=
 "login.html";
 
-};
+});
