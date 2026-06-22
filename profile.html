@@ -230,43 +230,32 @@ import {db,auth}
 from "./js/firebase.js";
 
 import {
-
 doc,
 getDoc
-
 }
-
 from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
 import {
-
 onAuthStateChanged,
 signOut
-
 }
-
 from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
 
 
 const nameEl=
-document.getElementById(
-"name"
-);
+document.getElementById("name");
 
 const emailEl=
-document.getElementById(
-"email"
-);
+document.getElementById("email");
 
 const phoneEl=
-document.getElementById(
-"phone"
-);
+document.getElementById("phone");
 
 const addressEl=
-document.getElementById(
-"address"
-);
+document.getElementById("address");
+
+const logoutBtn=
+document.getElementById("logoutBtn");
 
 
 onAuthStateChanged(
@@ -284,18 +273,19 @@ return;
 
 }
 
+try{
 
-const snapshot=
+/* Users collection with capital U */
 
-await getDoc(
-
+const userRef=
 doc(
 db,
-"users",
+"Users",
 user.uid
-)
-
 );
+
+const snapshot=
+await getDoc(userRef);
 
 
 if(snapshot.exists()){
@@ -303,43 +293,93 @@ if(snapshot.exists()){
 const data=
 snapshot.data();
 
+
 nameEl.innerText=
-data.name;
+data.name || "No Name";
+
 
 emailEl.innerText=
-data.email;
+data.email || user.email;
+
 
 phoneEl.innerText=
-data.phone;
+data.phone || "Not Added";
+
+
+/* Address object convert */
+
+if(data.address){
+
+let addressText=`
+
+${data.address.street || ""},
+
+${data.address.area || ""},
+
+${data.address.district || ""},
+
+${data.address.state || ""}
+
+- ${data.address.pincode || ""}
+
+`;
 
 addressEl.innerText=
-data.address;
+addressText;
+
+}
+
+else{
+
+addressEl.innerText=
+"Address not added";
+
+}
+
+}
+
+else{
+
+nameEl.innerText=
+"No user data found";
+
+}
+
+}
+
+catch(error){
+
+console.log(error);
+
+alert(error.message);
 
 }
 
 });
 
 
-document
-.getElementById(
-"logoutBtn"
-)
-
-.onclick=
+logoutBtn.onclick=
 
 async()=>{
 
-await signOut(
-auth
-);
+try{
+
+await signOut(auth);
 
 window.location=
 "login.html";
 
+}
+
+catch(error){
+
+alert(error.message);
+
+}
+
 };
 
 </script>
-
 </body>
 
 </html>
