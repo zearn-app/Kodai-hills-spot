@@ -4,8 +4,7 @@
 <head>
 
 <meta charset="UTF-8">
-<meta name="viewport"
-content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 
 <title>Kodai Hills Spot - Checkout</title>
 
@@ -23,180 +22,138 @@ background:#f5f5f5;
 padding-bottom:100px;
 }
 
-/* Header */
-
 .header{
-
 background:white;
 padding:15px;
-
 display:flex;
 align-items:center;
 gap:10px;
-
 box-shadow:0 2px 10px rgba(0,0,0,.1);
-
 position:sticky;
 top:0;
 z-index:100;
-
 }
 
 .logo{
-
 width:45px;
 height:45px;
 border-radius:50%;
 border:2px solid #2e7d32;
 object-fit:cover;
-
 }
 
 .title{
-
 font-size:22px;
 font-weight:bold;
 color:#2e7d32;
-
 }
 
-/* Sections */
-
 .section{
-
 background:white;
-
 margin:15px;
-
 padding:20px;
-
 border-radius:20px;
-
 box-shadow:0 2px 10px rgba(0,0,0,.08);
-
 }
 
 .heading{
-
 font-size:18px;
 font-weight:bold;
 margin-bottom:15px;
-
 }
 
-/* Product */
-
 .product{
-
 display:flex;
 gap:15px;
 align-items:center;
-
 }
 
 .product img{
-
 width:90px;
 height:90px;
 border-radius:12px;
 object-fit:cover;
-
 }
 
 .details{
-
 flex:1;
-
 }
 
 .price{
-
 color:#2e7d32;
 font-size:18px;
 font-weight:bold;
 margin-top:5px;
-
 }
 
-/* Inputs */
-
-input,
-select{
-
+input,select{
 width:100%;
 padding:14px;
 border:1px solid #ddd;
 border-radius:12px;
 margin-top:10px;
 outline:none;
-
 }
 
-/* Payment options */
-
 .payment-box{
-
 background:#f5f5f5;
 padding:15px;
 border-radius:15px;
 margin-top:10px;
-
 }
 
-/* Summary */
-
 .row{
-
 display:flex;
 justify-content:space-between;
 margin:10px 0;
-
 }
 
 .total{
-
 font-size:22px;
 font-weight:bold;
 color:#2e7d32;
-
 }
 
-/* Fixed button */
-
 .bottom{
-
 position:fixed;
 bottom:0;
 left:0;
-
 width:100%;
-
 background:white;
-
 padding:15px;
-
 box-shadow:0 -2px 10px rgba(0,0,0,.1);
-
 }
 
 .place-btn{
-
 width:100%;
-
 padding:15px;
-
 border:none;
-
 border-radius:15px;
-
 background:#2e7d32;
-
 color:white;
-
 font-size:18px;
-
 font-weight:bold;
+}
 
+.addressCard{
+background:#f5f5f5;
+padding:15px;
+border-radius:15px;
+line-height:28px;
+}
+
+.hidden{
+display:none;
+}
+
+.changeBtn{
+margin-top:10px;
+padding:10px;
+width:100%;
+background:#2e7d32;
+color:white;
+border:none;
+border-radius:10px;
 }
 
 </style>
@@ -207,13 +164,10 @@ font-weight:bold;
 
 <div class="header">
 
-<img src="assets/logo.png"
-class="logo">
+<img src="assets/logo.png" class="logo">
 
 <div class="title">
-
 Kodai Hills Spot
-
 </div>
 
 </div>
@@ -222,22 +176,54 @@ Kodai Hills Spot
 <div class="section">
 
 <div class="heading">
-
 📦 Delivery Address
+</div>
+
+<div id="savedAddress" class="addressCard hidden">
+
+<div id="addressText"></div>
+
+<button
+class="changeBtn"
+onclick="changeAddress()">
+
+Change Address
+
+</button>
 
 </div>
 
-<input
-id="name"
-placeholder="Full Name">
+
+<div id="addressForm">
+
+<input id="name" placeholder="Full Name">
+
+<input id="phone" placeholder="Phone Number">
+
+<select id="state">
+<option value="">Select State</option>
+<option>Tamil Nadu</option>
+<option>Kerala</option>
+<option>Karnataka</option>
+</select>
 
 <input
-id="phone"
-placeholder="Phone Number">
+id="district"
+placeholder="District">
 
 <input
-id="address"
-placeholder="Full Address">
+id="area"
+placeholder="Area">
+
+<input
+id="street"
+placeholder="Street">
+
+<input
+id="pincode"
+placeholder="Pincode">
+
+</div>
 
 </div>
 
@@ -246,36 +232,27 @@ placeholder="Full Address">
 <div class="section">
 
 <div class="heading">
-
 🛍 Order Item
-
 </div>
 
 <div class="product">
 
-<img id="productImage"
-src="">
+<img id="productImage">
 
 <div class="details">
 
 <h3 id="productName">
-
 Loading...
-
 </h3>
 
 <div
 class="price"
 id="productPrice">
-
 ₹0
-
 </div>
 
 <p id="productQty">
-
 Qty : 1
-
 </p>
 
 </div>
@@ -289,9 +266,7 @@ Qty : 1
 <div class="section">
 
 <div class="heading">
-
 💳 Payment Method
-
 </div>
 
 <div class="payment-box">
@@ -299,27 +274,19 @@ Qty : 1
 <select id="payment">
 
 <option>
-
 Cash On Delivery
-
 </option>
 
 <option>
-
 UPI
-
 </option>
 
 <option>
-
 Debit Card
-
 </option>
 
 <option>
-
 Credit Card
-
 </option>
 
 </select>
@@ -333,64 +300,27 @@ Credit Card
 <div class="section">
 
 <div class="heading">
-
 🧾 Order Summary
-
 </div>
 
 <div class="row">
-
-<span>
-
-Subtotal
-
-</span>
-
-<span id="subtotal">
-
-₹0
-
-</span>
-
+<span>Subtotal</span>
+<span id="subtotal">₹0</span>
 </div>
 
 <div class="row">
-
-<span>
-
-Delivery
-
-</span>
-
-<span>
-
-₹40
-
-</span>
-
+<span>Delivery</span>
+<span>₹40</span>
 </div>
 
-<hr
-style="margin:10px 0">
+<hr style="margin:10px 0">
 
 <div class="row total">
-
-<span>
-
-Total
-
-</span>
-
-<span id="total">
-
-₹0
-
-</span>
-
+<span>Total</span>
+<span id="total">₹0</span>
 </div>
 
 </div>
-
 
 
 <div class="bottom">
@@ -406,11 +336,27 @@ Place Order →
 </div>
 
 
-<script type="module"
-src="js/checkout.js">
+<script>
+
+function changeAddress(){
+
+document.getElementById(
+"savedAddress"
+).classList.add(
+"hidden"
+);
+
+document.getElementById(
+"addressForm"
+).classList.remove(
+"hidden"
+);
+
+}
 
 </script>
 
-</body>
+<script type="module" src="js/checkout.js"></script>
 
+</body>
 </html>
