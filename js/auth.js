@@ -1,210 +1,102 @@
-import {auth,db}
-from "./firebase.js";
+import { auth, db } from "./firebase.js";
 
 import {
-
 RecaptchaVerifier,
 signInWithPhoneNumber,
 createUserWithEmailAndPassword
-
-}
-
-from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
+} from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
 
 import {
-
 doc,
 setDoc
-
-}
-
-from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
-
+} from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
 let confirmationResult;
 
-
-/* Recaptcha */
-
-window.recaptchaVerifier=
-
-new RecaptchaVerifier(
-
+/* ---------------- OTP SETUP ---------------- */
+window.recaptchaVerifier = new RecaptchaVerifier(
 auth,
 "recaptcha-container",
 {
-
-size:"invisible"
-
+size: "invisible"
 }
-
 );
 
+/* ---------------- SIGNUP (SEND OTP) ---------------- */
+document.getElementById("signupBtn").onclick = async () => {
+try {
 
-/* Send OTP */
+const phone = document.getElementById("phone").value.trim();
 
-signupBtn.onclick=
-
-async()=>{
-
-try{
-
-const phone=
-
-document.getElementById(
-"phone"
-).value.trim();
-
-
-if(phone.length!=10){
-
-alert(
-"Enter valid phone number"
-);
-
+if (phone.length !== 10) {
+alert("Enter valid 10-digit phone number");
 return;
-
 }
 
+const appVerifier = window.recaptchaVerifier;
 
-const appVerifier=
-
-window.recaptchaVerifier;
-
-
-confirmationResult=
-
-await signInWithPhoneNumber(
-
+confirmationResult = await signInWithPhoneNumber(
 auth,
-
-"+91"+phone,
-
+"+91" + phone,
 appVerifier
-
 );
 
+/* SHOW OTP UI */
+document.getElementById("otp").style.display = "block";
+document.getElementById("verifyOtpBtn").style.display = "block";
 
-alert(
-"OTP sent successfully"
-);
+document.getElementById("signupBtn").style.display = "none";
 
+alert("OTP sent successfully");
 
-otp.style.display=
-"block";
-
-verifyOtpBtn.style.display=
-"block";
-
-signupBtn.style.display=
-"none";
-
+} catch (error) {
+alert(error.message);
 }
-
-catch(error){
-
-alert(
-error.message
-);
-
-}
-
 };
 
+/* ---------------- VERIFY OTP + CREATE ACCOUNT ---------------- */
+document.getElementById("verifyOtpBtn").onclick = async () => {
+try {
 
+const code = document.getElementById("otp").value;
 
-/* Verify OTP */
+if (!code) {
+alert("Enter OTP");
+return;
+}
 
-verifyOtpBtn.onclick=
+/* confirm OTP */
+await confirmationResult.confirm(code);
 
-async()=>{
+/* get form values */
+const name = document.getElementById("name").value;
+const email = document.getElementById("email").value;
+const password = document.getElementById("password").value;
+const phone = document.getElementById("phone").value;
 
-try{
-
-const code=
-
-otp.value;
-
-
-await confirmationResult.confirm(
-code
-);
-
-
-const user=
-
-auth.currentUser;
-
-
-const name=
-document.getElementById(
-"name"
-).value;
-
-const email=
-document.getElementById(
-"email"
-).value;
-
-const password=
-document.getElementById(
-"password"
-).value;
-
-const phone=
-document.getElementById(
-"phone"
-).value;
-
-
-/* Create email account */
-
-await createUserWithEmailAndPassword(
-
+/* create email account AFTER OTP success */
+const userCredential = await createUserWithEmailAndPassword(
 auth,
 email,
 password
-
 );
 
+const user = userCredential.user;
 
-/* Save user */
+/* save to firestore */
+await setDoc(doc(db, "Users", user.uid), {
+name: name,
+email: email,
+phone: phone,
+createdAt: Date.now()
+});
 
-await setDoc(
+alert("Signup successful");
 
-doc(
-db,
-"Users",
-user.uid
-),
+/* redirect */
+window.location.href = "index.html";
 
-{
-
-name:name,
-email:email,
-phone:phone
-
+} catch (error) {
+alert(error.message);
 }
-
-);
-
-
-alert(
-"Signup successful"
-);
-
-
-window.location=
-"index.html";
-
-}
-
-catch(error){
-
-alert(
-error.message
-);
-
-}
-
 };
