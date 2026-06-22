@@ -66,10 +66,6 @@ font-size:16px;
 outline:none;
 }
 
-input:focus{
-border:1px solid #2e7d32;
-}
-
 button{
 width:100%;
 padding:14px;
@@ -87,7 +83,6 @@ text-align:center;
 margin-top:20px;
 cursor:pointer;
 font-size:16px;
-color:#333;
 }
 </style>
 </head>
@@ -100,38 +95,30 @@ color:#333;
 <img src="logo.png" class="logo-img">
 </div>
 
-<div class="logo">
-Kodai Hills Spot 🌿
-</div>
+<div class="logo">Kodai Hills Spot 🌿</div>
 
 <!-- SIGNUP -->
 <div id="signupBox">
+
 <input id="name" placeholder="Full Name">
 <input id="phone" placeholder="Phone Number">
 <input id="email" type="email" placeholder="Gmail">
 <input id="password" type="password" placeholder="Password">
 
-<button id="signupBtn">Sign Up</button>
+<button id="signupBtn">Send OTP</button>
+
 </div>
 
-<!-- LOGIN -->
+<!-- LOGIN / OTP -->
 <div id="loginBox" style="display:none">
 
-<input id="loginEmail" type="email" placeholder="Gmail">
-<input id="loginPassword" type="password" placeholder="Password">
-
-<!-- OTP SECTION (FIXED) -->
 <div id="recaptcha-container"></div>
 
 <input id="otp" placeholder="Enter OTP" style="display:none">
 
-<button id="sendOtpBtn">Send OTP</button>
-
 <button id="verifyOtpBtn" style="display:none">
 Verify OTP
 </button>
-
-<button id="loginBtn">Login</button>
 
 </div>
 
@@ -158,12 +145,6 @@ login.style.display = "block";
 text.innerText = "Don't have an account? Sign Up";
 }
 }
-
-/* 👉 FIX: show OTP fields when needed */
-document.getElementById("sendOtpBtn").addEventListener("click", function () {
-document.getElementById("otp").style.display = "block";
-document.getElementById("verifyOtpBtn").style.display = "block";
-});
 </script>
 
 <script type="module" src="js/auth.js"></script>
