@@ -1,55 +1,63 @@
 import { auth, db } from "./firebase.js";
 
 import {
-
 createUserWithEmailAndPassword,
 signInWithEmailAndPassword
-
 }
-
 from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
 
-
 import {
-
 doc,
 setDoc
-
 }
-
 from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
-
-
-const signupBtn=
+const signupBtn =
 document.getElementById("signupBtn");
 
-const loginBtn=
+const loginBtn =
 document.getElementById("loginBtn");
 
 
 
-signupBtn.onclick=async()=>{
+signupBtn.onclick = async()=>{
 
 try{
 
-const email=
-document.getElementById("email").value;
+const name =
+document.getElementById("name").value.trim();
 
-const password=
-document.getElementById("password").value;
+const phone =
+document.getElementById("phone").value.trim();
 
-const name=
-document.getElementById("name").value;
+const address =
+document.getElementById("address").value.trim();
 
-const phone=
-document.getElementById("phone").value;
+const email =
+document.getElementById("email").value.trim();
 
-const address=
-document.getElementById("address").value;
+const password =
+document.getElementById("password").value.trim();
 
 
-const userCredential=
+// Validation
+
+if(
+name==="" ||
+phone==="" ||
+address==="" ||
+email==="" ||
+password===""
+
+){
+
+alert("Please fill all fields");
+return;
+
+}
+
+
+const userCredential =
 
 await createUserWithEmailAndPassword(
 
@@ -59,6 +67,8 @@ password
 
 );
 
+
+// Save user details to Firestore
 
 await setDoc(
 
@@ -73,7 +83,8 @@ userCredential.user.uid
 name:name,
 phone:phone,
 address:address,
-email:email
+email:email,
+uid:userCredential.user.uid
 
 }
 
@@ -95,15 +106,29 @@ alert(error.message);
 
 
 
-loginBtn.onclick=async()=>{
+
+loginBtn.onclick = async()=>{
 
 try{
 
-const email=
-document.getElementById("loginEmail").value;
+const email =
+document.getElementById("loginEmail").value.trim();
 
-const password=
-document.getElementById("loginPassword").value;
+const password =
+document.getElementById("loginPassword").value.trim();
+
+
+// Validation
+
+if(
+email==="" ||
+password===""
+){
+
+alert("Please fill all fields");
+return;
+
+}
 
 
 await signInWithEmailAndPassword(
