@@ -1,33 +1,69 @@
-import { auth, db }
-from "./firebase.js";
+import { initializeApp }
+from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
 
 import {
+getAuth,
+onAuthStateChanged
+}
+from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
+
+import {
+getFirestore,
 collection,
 addDoc,
 getDocs,
 deleteDoc,
 doc,
-getCountFromServer,
-updateDoc
+updateDoc,
+getCountFromServer
 }
 from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
-import {
-onAuthStateChanged
-}
-from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
+
+
+const firebaseConfig={
+
+apiKey:"AIzaSyAXtM0DnYPTYbdQmvv93KAQwcqxty2C1vQ",
+
+authDomain:"kodaihillsspot-4a1b8.firebaseapp.com",
+
+projectId:"kodaihillsspot-4a1b8",
+
+storageBucket:"kodaihillsspot-4a1b8.firebasestorage.app",
+
+messagingSenderId:"396566428046",
+
+appId:"1:396566428046:web:c9bafa2143b34e7d64ccdf"
+
+};
+
+
+const app=
+initializeApp(firebaseConfig);
+
+const auth=
+getAuth(app);
+
+const db=
+getFirestore(app);
+
 
 
 const productsDiv=
-document.getElementById("products");
+document.getElementById(
+"products"
+);
 
 const ordersDiv=
-document.getElementById("allOrders");
+document.getElementById(
+"allOrders"
+);
 
 let selectedOrderId=null;
 
 
-/* Admin authentication */
+
+/* LOGIN CHECK */
 
 onAuthStateChanged(
 
@@ -38,28 +74,34 @@ auth,
 if(!user){
 
 window.location=
-"admin-login.html";
-
-return;
-
-}
-
-if(
-user.email !==
-"kodaihillsspot@gmail.com"
-){
-
-alert("Access Denied");
-
-window.location=
 "index.html";
 
 return;
 
 }
 
+
+if(
+user.email!==
+"kodaihillsspot@gmail.com"
+){
+
+alert(
+"Access denied"
+);
+
+window.location=
+"home.html";
+
+return;
+
+}
+
+
 loadStats();
+
 loadProducts();
+
 loadOrders();
 
 }
@@ -67,72 +109,85 @@ loadOrders();
 );
 
 
-/* Add Product */
 
-document.getElementById(
+/* USER PAGE */
+
+document
+.getElementById(
+"userBtn"
+)
+
+.addEventListener(
+
+"click",
+
+()=>{
+
+window.location=
+"srkxditit.html";
+
+}
+
+);
+
+
+
+/* ADD PRODUCT */
+
+document
+.getElementById(
 "addBtn"
 )
 
-.onclick=
+.addEventListener(
+
+"click",
 
 async()=>{
 
 try{
 
-
-/* Input elements */
-
-const nameInput=
-document.getElementById(
-"name"
-);
-
-const priceInput=
-document.getElementById(
-"price"
-);
-
-const categoryInput=
-document.getElementById(
-"category"
-);
-
-const imageInput=
-document.getElementById(
-"image"
-);
-
-const descriptionInput=
-document.getElementById(
-"description"
-);
-
-
-/* Values */
-
 const name=
-nameInput.value.trim();
+document
+.getElementById(
+"name"
+)
+.value.trim();
 
 const price=
-priceInput.value.trim();
+document
+.getElementById(
+"price"
+)
+.value.trim();
 
 const category=
-categoryInput.value;
+document
+.getElementById(
+"category"
+)
+.value;
 
 const image=
-imageInput.value.trim();
+document
+.getElementById(
+"image"
+)
+.value.trim();
 
 const description=
-descriptionInput.value.trim();
+document
+.getElementById(
+"description"
+)
+.value.trim();
 
 
 if(
-
-!name ||
-!price ||
-!image ||
+!name||
+!price||
+!image||
 !description
-
 ){
 
 alert(
@@ -144,8 +199,6 @@ return;
 }
 
 
-/* Add to Firebase */
-
 await addDoc(
 
 collection(
@@ -156,13 +209,9 @@ db,
 {
 
 name:name,
-
 price:price,
-
 category:category,
-
 Image:image,
-
 description:description
 
 }
@@ -171,21 +220,25 @@ description:description
 
 
 alert(
-"Product Added Successfully"
+"Product Added"
 );
 
 
-/* Clear fields */
+document.getElementById(
+"name"
+).value="";
 
-nameInput.value="";
+document.getElementById(
+"price"
+).value="";
 
-priceInput.value="";
+document.getElementById(
+"image"
+).value="";
 
-categoryInput.selectedIndex=0;
-
-imageInput.value="";
-
-descriptionInput.value="";
+document.getElementById(
+"description"
+).value="";
 
 
 loadProducts();
@@ -202,10 +255,13 @@ error.message
 
 }
 
-};
+}
+
+);
 
 
-/* Product list */
+
+/* PRODUCTS */
 
 async function loadProducts(){
 
@@ -228,7 +284,9 @@ db,
 productsDiv.innerHTML="";
 
 
-snapshot.forEach((item)=>{
+snapshot.forEach(
+
+(item)=>{
 
 const data=
 item.data();
@@ -236,11 +294,15 @@ item.data();
 
 productsDiv.innerHTML+=`
 
-<div class="product">
+<div style="
+background:white;
+padding:15px;
+margin:10px 0;
+border-radius:15px;
+">
 
 <img
 src="${data.Image}"
-
 style="
 width:100%;
 height:150px;
@@ -248,28 +310,14 @@ object-fit:cover;
 border-radius:10px;
 ">
 
-<h3>
+<h3>${data.name}</h3>
 
-${data.name}
+<p>₹${data.price}</p>
 
-</h3>
-
-<p>
-
-₹${data.price}
-
-</p>
-
-<p>
-
-${data.category}
-
-</p>
+<p>${data.category}</p>
 
 <button
-
 onclick="deleteProduct('${item.id}')"
-
 style="
 background:red;
 color:white;
@@ -286,12 +334,15 @@ Delete
 
 `;
 
-});
+}
+
+);
 
 }
 
 
-/* Delete Product */
+
+/* DELETE */
 
 window.deleteProduct=
 
@@ -314,11 +365,12 @@ loadStats();
 };
 
 
-/* Dashboard Stats */
+
+/* STATS */
 
 async function loadStats(){
 
-const productCount=
+const products=
 
 await getCountFromServer(
 
@@ -329,8 +381,7 @@ db,
 
 );
 
-
-const orderCount=
+const orders=
 
 await getCountFromServer(
 
@@ -348,7 +399,7 @@ document.getElementById(
 
 .innerText=
 
-productCount.data().count;
+products.data().count;
 
 
 document.getElementById(
@@ -357,26 +408,13 @@ document.getElementById(
 
 .innerText=
 
-orderCount.data().count;
+orders.data().count;
 
 }
 
 
-/* User page */
 
-document.getElementById(
-"userBtn"
-)
-
-.onclick=()=>{
-
-window.location=
-"srkxditit.html";
-
-};
-
-
-/* Orders */
+/* ORDERS */
 
 async function loadOrders(){
 
@@ -395,130 +433,38 @@ db,
 );
 
 
-snapshot.forEach((item)=>{
+snapshot.forEach(
+
+(item)=>{
 
 const data=
 item.data();
 
 ordersDiv.innerHTML+=`
 
-<div
-class="product"
-onclick="openPopup('${item.id}')">
+<div style="
+background:white;
+padding:15px;
+margin:10px 0;
+border-radius:15px;
+">
 
-<h3>
+<h3>${data.name||""}</h3>
 
-${data.name}
+<p>${data.email||""}</p>
 
-</h3>
+<p>₹${data.price||""}</p>
 
-<p>
-
-${data.email||""}
-
-</p>
-
-<p>
-
-₹${data.price}
-
-</p>
-
-<p>
-
-Status:
-${data.status || "Pending"}
-
+<p>Status:
+${data.status||"Pending"}
 </p>
 
 </div>
 
 `;
 
-});
-
-}
-
-
-/* Popup */
-
-window.openPopup=
-(id)=>{
-
-selectedOrderId=id;
-
-statusPopup.style.display=
-"flex";
-
-};
-
-
-window.closePopup=
-()=>{
-
-statusPopup.style.display=
-"none";
-
-};
-
-
-statusSelect.onchange=
-()=>{
-
-trackingId.style.display=
-
-statusSelect.value==="Approved"
-
-?
-
-"block"
-
-:
-
-"none";
-
-};
-
-
-updateBtn.onclick=
-
-async()=>{
-
-await updateDoc(
-
-doc(
-db,
-"Orders",
-selectedOrderId
-),
-
-{
-
-status:
-statusSelect.value,
-
-trackingId:
-
-statusSelect.value==="Approved"
-
-?
-
-trackingId.value
-
-:
-
-""
-
 }
 
 );
 
-alert(
-"Status Updated"
-);
-
-closePopup();
-
-loadOrders();
-
-};
+}
