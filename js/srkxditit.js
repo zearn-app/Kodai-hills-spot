@@ -1,5 +1,4 @@
-import {auth,db}
-from "./firebase.js";
+import { auth, db } from "./firebase.js";
 
 import {
 onAuthStateChanged
@@ -14,45 +13,35 @@ doc
 }
 from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
-const usersDiv=
-document.getElementById("users");
 
-const totalUsers=
-document.getElementById("totalUsers");
-
-const searchInput=
-document.getElementById("searchInput");
+const usersDiv=document.getElementById("users");
+const totalUsers=document.getElementById("totalUsers");
+const searchInput=document.getElementById("searchInput");
 
 let allUsers=[];
 
 
-/* Admin check */
+/* Check admin login */
 
-onAuthStateChanged(
+onAuthStateChanged(auth,(user)=>{
 
-auth,
-
-(user)=>{
+console.log("User:",user);
 
 if(!user){
 
-window.location=
-"index.html";
+alert("Login first");
+
+window.location="index.html";
 
 return;
 
 }
 
-if(
-user.email!=="kodaihillsspot@gmail.com"
-){
+if(user.email!=="kodaihillsspot@gmail.com"){
 
-alert(
-"Access denied"
-);
+alert("Access denied");
 
-window.location=
-"index.html";
+window.location="index.html";
 
 return;
 
@@ -60,27 +49,25 @@ return;
 
 loadUsers();
 
-}
-
-);
+});
 
 
-/* Load users */
 
 async function loadUsers(){
 
 try{
 
-usersDiv.innerHTML=
-"Loading...";
+usersDiv.innerHTML="Loading...";
 
-const snapshot=
+console.log("Fetching users");
 
-await getDocs(
-collection(
-db,
-"Users"
-)
+const snapshot=await getDocs(
+collection(db,"Users")
+);
+
+console.log(
+"Documents found:",
+snapshot.size
 );
 
 allUsers=[];
@@ -96,58 +83,64 @@ id:item.id,
 
 });
 
-
 totalUsers.innerText=
 allUsers.length;
 
 showUsers();
 
 }
+
 catch(error){
 
-console.log(error);
+console.log(
+"Firestore Error:",
+error
+);
 
-usersDiv.innerHTML=
+usersDiv.innerHTML=`
 
-`<div class="user">
+<div class="user">
+
+Error:<br>
+
 ${error.message}
-</div>`;
+
+</div>
+
+`;
 
 }
 
 }
 
 
-/* Display users */
 
 function showUsers(){
 
 usersDiv.innerHTML="";
 
 const search=
-
-searchInput.value
-.toLowerCase();
-
+searchInput.value.toLowerCase();
 
 const filtered=
-
-allUsers.filter((user)=>{
+allUsers.filter(user=>{
 
 const name=
-
 (user.name||"")
 .toLowerCase();
 
 const email=
-
 (user.email||"")
 .toLowerCase();
 
 return(
+
 name.includes(search)
+
 ||
+
 email.includes(search)
+
 );
 
 });
@@ -155,11 +148,15 @@ email.includes(search)
 
 if(filtered.length===0){
 
-usersDiv.innerHTML=
+usersDiv.innerHTML=`
 
-`<div class="user">
+<div class="user">
+
 No users found
-</div>`;
+
+</div>
+
+`;
 
 return;
 
@@ -173,15 +170,21 @@ usersDiv.innerHTML+=`
 <div class="user">
 
 <h3>
+
 ${user.name||"No Name"}
+
 </h3>
 
 <div class="info">
+
 📧 ${user.email||"-"}
+
 </div>
 
 <div class="info">
+
 📱 ${user.phone||"-"}
+
 </div>
 
 <button
@@ -201,36 +204,28 @@ Delete User
 }
 
 
-/* Search */
-
 searchInput.addEventListener(
 "input",
 showUsers
 );
 
 
-/* Delete */
-
 window.deleteUser=
-
 async(id)=>{
 
-if(
-!confirm(
-"Delete user?"
-)
-)return;
+try{
 
 await deleteDoc(
-
-doc(
-db,
-"Users",
-id
-)
-
+doc(db,"Users",id)
 );
 
 loadUsers();
+
+}
+catch(error){
+
+alert(error.message);
+
+}
 
 };
