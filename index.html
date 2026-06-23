@@ -69,32 +69,36 @@
         const profileLink = document.getElementById("profileLink");
 
         async function loadProducts(){
-            productsDiv.innerHTML="";
-            const querySnapshot = await getDocs(collection(db, "Products"));
-            querySnapshot.forEach((doc)=>{
-                const data = doc.data();
-                productsDiv.innerHTML += `
-                    <div class="card" onclick="window.location='product-details.html?id=${doc.id}'">
-                        <img src="${data.Image}">
-                        <h3>${data.name}</h3>
-                        <div class="price">₹${data.price}</div>
-                    </div>
-                `;
-            });
+            try {
+                const querySnapshot = await getDocs(collection(db, "Products"));
+                productsDiv.innerHTML = "";
+                querySnapshot.forEach((doc)=>{
+                    const data = doc.data();
+                    productsDiv.innerHTML += `
+                        <div class="card" onclick="window.location='product-details.html?id=${doc.id}'">
+                            <img src="${data.Image}">
+                            <h3>${data.name}</h3>
+                            <div class="price">₹${data.price}</div>
+                        </div>
+                    `;
+                });
+            } catch (error) {
+                productsDiv.innerHTML = "Error loading products.";
+                console.error("Error:", error);
+            }
         }
 
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 userArea.innerHTML = "";
-                profileLink.style.display = "block"; // Show profile when logged in
+                profileLink.style.display = "block";
             } else {
-                userArea.innerHTML = `
-                    <button class="auth-btn" onclick="window.location='login.html'">Login</button>
-                `;
-                profileLink.style.display = "none"; // Hide profile when logged out
+                userArea.innerHTML = `<button class="auth-btn" onclick="window.location='login.html'">Login</button>`;
+                profileLink.style.display = "none";
             }
         });
 
+        // Ensure this is called
         loadProducts();
     </script>
 </body>
