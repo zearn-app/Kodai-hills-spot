@@ -28,39 +28,39 @@ appId:"1:396566428046:web:c9bafa2143b34e7d64ccdf"
 
 };
 
+const app=
+initializeApp(firebaseConfig);
 
-const app=initializeApp(firebaseConfig);
+const auth=
+getAuth(app);
 
-const auth=getAuth(app);
-
-const db=getFirestore(app);
+const db=
+getFirestore(app);
 
 let currentUser;
 
 
-/* IMPORTANT FIX */
+/* IMPORTANT */
 
 window.recaptchaVerifier=
 new RecaptchaVerifier(
 
 auth,
-
 "recaptcha-container",
-
 {
 size:"normal"
 }
 
 );
 
-await window.recaptchaVerifier.render();
+window.recaptchaVerifier
+.render();
 
-
-
-/* SEND OTP */
 
 document
-.getElementById("sendOtpBtn")
+.getElementById(
+"sendOtpBtn"
+)
 
 .onclick=
 
@@ -68,16 +68,19 @@ async()=>{
 
 try{
 
-const phoneInput=
+let number=
+
 document
-.getElementById("phone")
+.getElementById(
+"phone"
+)
 .value
 .trim();
 
-if(phoneInput.length!==10){
+if(number.length!=10){
 
 alert(
-"Enter valid phone number"
+"Enter valid number"
 );
 
 return;
@@ -85,7 +88,7 @@ return;
 }
 
 const phone=
-"+91"+phoneInput;
+"+91"+number;
 
 
 const confirmationResult=
@@ -111,9 +114,8 @@ document
 "hidden"
 );
 
-
 alert(
-"OTP sent successfully"
+"OTP sent"
 );
 
 }
@@ -122,17 +124,13 @@ catch(error){
 
 console.log(error);
 
-alert(
-error.message
-);
+alert(error.message);
 
 }
 
 };
 
 
-
-/* VERIFY OTP */
 
 document
 .getElementById(
@@ -151,18 +149,7 @@ document
 .getElementById(
 "otp"
 )
-.value
-.trim();
-
-if(!otp){
-
-alert(
-"Enter OTP"
-);
-
-return;
-
-}
+.value;
 
 
 const result=
@@ -177,8 +164,6 @@ currentUser=
 result.user;
 
 
-/* Check existing user */
-
 const snapshot=
 
 await getDoc(
@@ -191,14 +176,12 @@ currentUser.uid
 
 );
 
-
 if(snapshot.exists()){
 
 window.location=
 "home.html";
 
 }
-
 else{
 
 document
@@ -215,8 +198,6 @@ document
 
 catch(error){
 
-console.log(error);
-
 alert(
 "Wrong OTP"
 );
@@ -226,8 +207,6 @@ alert(
 };
 
 
-
-/* SAVE USER */
 
 document
 .getElementById(
@@ -244,8 +223,7 @@ document
 .getElementById(
 "name"
 )
-.value
-.trim();
+.value;
 
 const email=
 
@@ -253,8 +231,7 @@ document
 .getElementById(
 "email"
 )
-.value
-.trim();
+.value;
 
 
 await setDoc(
