@@ -1,4 +1,4 @@
-import { db }
+import { db } 
 from "./firebase.js";
 
 import {
@@ -12,45 +12,54 @@ from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 const usersDiv =
 document.getElementById("users");
 
+const totalUsers =
+document.getElementById("totalUsers");
+
+const searchInput =
+document.getElementById("searchInput");
+
 let allUsers=[];
 
 
-/* Load users */
+/* Load Users */
 
 async function loadUsers(){
 
 try{
 
-usersDiv.innerHTML="Loading...";
+usersDiv.innerHTML=
+"Loading...";
 
-const snapshot = await getDocs(
-collection(db,"Users") // FIXED
+const snapshot=
+await getDocs(
+collection(db,"Users")
 );
-
-document.getElementById(
-"totalUsers"
-).innerText=snapshot.size;
 
 allUsers=[];
 
-snapshot.forEach((item)=>{
+snapshot.forEach((docItem)=>{
 
 allUsers.push({
 
-id:item.id,
-...item.data()
+id:docItem.id,
+...docItem.data()
 
 });
 
 });
+
+totalUsers.innerText=
+allUsers.length;
 
 showUsers();
 
 }
-
 catch(error){
 
-console.log(error);
+console.log(
+"Firestore Error:",
+error
+);
 
 usersDiv.innerHTML=
 "Error loading users";
@@ -60,20 +69,16 @@ usersDiv.innerHTML=
 }
 
 
-
-/* Show users */
+/* Show Users */
 
 function showUsers(){
 
 const search=
-
-document.getElementById(
-"searchInput"
-)
-.value
+searchInput.value
 .toLowerCase();
 
 usersDiv.innerHTML="";
+
 
 if(allUsers.length===0){
 
@@ -83,6 +88,7 @@ usersDiv.innerHTML=
 return;
 
 }
+
 
 allUsers.forEach((user)=>{
 
@@ -94,15 +100,17 @@ const email=
 (user.email||"")
 .toLowerCase();
 
+const phone=
+user.phone||"-";
+
+const address=
+user.address||"-";
+
 
 if(
-
 name.includes(search)
-
 ||
-
 email.includes(search)
-
 ){
 
 usersDiv.innerHTML+=`
@@ -110,23 +118,22 @@ usersDiv.innerHTML+=`
 <div class="user">
 
 <h3>
-${user.name||"No Name"}
+${user.name || "No Name"}
 </h3>
 
-<div class="info">
-📧 ${user.email||"-"}
+<div>
+📧 ${user.email || "-"}
 </div>
 
-<div class="info">
-📱 ${user.phone||"-"}
+<div>
+📱 ${phone}
 </div>
 
-<div class="info">
-🏠 ${user.address||"-"}
+<div>
+🏠 ${address}
 </div>
 
 <button
-class="delete"
 onclick="deleteUser('${user.id}')">
 
 Delete User
@@ -145,39 +152,24 @@ Delete User
 
 
 
-/* Delete user */
+/* Delete */
 
 window.deleteUser=
-
 async(id)=>{
-
-const confirmDelete=
-confirm(
-"Delete user?"
-);
-
-if(!confirmDelete) return;
 
 try{
 
 await deleteDoc(
-
 doc(
 db,
-"Users", // FIXED
+"Users",
 id
 )
-
-);
-
-alert(
-"User deleted"
 );
 
 loadUsers();
 
 }
-
 catch(error){
 
 console.log(error);
@@ -191,12 +183,7 @@ alert(
 };
 
 
-
-document
-.getElementById(
-"searchInput"
-)
-.addEventListener(
+searchInput.addEventListener(
 "input",
 showUsers
 );
