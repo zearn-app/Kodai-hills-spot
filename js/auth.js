@@ -207,7 +207,7 @@ password
 /* ADMIN CHECK */
 
 const adminEmail=
-"admin@gmail.com";
+"kodaihillsspot@gmail.com";
 
 
 if(
@@ -230,7 +230,7 @@ alert(
 );
 
 window.location=
-"home.html";
+"index.html";
 
 }
 
