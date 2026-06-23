@@ -1,14 +1,12 @@
-import { initializeApp }
-from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
+import { auth, db }
+from "./firebase.js";
 
 import {
-getAuth,
 onAuthStateChanged
 }
 from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
 
 import {
-getFirestore,
 collection,
 addDoc,
 getDocs,
@@ -18,35 +16,6 @@ updateDoc,
 getCountFromServer
 }
 from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
-
-
-
-const firebaseConfig={
-
-apiKey:"AIzaSyAXtM0DnYPTYbdQmvv93KAQwcqxty2C1vQ",
-
-authDomain:"kodaihillsspot-4a1b8.firebaseapp.com",
-
-projectId:"kodaihillsspot-4a1b8",
-
-storageBucket:"kodaihillsspot-4a1b8.firebasestorage.app",
-
-messagingSenderId:"396566428046",
-
-appId:"1:396566428046:web:c9bafa2143b34e7d64ccdf"
-
-};
-
-
-const app=
-initializeApp(firebaseConfig);
-
-const auth=
-getAuth(app);
-
-const db=
-getFirestore(app);
-
 
 
 const productsDiv=
@@ -63,7 +32,7 @@ let selectedOrderId=null;
 
 
 
-/* LOGIN CHECK */
+/* ADMIN LOGIN CHECK */
 
 onAuthStateChanged(
 
@@ -80,7 +49,6 @@ return;
 
 }
 
-
 if(
 user.email!==
 "kodaihillsspot@gmail.com"
@@ -96,7 +64,6 @@ window.location=
 return;
 
 }
-
 
 loadStats();
 
@@ -117,18 +84,12 @@ document
 "userBtn"
 )
 
-.addEventListener(
-
-"click",
-
-()=>{
+.onclick=()=>{
 
 window.location=
 "srkxditit.html";
 
-}
-
-);
+};
 
 
 
@@ -139,9 +100,7 @@ document
 "addBtn"
 )
 
-.addEventListener(
-
-"click",
+.onclick=
 
 async()=>{
 
@@ -218,9 +177,8 @@ description:description
 
 );
 
-
 alert(
-"Product Added"
+"Product added"
 );
 
 
@@ -246,7 +204,6 @@ loadProducts();
 loadStats();
 
 }
-
 catch(error){
 
 alert(
@@ -255,19 +212,16 @@ error.message
 
 }
 
-}
-
-);
+};
 
 
 
-/* PRODUCTS */
+/* LOAD PRODUCTS */
 
 async function loadProducts(){
 
 productsDiv.innerHTML=
 "Loading...";
-
 
 const snapshot=
 
@@ -280,7 +234,6 @@ db,
 
 );
 
-
 productsDiv.innerHTML="";
 
 
@@ -291,18 +244,19 @@ snapshot.forEach(
 const data=
 item.data();
 
-
 productsDiv.innerHTML+=`
 
-<div style="
+<div
+style="
 background:white;
 padding:15px;
-margin:10px 0;
+margin-bottom:15px;
 border-radius:15px;
 ">
 
 <img
 src="${data.Image}"
+
 style="
 width:100%;
 height:150px;
@@ -310,14 +264,22 @@ object-fit:cover;
 border-radius:10px;
 ">
 
-<h3>${data.name}</h3>
+<h3>
+${data.name}
+</h3>
 
-<p>₹${data.price}</p>
+<p>
+₹${data.price}
+</p>
 
-<p>${data.category}</p>
+<p>
+${data.category}
+</p>
 
 <button
+
 onclick="deleteProduct('${item.id}')"
+
 style="
 background:red;
 color:white;
@@ -342,7 +304,7 @@ Delete
 
 
 
-/* DELETE */
+/* DELETE PRODUCT */
 
 window.deleteProduct=
 
@@ -366,7 +328,7 @@ loadStats();
 
 
 
-/* STATS */
+/* DASHBOARD */
 
 async function loadStats(){
 
@@ -414,12 +376,11 @@ orders.data().count;
 
 
 
-/* ORDERS */
+/* LOAD ORDERS */
 
 async function loadOrders(){
 
 ordersDiv.innerHTML="";
-
 
 const snapshot=
 
@@ -442,21 +403,44 @@ item.data();
 
 ordersDiv.innerHTML+=`
 
-<div style="
+<div
+
+onclick='openOrder(${JSON.stringify({
+id:item.id,
+...data
+})})'
+
+style="
 background:white;
 padding:15px;
-margin:10px 0;
+margin-bottom:15px;
 border-radius:15px;
+cursor:pointer;
 ">
 
-<h3>${data.name||""}</h3>
+<h3>
 
-<p>${data.email||""}</p>
+${data.name||""}
 
-<p>₹${data.price||""}</p>
+</h3>
 
-<p>Status:
+<p>
+
+${data.email||""}
+
+</p>
+
+<p>
+
+₹${data.price||0}
+
+</p>
+
+<p>
+
+Status:
 ${data.status||"Pending"}
+
 </p>
 
 </div>
@@ -468,3 +452,165 @@ ${data.status||"Pending"}
 );
 
 }
+
+
+
+/* OPEN ORDER POPUP */
+
+window.openOrder=
+
+(data)=>{
+
+selectedOrderId=
+data.id;
+
+
+document.getElementById(
+"statusPopup"
+).style.display=
+"flex";
+
+
+document.getElementById(
+"orderId"
+).innerText=
+data.id||"-";
+
+document.getElementById(
+"productName"
+).innerText=
+data.name||"-";
+
+document.getElementById(
+"quantity"
+).innerText=
+data.quantity||1;
+
+document.getElementById(
+"totalPrice"
+).innerText=
+"₹"+(data.price||0);
+
+
+document.getElementById(
+"userName"
+).innerText=
+data.userName||"-";
+
+document.getElementById(
+"userEmail"
+).innerText=
+data.email||"-";
+
+document.getElementById(
+"userPhone"
+).innerText=
+data.phone||"-";
+
+document.getElementById(
+"userAddress"
+).innerText=
+data.address||"-";
+
+
+document.getElementById(
+"statusSelect"
+).value=
+data.status||"Pending";
+
+};
+
+
+
+/* CLOSE POPUP */
+
+window.closePopup=
+
+()=>{
+
+document.getElementById(
+"statusPopup"
+).style.display=
+"none";
+
+};
+
+
+
+/* STATUS CHANGE */
+
+statusSelect.onchange=
+
+()=>{
+
+trackingId.style.display=
+
+statusSelect.value==="Accepted"
+
+?
+
+"block"
+
+:
+
+"none";
+
+};
+
+
+
+/* UPDATE ORDER */
+
+updateBtn.onclick=
+
+async()=>{
+
+try{
+
+await updateDoc(
+
+doc(
+db,
+"Orders",
+selectedOrderId
+),
+
+{
+
+status:
+statusSelect.value,
+
+trackingId:
+
+statusSelect.value==="Accepted"
+
+?
+
+trackingId.value
+
+:
+
+""
+
+}
+
+);
+
+alert(
+"Order updated"
+);
+
+closePopup();
+
+loadOrders();
+
+}
+catch(error){
+
+alert(
+error.message
+);
+
+}
+
+};
