@@ -1,5 +1,23 @@
-const cartItems=
+import { auth, db }
+from "./firebase.js";
 
+import {
+collection,
+query,
+where,
+getDocs,
+deleteDoc,
+doc
+}
+from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
+
+import {
+onAuthStateChanged
+}
+from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
+
+
+const cartItems=
 document.getElementById(
 "cartItems"
 );
@@ -9,19 +27,98 @@ document.getElementById(
 "total"
 );
 
+let cart=[];
 
-let cart=
 
-JSON.parse(
+/* Check login */
 
-localStorage.getItem(
-"cart"
+onAuthStateChanged(
+
+auth,
+
+(user)=>{
+
+if(!user){
+
+window.location=
+"login.html";
+
+return;
+
+}
+
+loadCart(
+user.uid
+);
+
+}
+
+);
+
+
+/* Load Cart */
+
+async function loadCart(uid){
+
+try{
+
+cartItems.innerHTML=
+"Loading...";
+
+const q=
+
+query(
+
+collection(
+db,
+"Cart"
+),
+
+where(
+"uid",
+"==",
+uid
 )
 
-)||[];
+);
+
+const snapshot=
+
+await getDocs(q);
+
+cart=[];
+
+snapshot.forEach((item)=>{
+
+cart.push({
+
+docId:item.id,
+...item.data()
+
+});
+
+});
 
 
-function loadCart(){
+showCart();
+
+}
+catch(error){
+
+console.log(error);
+
+cartItems.innerHTML=
+
+"<h2>Error loading cart</h2>";
+
+}
+
+}
+
+
+/* Show cart */
+
+function showCart(){
 
 cartItems.innerHTML="";
 
@@ -40,6 +137,10 @@ Cart Empty
 
 `;
 
+totalDiv.innerText=
+
+"Total : ₹0";
+
 return;
 
 }
@@ -49,11 +150,11 @@ cart.forEach((item,index)=>{
 
 total +=
 
-item.price*
-item.quantity;
+Number(item.price)*
+Number(item.quantity);
 
 
-cartItems.innerHTML +=`
+cartItems.innerHTML+=`
 
 <div class="card"
 
@@ -88,7 +189,7 @@ ${item.quantity}
 class="remove"
 
 onclick="event.stopPropagation();
-removeItem(${index})">
+removeItem('${item.docId}')">
 
 Remove
 
@@ -110,27 +211,43 @@ totalDiv.innerText=
 }
 
 
+/* Remove */
+
 window.removeItem=
-(index)=>{
 
-cart.splice(
-index,
-1
-);
+async(docId)=>{
 
-localStorage.setItem(
+try{
 
-"cart",
+await deleteDoc(
 
-JSON.stringify(
-cart
+doc(
+db,
+"Cart",
+docId
 )
 
 );
 
-loadCart();
+cart=
+
+cart.filter(
+
+item=>
+
+item.docId!==docId
+
+);
+
+showCart();
+
+}
+catch(error){
+
+alert(
+error.message
+);
+
+}
 
 };
-
-
-loadCart();
