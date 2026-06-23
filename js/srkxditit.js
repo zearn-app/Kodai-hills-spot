@@ -1,4 +1,5 @@
-import { auth, db } from "./firebase.js";
+import { auth, db }
+from "./firebase.js";
 
 import {
 onAuthStateChanged
@@ -14,14 +15,20 @@ doc
 from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
 
-const usersDiv =
-document.getElementById("users");
+const usersDiv=
+document.getElementById(
+"users"
+);
 
-const totalUsers =
-document.getElementById("totalUsers");
+const totalUsers=
+document.getElementById(
+"totalUsers"
+);
 
-const searchInput =
-document.getElementById("searchInput");
+const searchInput=
+document.getElementById(
+"searchInput"
+);
 
 let allUsers=[];
 
@@ -34,26 +41,28 @@ auth,
 (user)=>{
 
 console.log(
-"Auth User:",
+"Current User:",
 user
 );
 
 if(!user){
 
 usersDiv.innerHTML=
-"❌ User not logged in";
+"❌ Login Required";
 
 return;
 
 }
 
-console.log(
-"Email:",
+
+let email=
 user.email
-);
+.trim()
+.toLowerCase();
+
 
 if(
-user.email !==
+email!==
 "kodaihillsspot@gmail.com"
 ){
 
@@ -64,11 +73,11 @@ return;
 
 }
 
+
 loadUsers();
 
 }
 );
-
 
 
 async function loadUsers(){
@@ -76,10 +85,10 @@ async function loadUsers(){
 try{
 
 usersDiv.innerHTML=
-"Loading users...";
+"Loading Users...";
 
 console.log(
-"Loading Firestore..."
+"Fetching Users..."
 );
 
 const snapshot=
@@ -91,9 +100,10 @@ db,
 );
 
 console.log(
-"Total docs:",
+"Users:",
 snapshot.size
 );
+
 
 allUsers=[];
 
@@ -101,17 +111,13 @@ allUsers=[];
 snapshot.forEach(
 (docSnap)=>{
 
-console.log(
-"Document:",
-docSnap.id,
-docSnap.data()
-);
+let data=
+docSnap.data();
 
 allUsers.push({
 
 id:docSnap.id,
-
-...docSnap.data()
+...data
 
 });
 
@@ -126,10 +132,7 @@ showUsers();
 }
 catch(error){
 
-console.log(
-"ERROR:",
-error
-);
+console.log(error);
 
 usersDiv.innerHTML=`
 
@@ -151,15 +154,19 @@ function showUsers(){
 
 usersDiv.innerHTML="";
 
+
 let search=
 searchInput.value
 .toLowerCase();
+
 
 let filtered=
 allUsers.filter(
 (user)=>{
 
-return JSON.stringify(user)
+return JSON.stringify(
+user
+)
 .toLowerCase()
 .includes(search);
 
@@ -173,7 +180,7 @@ usersDiv.innerHTML=`
 
 <div class="user">
 
-No users found
+No Users Found
 
 </div>
 
@@ -182,6 +189,7 @@ No users found
 return;
 
 }
+
 
 
 filtered.forEach(
@@ -193,19 +201,32 @@ usersDiv.innerHTML+=`
 
 <h3>
 
-${user.name||user.username||"No Name"}
+${user.name||
+user.username||
+"No Name"}
 
 </h3>
 
 <div class="info">
 
-📧 ${user.email||"-"}
+📧 Email:
+${user.email||"-"}
 
 </div>
 
 <div class="info">
 
-📱 ${user.phone||user.mobile||"-"}
+📱 Phone:
+${user.phone||
+user.mobile||
+"-"}
+
+</div>
+
+<div class="info">
+
+🆔 User ID:
+${user.id}
 
 </div>
 
@@ -228,13 +249,20 @@ document
 .querySelectorAll(
 ".delete"
 )
-.forEach(btn=>{
+.forEach(
+(btn)=>{
 
 btn.onclick=
 async()=>{
 
 let id=
 btn.dataset.id;
+
+if(
+confirm(
+"Delete User?"
+)
+){
 
 await deleteDoc(
 doc(
@@ -246,6 +274,8 @@ id
 
 loadUsers();
 
+}
+
 };
 
 });
@@ -253,7 +283,8 @@ loadUsers();
 }
 
 
-searchInput.addEventListener(
+searchInput
+.addEventListener(
 "input",
 showUsers
 );
