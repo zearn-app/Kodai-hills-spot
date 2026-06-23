@@ -8,7 +8,6 @@ RecaptchaVerifier,
 signInWithPhoneNumber
 
 }
-
 from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
 
 import {
@@ -19,7 +18,6 @@ setDoc,
 getDoc
 
 }
-
 from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
 
@@ -57,7 +55,13 @@ const db=
 getFirestore(app);
 
 
+let currentUser=null;
+
+
+/* Create Recaptcha */
+
 window.recaptchaVerifier=
+
 new RecaptchaVerifier(
 
 auth,
@@ -66,14 +70,31 @@ auth,
 
 {
 
-size:"normal"
+size:"normal",
+
+callback:()=>{
+
+console.log(
+"Recaptcha solved"
+);
+
+}
 
 }
 
 );
 
 
-let currentUser=null;
+/* Render Recaptcha */
+
+window.recaptchaVerifier
+.render()
+.then((widgetId)=>{
+
+window.recaptchaWidgetId=
+widgetId;
+
+});
 
 
 /* SEND OTP */
@@ -83,24 +104,40 @@ document
 "sendOtpBtn"
 )
 
-.onclick=
+.addEventListener(
+
+"click",
 
 async()=>{
 
 try{
 
-const phone=
-
-"+91"+
+const number=
 
 document
 .getElementById(
 "phone"
 )
 
-.value.trim();
+.value
+.trim();
 
-const result=
+
+if(number===""){
+
+alert(
+"Enter phone number"
+);
+
+return;
+
+}
+
+const phone=
+"+91"+number;
+
+
+const confirmationResult=
 
 await signInWithPhoneNumber(
 
@@ -111,7 +148,8 @@ window.recaptchaVerifier
 );
 
 window.confirmationResult=
-result;
+confirmationResult;
+
 
 document
 .getElementById(
@@ -124,24 +162,24 @@ document
 );
 
 alert(
-"OTP Sent"
+"OTP sent successfully"
 );
 
 }
 
 catch(error){
 
+console.log(error);
+
 alert(
 error.message
 );
 
-console.log(
-error
-);
+}
 
 }
 
-};
+);
 
 
 /* VERIFY OTP */
@@ -151,7 +189,9 @@ document
 "verifyBtn"
 )
 
-.onclick=
+.addEventListener(
+
+"click",
 
 async()=>{
 
@@ -164,7 +204,20 @@ document
 "otp"
 )
 
-.value;
+.value
+.trim();
+
+
+if(otp===""){
+
+alert(
+"Enter OTP"
+);
+
+return;
+
+}
+
 
 const result=
 
@@ -174,8 +227,10 @@ await window
 otp
 );
 
+
 currentUser=
 result.user;
+
 
 const snapshot=
 
@@ -190,11 +245,7 @@ currentUser.uid
 );
 
 
-if(
-
-snapshot.exists()
-
-){
+if(snapshot.exists()){
 
 window.location=
 "home.html";
@@ -219,23 +270,27 @@ document
 
 catch(error){
 
+console.log(error);
+
 alert(
 "Invalid OTP"
 );
 
 }
 
-};
+});
 
 
-/* SAVE DETAILS */
+/* SAVE USER */
 
 document
 .getElementById(
 "saveBtn"
 )
 
-.onclick=
+.addEventListener(
+
+"click",
 
 async()=>{
 
@@ -246,7 +301,7 @@ document
 "name"
 )
 
-.value;
+.value.trim();
 
 const email=
 
@@ -255,7 +310,18 @@ document
 "email"
 )
 
-.value;
+.value.trim();
+
+
+if(!name||!email){
+
+alert(
+"Fill details"
+);
+
+return;
+
+}
 
 
 await setDoc(
@@ -282,7 +348,10 @@ currentUser.phoneNumber
 
 );
 
+
 window.location=
 "home.html";
 
-};
+}
+
+);
