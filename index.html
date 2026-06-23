@@ -36,12 +36,29 @@ box-shadow:0 2px 10px rgba(0,0,0,.1);
 position:relative;
 }
 
+/* Logo container */
+
+.logo-container{
+display:flex;
+flex-direction:column;
+align-items:center;
+}
+
+/* Logo 2 */
+
 .logo-img{
-width:80px;
-height:80px;
-border-radius:50%;
-object-fit:cover;
-border:2px solid #2e7d32;
+width:140px;
+height:auto;
+object-fit:contain;
+}
+
+/* Logo 3 below */
+
+.logo-small{
+width:100px;
+height:auto;
+margin-top:5px;
+object-fit:contain;
 }
 
 .top-right{
@@ -223,9 +240,17 @@ font-weight:bold;
 
 <nav class="navbar">
 
+<div class="logo-container">
+
 <img
-src="logo1.png"
+src="logo2.png"
 class="logo-img">
+
+<img
+src="logo3.png"
+class="logo-small">
+
+</div>
 
 <div class="top-right">
 
@@ -420,7 +445,6 @@ document.getElementById(
 "profileLink"
 );
 
-
 async function loadProducts(){
 
 try{
@@ -479,7 +503,6 @@ console.log(error);
 }
 
 }
-
 
 onAuthStateChanged(
 
