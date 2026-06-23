@@ -1,11 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
 <meta charset="UTF-8">
-<meta name="viewport"
-content="width=device-width,initial-scale=1">
-
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Kodai Hills Spot</title>
 
 <style>
@@ -61,7 +58,6 @@ background:#2e7d32;
 color:white;
 font-size:18px;
 margin-top:10px;
-cursor:pointer;
 }
 
 .hidden{
@@ -80,33 +76,21 @@ display:none;
 Kodai Hills Spot 🌿
 </div>
 
-<!-- Step 1 -->
-
 <div id="phoneBox">
 
 <input
 id="phone"
 placeholder="Phone Number">
 
-<div id="recaptcha-container"
-style="margin-top:10px;margin-bottom:10px;">
-</div>
+<!-- ONLY ONE -->
+<div id="recaptcha-container"></div>
 
-<div
-id="recaptcha-container">
-</div>
-
-<button
-id="sendOtpBtn">
-
+<button id="sendOtpBtn">
 Send OTP
-
 </button>
 
 </div>
 
-
-<!-- Step 2 -->
 
 <div
 id="otpBox"
@@ -125,8 +109,6 @@ Verify OTP
 
 </div>
 
-
-<!-- Step 3 -->
 
 <div
 id="detailsBox"
@@ -152,7 +134,8 @@ Continue
 </div>
 
 <script type="module"
-src="js/auth.js"></script>
+src="js/auth.js">
+</script>
 
 </body>
 </html>
