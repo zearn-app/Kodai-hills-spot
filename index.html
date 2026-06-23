@@ -1,3 +1,11 @@
+<!DOCTYPE html>  <html lang="en">  <head>  <meta charset="UTF-8">  
+<meta name="viewport"  
+content="width=device-width,initial-scale=1"> 
+
+
+ <title>Kodai Hills Spot</title>  
+
+
 <style>
 
 *{
@@ -283,3 +291,94 @@ font-weight:bold;
 }
 
 </style>
+
+
+
+</head>  <body>  <nav class="navbar">  <div class="logo-container">  <h5>ⴕ ૐ ☪︎</h5>  <img src="logo3.png"  
+class="logo-img">
+
+<img src="logo4.png"  
+class="logo-small">
+
+</div>  </nav>  <div  
+class="login-float"  
+id="loginFloat">  <button  
+class="auth-btn"  
+onclick="window.location='login.html'">
+
+Login
+
+</button>  </div>  <!-- AUTO SLIDER -->  <section class="hero">  <div class="slider">  <div class="slide active">  
+<img src="img1.jpg">  
+</div>  <div class="slide">  
+<img src="img2.jpg">  
+</div>  <div class="slide">  
+<img src="img3.jpg">  
+</div>  <div class="slide">  
+<img src="img4.jpg">  
+</div>  <div class="overlay">  </div>  </div>  </section>  <div class="search">  <input placeholder="🔍 Search products">  </div>  <div class="category-section">  <div class="category-scroll">  <div class="category-card">  
+<div class="category-icon">🍫</div>  
+<div class="category-name">Chocolate</div>  
+</div>  <div class="category-card">  
+<div class="category-icon">🥑</div>  
+<div class="category-name">Fruits</div>  
+</div>  <div class="category-card">  
+<div class="category-icon">🥔</div>  
+<div class="category-name">Vegetables</div>  
+</div>  <div class="category-card">  
+<div class="category-icon">🌿</div>  
+<div class="category-name">Organic</div>  
+</div>  </div>  </div>  <section class="section">  <div class="title">  
+Featured Products  
+</div>  <div  
+id="products"  
+class="products">  Loading...
+
+</div>  </section>  <nav class="bottom-nav">  <a href="index.html"  
+class="active">
+
+🏠<br>Home
+
+</a>  <a href="products.html">  🛍️<br>Products
+
+</a>  <a href="cart.html">  🛒<br>Cart
+
+</a>  <a  
+href="profile.html"  
+id="profileLink"  
+style="display:none;">
+
+👤<br>Profile
+
+</a>  </nav>  <script type="module" src="./js/home.js"></script>  <script>  
+  
+const slides=  
+document.querySelectorAll(".slide");  
+  
+let current=0;  
+  
+setInterval(()=>{  
+  
+slides[current]  
+.classList.remove(  
+"active"  
+);  
+  
+current++;  
+  
+if(  
+current>=slides.length  
+){  
+current=0;  
+}  
+  
+slides[current]  
+.classList.add(  
+"active"  
+);  
+  
+},3000);  
+  
+</script>  
+</body>  
+</html> 
