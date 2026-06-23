@@ -1,22 +1,18 @@
-import {initializeApp}
+import { initializeApp }
 from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
 
 import {
-
 getAuth,
 RecaptchaVerifier,
 signInWithPhoneNumber
-
 }
 from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
 
 import {
-
 getFirestore,
 doc,
 setDoc,
 getDoc
-
 }
 from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
@@ -24,44 +20,27 @@ from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 const firebaseConfig={
 
 apiKey:"AIzaSyAXtM0DnYPTYbdQmvv93KAQwcqxty2C1vQ",
-
-authDomain:
-"kodaihillsspot-4a1b8.firebaseapp.com",
-
-projectId:
-"kodaihillsspot-4a1b8",
-
-storageBucket:
-"kodaihillsspot-4a1b8.firebasestorage.app",
-
-messagingSenderId:
-"396566428046",
-
-appId:
-"1:396566428046:web:c9bafa2143b34e7d64ccdf"
+authDomain:"kodaihillsspot-4a1b8.firebaseapp.com",
+projectId:"kodaihillsspot-4a1b8",
+storageBucket:"kodaihillsspot-4a1b8.firebasestorage.app",
+messagingSenderId:"396566428046",
+appId:"1:396566428046:web:c9bafa2143b34e7d64ccdf"
 
 };
 
 
-const app=
-initializeApp(
-firebaseConfig
-);
+const app=initializeApp(firebaseConfig);
 
-const auth=
-getAuth(app);
+const auth=getAuth(app);
 
-const db=
-getFirestore(app);
+const db=getFirestore(app);
+
+let currentUser;
 
 
-let currentUser=null;
-
-
-/* Create Recaptcha */
+/* IMPORTANT FIX */
 
 window.recaptchaVerifier=
-
 new RecaptchaVerifier(
 
 auth,
@@ -69,64 +48,36 @@ auth,
 "recaptcha-container",
 
 {
-
-size:"normal",
-
-callback:()=>{
-
-console.log(
-"Recaptcha solved"
-);
-
-}
-
+size:"normal"
 }
 
 );
 
+await window.recaptchaVerifier.render();
 
-/* Render Recaptcha */
-
-window.recaptchaVerifier
-.render()
-.then((widgetId)=>{
-
-window.recaptchaWidgetId=
-widgetId;
-
-});
 
 
 /* SEND OTP */
 
 document
-.getElementById(
-"sendOtpBtn"
-)
+.getElementById("sendOtpBtn")
 
-.addEventListener(
-
-"click",
+.onclick=
 
 async()=>{
 
 try{
 
-const number=
-
+const phoneInput=
 document
-.getElementById(
-"phone"
-)
-
+.getElementById("phone")
 .value
 .trim();
 
-
-if(number===""){
+if(phoneInput.length!==10){
 
 alert(
-"Enter phone number"
+"Enter valid phone number"
 );
 
 return;
@@ -134,7 +85,7 @@ return;
 }
 
 const phone=
-"+91"+number;
+"+91"+phoneInput;
 
 
 const confirmationResult=
@@ -147,6 +98,7 @@ window.recaptchaVerifier
 
 );
 
+
 window.confirmationResult=
 confirmationResult;
 
@@ -155,11 +107,10 @@ document
 .getElementById(
 "otpBox"
 )
-
-.classList
-.remove(
+.classList.remove(
 "hidden"
 );
+
 
 alert(
 "OTP sent successfully"
@@ -177,9 +128,8 @@ error.message
 
 }
 
-}
+};
 
-);
 
 
 /* VERIFY OTP */
@@ -189,9 +139,7 @@ document
 "verifyBtn"
 )
 
-.addEventListener(
-
-"click",
+.onclick=
 
 async()=>{
 
@@ -203,12 +151,10 @@ document
 .getElementById(
 "otp"
 )
-
 .value
 .trim();
 
-
-if(otp===""){
+if(!otp){
 
 alert(
 "Enter OTP"
@@ -227,10 +173,11 @@ await window
 otp
 );
 
-
 currentUser=
 result.user;
 
+
+/* Check existing user */
 
 const snapshot=
 
@@ -258,9 +205,7 @@ document
 .getElementById(
 "detailsBox"
 )
-
-.classList
-.remove(
+.classList.remove(
 "hidden"
 );
 
@@ -273,12 +218,13 @@ catch(error){
 console.log(error);
 
 alert(
-"Invalid OTP"
+"Wrong OTP"
 );
 
 }
 
-});
+};
+
 
 
 /* SAVE USER */
@@ -288,9 +234,7 @@ document
 "saveBtn"
 )
 
-.addEventListener(
-
-"click",
+.onclick=
 
 async()=>{
 
@@ -300,8 +244,8 @@ document
 .getElementById(
 "name"
 )
-
-.value.trim();
+.value
+.trim();
 
 const email=
 
@@ -309,19 +253,8 @@ document
 .getElementById(
 "email"
 )
-
-.value.trim();
-
-
-if(!name||!email){
-
-alert(
-"Fill details"
-);
-
-return;
-
-}
+.value
+.trim();
 
 
 await setDoc(
@@ -334,24 +267,16 @@ currentUser.uid
 
 {
 
-uid:
-currentUser.uid,
-
+uid:currentUser.uid,
 name:name,
-
 email:email,
-
-phone:
-currentUser.phoneNumber
+phone:currentUser.phoneNumber
 
 }
 
 );
-
 
 window.location=
 "home.html";
 
-}
-
-);
+};
