@@ -2,7 +2,9 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport"
+content="width=device-width,initial-scale=1">
+
 <title>Kodai Hills Spot</title>
 
 <style>
@@ -33,11 +35,11 @@ box-shadow:0 5px 20px rgba(0,0,0,.1);
 }
 
 .logo{
-font-size:30px;
+font-size:32px;
 font-weight:bold;
 text-align:center;
 color:#2e7d32;
-margin-bottom:20px;
+margin-bottom:25px;
 }
 
 input{
@@ -59,26 +61,22 @@ color:white;
 font-size:18px;
 margin-top:10px;
 cursor:pointer;
+cursor:pointer;
+}
+
+.toggle{
+text-align:center;
+margin-top:15px;
+cursor:pointer;
 }
 
 .hidden{
 display:none;
 }
 
-.switch{
-text-align:center;
-margin-top:15px;
-color:#2e7d32;
-cursor:pointer;
-}
-
-hr{
-margin:20px 0;
-}
-
 </style>
-
 </head>
+
 <body>
 
 <div class="container">
@@ -87,57 +85,14 @@ margin:20px 0;
 Kodai Hills Spot 🌿
 </div>
 
-<!-- PHONE LOGIN -->
 
-<h3>Phone Login</h3>
+<!-- Signup -->
 
-<input
-id="phone"
-placeholder="Phone Number">
-
-<div id="recaptcha-container"></div>
-
-<button id="sendOtpBtn">
-Send OTP
-</button>
-
-<div
-id="otpBox"
-class="hidden">
-
-<input
-id="otp"
-placeholder="Enter OTP">
-
-<button id="verifyBtn">
-Verify OTP
-</button>
-
-</div>
-
-<div
-id="detailsBox"
-class="hidden">
+<div id="signupBox">
 
 <input
 id="name"
 placeholder="Full Name">
-
-<input
-id="newEmail"
-placeholder="Gmail">
-
-<button id="saveBtn">
-Continue
-</button>
-
-</div>
-
-<hr>
-
-<!-- GMAIL LOGIN -->
-
-<h3>Email Login</h3>
 
 <input
 id="email"
@@ -148,17 +103,112 @@ id="password"
 type="password"
 placeholder="Password">
 
-<button id="loginBtn">
-Login
-</button>
-
 <button id="signupBtn">
-Create Account
+
+Sign Up
+
 </button>
 
 </div>
 
-<script type="module" src="js/auth.js"></script>
+
+<!-- Login -->
+
+<div
+id="loginBox"
+class="hidden">
+
+<input
+id="loginEmail"
+placeholder="Gmail">
+
+<input
+id="loginPassword"
+type="password"
+placeholder="Password">
+
+<button
+id="loginBtn">
+
+Login
+
+</button>
+
+</div>
+
+
+<p
+class="toggle"
+onclick="toggleForm()"
+id="toggleText">
+
+Already have account? Login
+
+</p>
+
+</div>
+
+
+<script>
+
+function toggleForm(){
+
+let signup=
+document.getElementById(
+"signupBox"
+);
+
+let login=
+document.getElementById(
+"loginBox"
+);
+
+let text=
+document.getElementById(
+"toggleText"
+);
+
+if(login.classList.contains(
+"hidden"
+)){
+
+signup.classList.add(
+"hidden"
+);
+
+login.classList.remove(
+"hidden"
+);
+
+text.innerText=
+"Don't have account? Sign Up";
+
+}
+
+else{
+
+login.classList.add(
+"hidden"
+);
+
+signup.classList.remove(
+"hidden"
+);
+
+text.innerText=
+"Already have account? Login";
+
+}
+
+}
+
+</script>
+
+<script
+type="module"
+src="js/auth.js">
+
+</script>
 
 </body>
 </html>
