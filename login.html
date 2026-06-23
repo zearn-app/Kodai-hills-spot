@@ -33,11 +33,11 @@ box-shadow:0 5px 20px rgba(0,0,0,.1);
 }
 
 .logo{
-font-size:32px;
+font-size:30px;
 font-weight:bold;
 text-align:center;
 color:#2e7d32;
-margin-bottom:25px;
+margin-bottom:20px;
 }
 
 input{
@@ -58,16 +58,27 @@ background:#2e7d32;
 color:white;
 font-size:18px;
 margin-top:10px;
+cursor:pointer;
 }
 
 .hidden{
 display:none;
 }
 
+.switch{
+text-align:center;
+margin-top:15px;
+color:#2e7d32;
+cursor:pointer;
+}
+
+hr{
+margin:20px 0;
+}
+
 </style>
 
 </head>
-
 <body>
 
 <div class="container">
@@ -76,21 +87,19 @@ display:none;
 Kodai Hills Spot 🌿
 </div>
 
-<div id="phoneBox">
+<!-- PHONE LOGIN -->
+
+<h3>Phone Login</h3>
 
 <input
 id="phone"
 placeholder="Phone Number">
 
-<!-- ONLY ONE -->
 <div id="recaptcha-container"></div>
 
 <button id="sendOtpBtn">
 Send OTP
 </button>
-
-</div>
-
 
 <div
 id="otpBox"
@@ -100,15 +109,11 @@ class="hidden">
 id="otp"
 placeholder="Enter OTP">
 
-<button
-id="verifyBtn">
-
+<button id="verifyBtn">
 Verify OTP
-
 </button>
 
 </div>
-
 
 <div
 id="detailsBox"
@@ -119,23 +124,41 @@ id="name"
 placeholder="Full Name">
 
 <input
-id="email"
+id="newEmail"
 placeholder="Gmail">
 
-<button
-id="saveBtn">
-
+<button id="saveBtn">
 Continue
-
 </button>
 
 </div>
 
+<hr>
+
+<!-- GMAIL LOGIN -->
+
+<h3>Email Login</h3>
+
+<input
+id="email"
+placeholder="Gmail">
+
+<input
+id="password"
+type="password"
+placeholder="Password">
+
+<button id="loginBtn">
+Login
+</button>
+
+<button id="signupBtn">
+Create Account
+</button>
+
 </div>
 
-<script type="module"
-src="js/auth.js">
-</script>
+<script type="module" src="js/auth.js"></script>
 
 </body>
 </html>
