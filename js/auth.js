@@ -165,6 +165,7 @@ error.message
 
 
 /* LOGIN */
+/* LOGIN */
 
 document
 .getElementById(
@@ -192,6 +193,8 @@ document
 .value.trim();
 
 
+const userCredential=
+
 await signInWithEmailAndPassword(
 
 auth,
@@ -200,12 +203,36 @@ password
 
 );
 
+
+/* ADMIN CHECK */
+
+const adminEmail=
+"admin@gmail.com";
+
+
+if(
+email===adminEmail
+){
+
 alert(
-"Login successful"
+"Admin Login Successful"
 );
 
 window.location=
-"index.html";
+"admin.html";
+
+}
+
+else{
+
+alert(
+"Login Successful"
+);
+
+window.location=
+"home.html";
+
+}
 
 }
 
