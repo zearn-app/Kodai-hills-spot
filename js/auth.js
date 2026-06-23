@@ -148,7 +148,7 @@ alert(
 );
 
 window.location=
-"home.html";
+"index.html";
 
 }
 
