@@ -1,5 +1,10 @@
-import { db } 
+import {auth,db}
 from "./firebase.js";
+
+import {
+onAuthStateChanged
+}
+from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
 
 import {
 collection,
@@ -9,19 +14,58 @@ doc
 }
 from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
-const usersDiv =
+const usersDiv=
 document.getElementById("users");
 
-const totalUsers =
+const totalUsers=
 document.getElementById("totalUsers");
 
-const searchInput =
+const searchInput=
 document.getElementById("searchInput");
 
 let allUsers=[];
 
 
-/* Load Users */
+/* Admin check */
+
+onAuthStateChanged(
+
+auth,
+
+(user)=>{
+
+if(!user){
+
+window.location=
+"index.html";
+
+return;
+
+}
+
+if(
+user.email!=="kodaihillsspot@gmail.com"
+){
+
+alert(
+"Access denied"
+);
+
+window.location=
+"index.html";
+
+return;
+
+}
+
+loadUsers();
+
+}
+
+);
+
+
+/* Load users */
 
 async function loadUsers(){
 
@@ -31,22 +75,27 @@ usersDiv.innerHTML=
 "Loading...";
 
 const snapshot=
+
 await getDocs(
-collection(db,"Users")
+collection(
+db,
+"Users"
+)
 );
 
 allUsers=[];
 
-snapshot.forEach((docItem)=>{
+snapshot.forEach((item)=>{
 
 allUsers.push({
 
-id:docItem.id,
-...docItem.data()
+id:item.id,
+...item.data()
 
 });
 
 });
+
 
 totalUsers.innerText=
 allUsers.length;
@@ -56,84 +105,87 @@ showUsers();
 }
 catch(error){
 
-console.log(
-"Firestore Error:",
-error
-);
+console.log(error);
 
 usersDiv.innerHTML=
-"Error loading users";
+
+`<div class="user">
+${error.message}
+</div>`;
 
 }
 
 }
 
 
-/* Show Users */
+/* Display users */
 
 function showUsers(){
 
+usersDiv.innerHTML="";
+
 const search=
+
 searchInput.value
 .toLowerCase();
 
-usersDiv.innerHTML="";
+
+const filtered=
+
+allUsers.filter((user)=>{
+
+const name=
+
+(user.name||"")
+.toLowerCase();
+
+const email=
+
+(user.email||"")
+.toLowerCase();
+
+return(
+name.includes(search)
+||
+email.includes(search)
+);
+
+});
 
 
-if(allUsers.length===0){
+if(filtered.length===0){
 
 usersDiv.innerHTML=
-"No users found";
+
+`<div class="user">
+No users found
+</div>`;
 
 return;
 
 }
 
 
-allUsers.forEach((user)=>{
-
-const name=
-(user.name||"")
-.toLowerCase();
-
-const email=
-(user.email||"")
-.toLowerCase();
-
-const phone=
-user.phone||"-";
-
-const address=
-user.address||"-";
-
-
-if(
-name.includes(search)
-||
-email.includes(search)
-){
+filtered.forEach((user)=>{
 
 usersDiv.innerHTML+=`
 
 <div class="user">
 
 <h3>
-${user.name || "No Name"}
+${user.name||"No Name"}
 </h3>
 
-<div>
-📧 ${user.email || "-"}
+<div class="info">
+📧 ${user.email||"-"}
 </div>
 
-<div>
-📱 ${phone}
-</div>
-
-<div>
-🏠 ${address}
+<div class="info">
+📱 ${user.phone||"-"}
 </div>
 
 <button
+class="delete"
 onclick="deleteUser('${user.id}')">
 
 Delete User
@@ -144,44 +196,12 @@ Delete User
 
 `;
 
-}
-
 });
 
 }
 
 
-
-/* Delete */
-
-window.deleteUser=
-async(id)=>{
-
-try{
-
-await deleteDoc(
-doc(
-db,
-"Users",
-id
-)
-);
-
-loadUsers();
-
-}
-catch(error){
-
-console.log(error);
-
-alert(
-"Delete failed"
-);
-
-}
-
-};
-
+/* Search */
 
 searchInput.addEventListener(
 "input",
@@ -189,4 +209,28 @@ showUsers
 );
 
 
+/* Delete */
+
+window.deleteUser=
+
+async(id)=>{
+
+if(
+!confirm(
+"Delete user?"
+)
+)return;
+
+await deleteDoc(
+
+doc(
+db,
+"Users",
+id
+)
+
+);
+
 loadUsers();
+
+};
