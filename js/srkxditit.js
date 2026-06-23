@@ -14,50 +14,60 @@ doc
 from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
 
-const usersDiv=
+const usersDiv =
 document.getElementById("users");
 
-const totalUsers=
+const totalUsers =
 document.getElementById("totalUsers");
 
-const searchInput=
+const searchInput =
 document.getElementById("searchInput");
 
 let allUsers=[];
 
 
-/* Admin check */
+console.log("JS Loaded");
 
-onAuthStateChanged(auth,async(user)=>{
 
-console.log(user);
+onAuthStateChanged(
+auth,
+(user)=>{
+
+console.log(
+"Auth User:",
+user
+);
 
 if(!user){
 
-alert("Please login");
-
-window.location="index.html";
+usersDiv.innerHTML=
+"❌ User not logged in";
 
 return;
 
 }
+
+console.log(
+"Email:",
+user.email
+);
 
 if(
 user.email !==
 "kodaihillsspot@gmail.com"
 ){
 
-alert("Access denied");
-
-window.location="index.html";
+usersDiv.innerHTML=
+"❌ Admin access denied";
 
 return;
 
 }
 
-await loadUsers();
+loadUsers();
 
-});
+}
+);
 
 
 
@@ -68,19 +78,34 @@ try{
 usersDiv.innerHTML=
 "Loading users...";
 
+console.log(
+"Loading Firestore..."
+);
+
 const snapshot=
 await getDocs(
-collection(db,"Users")
+collection(
+db,
+"Users"
+)
 );
 
 console.log(
-"Users:",
+"Total docs:",
 snapshot.size
 );
 
 allUsers=[];
 
-snapshot.forEach((docSnap)=>{
+
+snapshot.forEach(
+(docSnap)=>{
+
+console.log(
+"Document:",
+docSnap.id,
+docSnap.data()
+);
 
 allUsers.push({
 
@@ -92,6 +117,7 @@ id:docSnap.id,
 
 });
 
+
 totalUsers.innerText=
 allUsers.length;
 
@@ -100,14 +126,16 @@ showUsers();
 }
 catch(error){
 
-console.log(error);
+console.log(
+"ERROR:",
+error
+);
 
 usersDiv.innerHTML=`
 
 <div class="user">
 
-Error:
-${error.message}
+❌ ${error.message}
 
 </div>
 
@@ -123,40 +151,20 @@ function showUsers(){
 
 usersDiv.innerHTML="";
 
-const search=
+let search=
 searchInput.value
 .toLowerCase();
 
-const filtered=
-allUsers.filter((user)=>{
+let filtered=
+allUsers.filter(
+(user)=>{
 
-const name=
-(user.name||"")
-.toLowerCase();
+return JSON.stringify(user)
+.toLowerCase()
+.includes(search);
 
-const email=
-(user.email||"")
-.toLowerCase();
-
-const phone=
-(user.phone||"")
-.toLowerCase();
-
-return(
-
-name.includes(search)
-
-||
-
-email.includes(search)
-
-||
-
-phone.includes(search)
-
+}
 );
-
-});
 
 
 if(filtered.length===0){
@@ -176,83 +184,57 @@ return;
 }
 
 
-filtered.forEach((user)=>{
+filtered.forEach(
+(user)=>{
 
-const userCard=
-document.createElement(
-"div"
-);
+usersDiv.innerHTML+=`
 
-userCard.className=
-"user";
-
-userCard.innerHTML=`
+<div class="user">
 
 <h3>
-${user.name||"No Name"}
+
+${user.name||user.username||"No Name"}
+
 </h3>
 
 <div class="info">
+
 📧 ${user.email||"-"}
+
 </div>
 
 <div class="info">
-📱 ${user.phone||"-"}
+
+📱 ${user.phone||user.mobile||"-"}
+
+</div>
+
+<button
+class="delete"
+data-id="${user.id}">
+
+Delete User
+
+</button>
+
 </div>
 
 `;
 
-const deleteBtn=
-document.createElement(
-"button"
-);
-
-deleteBtn.className=
-"delete";
-
-deleteBtn.innerText=
-"Delete User";
-
-deleteBtn.onclick=
-()=>deleteUser(
-user.id
-);
-
-userCard.appendChild(
-deleteBtn
-);
-
-usersDiv.appendChild(
-userCard
-);
-
 });
 
-}
 
+document
+.querySelectorAll(
+".delete"
+)
+.forEach(btn=>{
 
+btn.onclick=
+async()=>{
 
-searchInput.addEventListener(
-"input",
-showUsers
-);
-
-
-
-async function deleteUser(id){
-
-const confirmDelete=
-confirm(
-"Delete this user?"
-);
-
-if(!confirmDelete){
-
-return;
-
-}
-
-try{
+let id=
+btn.dataset.id;
 
 await deleteDoc(
 doc(
@@ -262,19 +244,16 @@ id
 )
 );
 
-alert(
-"User deleted"
-);
-
 loadUsers();
 
-}
-catch(error){
+};
 
-alert(
-error.message
+});
+
+}
+
+
+searchInput.addEventListener(
+"input",
+showUsers
 );
-
-}
-
-}
