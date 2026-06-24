@@ -122,8 +122,7 @@ size:"normal"
 /* Send OTP */
 
 
-sendOtpBtn.onclick=
-async()=>{
+sendOtpBtn.onclick=async()=>{
 
 try{
 
@@ -147,28 +146,24 @@ phone:phoneInput.value
 const data=
 await response.json();
 
-
-
-if(data.success){
-
-verifyStatus.innerHTML=
-"OTP Sent Successfully";
-
-}
-else{
+console.log(
+"Frontend Response:",
+data
+);
 
 verifyStatus.innerHTML=
-data.message;
-
-}
+JSON.stringify(data);
 
 }
 catch(error){
 
-console.log(error);
+console.log(
+"Frontend Error:",
+error
+);
 
 verifyStatus.innerHTML=
-"Failed";
+error.message;
 
 }
 
