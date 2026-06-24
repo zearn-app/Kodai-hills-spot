@@ -219,14 +219,12 @@ Related Products
 
 </div>
 
-
 <script type="module">
 
 import { db, auth }
 from "./js/firebase.js";
 
 import {
-
 doc,
 getDoc,
 collection,
@@ -234,44 +232,27 @@ getDocs,
 addDoc,
 query,
 where
-
 }
-
 from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
 import {
-
 onAuthStateChanged
-
 }
-
 from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
 
 
 const imageEl=document.getElementById("image");
-
 const reviewsDiv=document.getElementById("reviews");
-
 const nameEl=document.getElementById("name");
-
 const priceEl=document.getElementById("price");
-
 const categoryEl=document.getElementById("category");
-
 const descriptionEl=document.getElementById("description");
-
 const countEl=document.getElementById("count");
-
 const plusBtn=document.getElementById("plus");
-
 const minusBtn=document.getElementById("minus");
-
 const cartBtn=document.getElementById("cartBtn");
-
 const buyBtn=document.getElementById("buyBtn");
-
 const relatedDiv=document.getElementById("related");
-
 
 const params=
 new URLSearchParams(
@@ -295,17 +276,12 @@ auth,
 
 currentUser=user;
 
-}
+});
 
-);
-
-
-/* Quantity */
 
 plusBtn.onclick=()=>{
 
 quantity++;
-
 countEl.innerText=quantity;
 
 };
@@ -315,7 +291,6 @@ minusBtn.onclick=()=>{
 if(quantity>1){
 
 quantity--;
-
 countEl.innerText=quantity;
 
 }
@@ -323,37 +298,25 @@ countEl.innerText=quantity;
 };
 
 
-
 async function loadProduct(){
 
-try{
-
 const snapshot=
-
 await getDoc(
-
 doc(
 db,
 "Products",
 id
 )
-
 );
 
-if(!snapshot.exists()){
+currentProduct=
+snapshot.data();
+
+imageEl.src=
+currentProduct.Image;
 
 nameEl.innerText=
-"Product Not Found";
-
-return;
-
-}
-
-currentProduct=snapshot.data();
-
-imageEl.src=currentProduct.Image;
-
-nameEl.innerText=currentProduct.name;
+currentProduct.name;
 
 priceEl.innerText=
 "₹"+currentProduct.price;
@@ -365,23 +328,10 @@ currentProduct.category;
 descriptionEl.innerText=
 currentProduct.description;
 
+loadReviews();
 loadRelated();
 
-loadReviews();
-
 }
-
-catch(error){
-
-console.log(error);
-
-nameEl.innerText=
-"Error loading product";
-
-}
-
-}
-
 
 
 /* Reviews */
@@ -390,9 +340,7 @@ async function loadReviews(){
 
 reviewsDiv.innerHTML="";
 
-const q=
-
-query(
+const q=query(
 
 collection(
 db,
@@ -413,7 +361,7 @@ await getDocs(q);
 if(snapshot.empty){
 
 reviewsDiv.innerHTML=
-"<p>No reviews yet</p>";
+"No reviews";
 
 return;
 
@@ -421,15 +369,20 @@ return;
 
 snapshot.forEach((item)=>{
 
-const data=item.data();
+const data=
+item.data();
 
-reviewsDiv.innerHTML +=`
+reviewsDiv.innerHTML+=`
 
 <div class="review">
 
-<div>${data.rating}</div>
+<div>
+${data.rating}
+</div>
 
-<p>${data.comment}</p>
+<p>
+${data.comment}
+</p>
 
 </div>
 
@@ -440,41 +393,43 @@ reviewsDiv.innerHTML +=`
 }
 
 
-
-/* Related products */
+/* Related */
 
 async function loadRelated(){
 
 relatedDiv.innerHTML="";
 
-const querySnapshot=
-
+const snapshot=
 await getDocs(
-
 collection(
 db,
 "Products"
 )
-
 );
 
-querySnapshot.forEach((item)=>{
+snapshot.forEach((item)=>{
 
-const data=item.data();
+const data=
+item.data();
 
 if(item.id!==id){
 
-relatedDiv.innerHTML +=`
+relatedDiv.innerHTML+=`
 
 <div
 class="related-card"
+
 onclick="window.location='product-details.html?id=${item.id}'">
 
 <img src="${data.Image}">
 
-<h4>${data.name}</h4>
+<h4>
+${data.name}
+</h4>
 
-<p>₹${data.price}</p>
+<p>
+₹${data.price}
+</p>
 
 </div>
 
@@ -485,32 +440,14 @@ onclick="window.location='product-details.html?id=${item.id}'">
 });
 
 }
-
 
 
 /* Add cart */
 
 cartBtn.onclick=async()=>{
 
-if(!currentUser){
 
-window.location=
-"login.html";
-
-return;
-
-}
-
-await addDoc(
-
-collection(
-db,
-"Cart"
-),
-
-{
-
-uid:currentUser.uid,
+const item={
 
 productId:id,
 
@@ -522,6 +459,27 @@ image:currentProduct.Image,
 
 quantity:quantity
 
+};
+
+
+/* login user */
+
+if(currentUser){
+
+await addDoc(
+
+collection(
+db,
+"Cart"
+),
+
+{
+
+uid:
+currentUser.uid,
+
+...item
+
 }
 
 );
@@ -530,28 +488,48 @@ alert(
 "Added to Cart"
 );
 
-};
-
-
-
-/* Buy */
-
-buyBtn.onclick=()=>{
-
-if(!currentUser){
-
-window.location=
-"login.html";
-
 return;
 
 }
 
+
+/* guest user */
+
+let localCart=
+
+JSON.parse(
+
+localStorage.getItem(
+"guestCart"
+)
+
+)||[];
+
+
+localCart.push(item);
+
+localStorage.setItem(
+
+"guestCart",
+
+JSON.stringify(
+localCart
+)
+
+);
+
+alert(
+"Added to cart"
+);
+
+};
+
+
+
+buyBtn.onclick=()=>{
+
 window.location=
-"checkout.html?id="+
-id+
-"&qty="+
-quantity;
+"cart.html";
 
 };
 
