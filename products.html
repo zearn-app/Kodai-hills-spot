@@ -229,28 +229,39 @@ placeholder="🔍 Search products">
 
 <!-- Amount filter -->
 
-<select
-class="filter"
-id="priceFilter">
+<!-- Custom Filter -->
 
-<option value="">
-Sort Products
-</option>
+<div class="filter-scroll">
 
-<option value="low">
-Price : Low → High
-</option>
+<div class="filter-btn active-filter"
+onclick="setFilter('')">
 
-<option value="high">
-Price : High → Low
-</option>
+All
 
-<option value="buy">
-Most Buyed
-</option>
+</div>
 
-</select>
+<div class="filter-btn"
+onclick="setFilter('low')">
 
+⬆️ Low → High
+
+</div>
+
+<div class="filter-btn"
+onclick="setFilter('high')">
+
+⬇️ High → Low
+
+</div>
+
+<div class="filter-btn"
+onclick="setFilter('buy')">
+
+🔥 Most Buyed
+
+</div>
+
+</div>
 
 <!-- Products -->
 
