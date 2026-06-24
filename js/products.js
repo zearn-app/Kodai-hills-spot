@@ -2,12 +2,9 @@ import { db }
 from "./firebase.js";
 
 import {
-
 collection,
 getDocs
-
 }
-
 from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
 
@@ -21,30 +18,39 @@ document.getElementById(
 "searchInput"
 );
 
-const categoryFilter=
+const priceFilter=
 document.getElementById(
-"categoryFilter"
+"priceFilter"
+);
+
+const categoryCards=
+document.querySelectorAll(
+".category-card"
 );
 
 let allProducts=[];
 
+let selectedCategory="";
+
+
+/* Load products */
 
 async function loadProducts(){
 
+try{
+
+productsDiv.innerHTML=
+"Loading...";
+
 const querySnapshot=
-
 await getDocs(
-
 collection(
 db,
 "Products"
 )
-
 );
 
-
 allProducts=[];
-
 
 querySnapshot.forEach((doc)=>{
 
@@ -57,13 +63,24 @@ id:doc.id,
 
 });
 
-
 showProducts(
 allProducts
 );
 
 }
+catch(error){
 
+console.log(error);
+
+productsDiv.innerHTML=
+"<h3>Error loading products</h3>";
+
+}
+
+}
+
+
+/* Show products */
 
 function showProducts(products){
 
@@ -104,8 +121,7 @@ ${product.name}
 
 </div>
 
-<button
-class="btn">
+<button class="btn">
 
 View Details
 
@@ -120,41 +136,91 @@ View Details
 }
 
 
+/* Filter products */
+
 function filterProducts(){
 
-const search=
+let filtered=
+[...allProducts];
 
+
+const search=
 searchInput.value
 .toLowerCase();
 
-const category=
 
-categoryFilter.value;
-
-
-const filtered=
-
-allProducts.filter((item)=>{
-
-const matchesSearch=
+filtered=
+filtered.filter(item=>
 
 item.name
 .toLowerCase()
-.includes(search);
+.includes(search)
+
+);
 
 
-const matchesCategory=
+if(selectedCategory!==""){
 
-category==="" ||
+filtered=
+filtered.filter(item=>
 
-item.category===category;
+item.category
+.toLowerCase()===
+selectedCategory
+.toLowerCase()
+
+);
+
+}
 
 
-return matchesSearch
-&&
-matchesCategory;
+/* Price sorting */
 
-});
+if(priceFilter.value==="low"){
+
+filtered.sort(
+
+(a,b)=>
+
+Number(a.price)
+-
+Number(b.price)
+
+);
+
+}
+
+else if(
+priceFilter.value==="high"
+){
+
+filtered.sort(
+
+(a,b)=>
+
+Number(b.price)
+-
+Number(a.price)
+
+);
+
+}
+
+else if(
+priceFilter.value==="buy"
+){
+
+filtered.sort(
+
+(a,b)=>
+
+(b.buyCount||0)
+-
+(a.buyCount||0)
+
+);
+
+}
 
 
 showProducts(
@@ -164,15 +230,44 @@ filtered
 }
 
 
-searchInput.addEventListener(
+/* Search */
+
+searchInput
+.addEventListener(
 "input",
 filterProducts
 );
 
-categoryFilter.addEventListener(
+
+/* Price filter */
+
+priceFilter
+.addEventListener(
 "change",
 filterProducts
 );
+
+
+/* Category click */
+
+categoryCards
+.forEach(card=>{
+
+card.onclick=()=>{
+
+selectedCategory=
+card.innerText
+.replace("🍫","")
+.replace("🥑","")
+.replace("🥔","")
+.replace("🌿","")
+.trim();
+
+filterProducts();
+
+};
+
+});
 
 
 loadProducts();
