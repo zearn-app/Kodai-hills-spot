@@ -17,7 +17,6 @@ onAuthStateChanged
 }
 from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
 
-
 const cartItems=
 document.getElementById(
 "cartItems"
@@ -31,14 +30,13 @@ document.getElementById(
 let cart=[];
 
 
-/* login */
+/* Auth */
 
 onAuthStateChanged(
 
 auth,
 
 async(user)=>{
-
 
 if(user){
 
@@ -50,9 +48,7 @@ loadCart(
 user.uid
 );
 
-}
-
-else{
+}else{
 
 loadGuestCart();
 
@@ -61,25 +57,20 @@ loadGuestCart();
 });
 
 
-/* move local cart */
+/* Move local cart */
 
 async function moveLocalCart(uid){
 
 let guestCart=
-
 JSON.parse(
-
 localStorage.getItem(
 "guestCart"
 )
-
 )||[];
-
 
 if(
 guestCart.length===0
 )return;
-
 
 for(let item of guestCart){
 
@@ -102,7 +93,6 @@ uid:uid,
 
 }
 
-
 localStorage.removeItem(
 "guestCart"
 );
@@ -110,18 +100,15 @@ localStorage.removeItem(
 }
 
 
-/* guest cart */
+/* Guest cart */
 
 function loadGuestCart(){
 
 cart=
-
 JSON.parse(
-
 localStorage.getItem(
 "guestCart"
 )
-
 )||[];
 
 showCart();
@@ -129,7 +116,7 @@ showCart();
 }
 
 
-/* firebase cart */
+/* Firebase cart */
 
 async function loadCart(uid){
 
@@ -170,14 +157,13 @@ showCart();
 }
 
 
-/* display */
+/* Show cart */
 
 function showCart(){
 
 cartItems.innerHTML="";
 
 let total=0;
-
 
 if(cart.length===0){
 
@@ -191,17 +177,16 @@ return;
 
 }
 
-
 cart.forEach((item)=>{
 
 total+=
 item.price*
 item.quantity;
 
-
 cartItems.innerHTML+=`
 
-<div class="card">
+<div class="card"
+data-id="${item.productId}">
 
 <img src="${item.image}">
 
@@ -224,28 +209,13 @@ ${item.quantity}
 
 </p>
 
-${
-item.docId ?
-
-`<button
+<button
 class="remove"
 onclick="removeItem('${item.docId}')">
 
 Remove
 
-</button>`
-
-:
-
-`<button
-class="remove"
-onclick="removeGuest('${item.productId}')">
-
-Remove
-
-</button>`
-
-}
+</button>
 
 </div>
 
@@ -255,14 +225,13 @@ Remove
 
 });
 
-
 totalDiv.innerText=
 "Total : ₹"+total;
 
 }
 
 
-/* remove firebase */
+/* Remove item */
 
 window.removeItem=
 async(docId)=>{
@@ -278,34 +247,5 @@ docId
 );
 
 location.reload();
-
-};
-
-
-/* remove guest */
-
-window.removeGuest=
-(id)=>{
-
-cart=
-cart.filter(
-
-x=>
-
-x.productId!=id
-
-);
-
-localStorage.setItem(
-
-"guestCart",
-
-JSON.stringify(
-cart
-)
-
-);
-
-showCart();
 
 };
