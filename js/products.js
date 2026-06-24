@@ -1,11 +1,17 @@
-import { db }
+import { db, auth }
 from "./firebase.js";
 
 import {
 collection,
-getDocs
+getDocs,
+addDoc
 }
 from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
+
+import {
+onAuthStateChanged
+}
+from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
 
 
 const productsDiv=
@@ -32,6 +38,23 @@ let allProducts=[];
 
 let selectedCategory="";
 
+let currentUser=null;
+
+
+/* Login state */
+
+onAuthStateChanged(
+
+auth,
+
+(user)=>{
+
+currentUser=user;
+
+}
+
+);
+
 
 /* Load products */
 
@@ -43,11 +66,14 @@ productsDiv.innerHTML=
 "Loading...";
 
 const querySnapshot=
+
 await getDocs(
+
 collection(
 db,
 "Products"
 )
+
 );
 
 allProducts=[];
@@ -68,6 +94,7 @@ allProducts
 );
 
 }
+
 catch(error){
 
 console.log(error);
@@ -101,13 +128,14 @@ products.forEach((product)=>{
 
 productsDiv.innerHTML+=`
 
-<div class="card"
+<div class="card">
+
+<img
+src="${product.Image}"
 
 onclick="window.location='product-details.html?id=${product.id}'"
 
 style="cursor:pointer">
-
-<img src="${product.Image}">
 
 <h3>
 
@@ -121,9 +149,17 @@ ${product.name}
 
 </div>
 
-<button class="btn">
+<button
+class="btn"
 
-View Details
+onclick="addToCart(
+'${product.id}',
+'${product.name}',
+'${product.price}',
+'${product.Image}'
+)">
+
+🛒 Add Cart
 
 </button>
 
@@ -136,6 +172,74 @@ View Details
 }
 
 
+/* Add Cart */
+
+window.addToCart=
+
+async(
+id,
+name,
+price,
+image
+)=>{
+
+event.stopPropagation();
+
+try{
+
+if(!currentUser){
+
+window.location=
+"login.html";
+
+return;
+
+}
+
+await addDoc(
+
+collection(
+db,
+"Cart"
+),
+
+{
+
+uid:currentUser.uid,
+
+productId:id,
+
+name:name,
+
+price:price,
+
+image:image,
+
+quantity:1
+
+}
+
+);
+
+alert(
+"Added to Cart"
+);
+
+}
+
+catch(error){
+
+console.log(error);
+
+alert(
+error.message
+);
+
+}
+
+};
+
+
 /* Filter products */
 
 function filterProducts(){
@@ -145,6 +249,7 @@ let filtered=
 
 
 const search=
+
 searchInput.value
 .toLowerCase();
 
@@ -176,7 +281,9 @@ selectedCategory
 
 /* Price sorting */
 
-if(priceFilter.value==="low"){
+if(
+priceFilter.value==="low"
+){
 
 filtered.sort(
 
@@ -239,7 +346,7 @@ filterProducts
 );
 
 
-/* Price filter */
+/* Price Filter */
 
 priceFilter
 .addEventListener(
@@ -248,7 +355,7 @@ filterProducts
 );
 
 
-/* Category click */
+/* Category Click */
 
 categoryCards
 .forEach(card=>{
@@ -256,6 +363,7 @@ categoryCards
 card.onclick=()=>{
 
 selectedCategory=
+
 card.innerText
 .replace("🍫","")
 .replace("🥑","")
