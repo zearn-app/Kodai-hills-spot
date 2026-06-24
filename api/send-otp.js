@@ -12,7 +12,6 @@ try{
 const {phone}=req.body;
 
 if(!phone){
-
 return res.status(400).json({
 
 success:false,
