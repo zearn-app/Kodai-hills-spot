@@ -126,10 +126,38 @@ async()=>{
 
 try{
 
-const phone=
+let phone=
 
-"+91"+
-phoneInput.value;
+phoneInput.value
+.trim()
+
+.replace(/\s/g,"")
+.replace(/-/g,"");
+
+
+if(phone.startsWith("+91")){
+
+phone=
+phone;
+
+}else{
+
+phone=
+"+91"+phone;
+
+}
+
+
+if(!/^\+91\d{10}$/.test(phone)){
+
+alert(
+"Enter valid 10 digit number"
+);
+
+return;
+
+}
+
 
 confirmationResult=
 
@@ -142,7 +170,7 @@ window.recaptchaVerifier
 );
 
 verifyStatus.innerHTML=
-"OTP sent";
+"OTP Sent Successfully";
 
 }
 catch(error){
@@ -155,7 +183,6 @@ error.message;
 }
 
 };
-
 
 /* Verify OTP */
 
