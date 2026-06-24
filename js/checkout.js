@@ -124,61 +124,36 @@ size:"normal"
 sendOtpBtn.onclick=
 async()=>{
 
-try{
+const response=
+await fetch(
+"/api/send-otp",
+{
+method:"POST",
+headers:{
+"Content-Type":"application/json"
+},
+body:JSON.stringify({
 
-let phone=
-
+phone:
 phoneInput.value
-.trim()
 
-.replace(/\s/g,"")
-.replace(/-/g,"");
-
-
-if(phone.startsWith("+91")){
-
-phone=
-phone;
-
-}else{
-
-phone=
-"+91"+phone;
-
+})
 }
-
-
-if(!/^\+91\d{10}$/.test(phone)){
-
-alert(
-"Enter valid 10 digit number"
 );
 
-return;
+const data=
+await response.json();
 
-}
-
-
-confirmationResult=
-
-await signInWithPhoneNumber(
-
-auth,
-phone,
-window.recaptchaVerifier
-
-);
+if(data.success){
 
 verifyStatus.innerHTML=
-"OTP Sent Successfully";
+"OTP Sent";
 
 }
-catch(error){
-
-console.log(error);
+else{
 
 verifyStatus.innerHTML=
-error.message;
+data.message;
 
 }
 
@@ -189,44 +164,38 @@ error.message;
 verifyOtpBtn.onclick=
 async()=>{
 
-try{
+const response=
+await fetch(
+"/api/verify-otp",
+{
+method:"POST",
+headers:{
+"Content-Type":"application/json"
+},
+body:JSON.stringify({
 
-const result=
+phone:
+phoneInput.value,
 
-await confirmationResult.confirm(
-
+otp:
 otpInput.value
 
-);
-
-await setDoc(
-
-doc(
-db,
-"VerifiedUsers",
-currentUser.uid
-),
-
-{
-
-verified:true
-
+})
 }
-
 );
+
+const data=
+await response.json();
+
+if(data.verified){
 
 isVerified=true;
 
 verifyStatus.innerHTML=
-"Phone Verified Successfully";
-
-document.getElementById(
-"otpSection"
-).style.display=
-"none";
+"Phone Verified";
 
 }
-catch(error){
+else{
 
 verifyStatus.innerHTML=
 "Wrong OTP";
@@ -234,8 +203,6 @@ verifyStatus.innerHTML=
 }
 
 };
-
-
 /* Place Order */
 
 document.getElementById(
