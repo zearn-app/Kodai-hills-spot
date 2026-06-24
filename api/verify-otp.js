@@ -2,14 +2,22 @@ import twilio from "twilio";
 
 const client=twilio(
 process.env.TWILIO_SID,
-process.env.TWILIO_AUTH
+process.env.TWILIO_AUTH_TOKEN
 );
 
 export default async function handler(req,res){
 
-const {phone,otp}=req.body;
-
 try{
+
+let {phone,otp}=req.body;
+
+phone=phone.trim();
+
+if(!phone.startsWith("+91")){
+
+phone="+91"+phone;
+
+}
 
 const result=
 await client.verify.v2
@@ -18,20 +26,27 @@ process.env.VERIFY_SERVICE
 )
 .verificationChecks
 .create({
-to:"+91"+phone,
+
+to:phone,
 code:otp
+
 });
 
-res.json({
+return res.status(200).json({
+
 verified:
 result.status==="approved"
+
 });
 
 }
 catch(error){
 
-res.json({
-verified:false
+return res.status(500).json({
+
+verified:false,
+message:error.message
+
 });
 
 }
