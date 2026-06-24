@@ -1,3 +1,246 @@
+import { db, auth }
+from "./firebase.js";
+
+import {
+doc,
+getDoc,
+setDoc
+}
+from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
+
+import {
+RecaptchaVerifier,
+signInWithPhoneNumber,
+onAuthStateChanged
+}
+from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
+
+
+const phoneInput=
+document.getElementById(
+"phone"
+);
+
+const sendOtpBtn=
+document.getElementById(
+"sendOtpBtn"
+);
+
+const verifyOtpBtn=
+document.getElementById(
+"verifyOtpBtn"
+);
+
+const otpInput=
+document.getElementById(
+"otp"
+);
+
+const verifyStatus=
+document.getElementById(
+"verifyStatus"
+);
+
+let confirmationResult;
+
+let isVerified=false;
+
+let currentUser=null;
+
+
+/* Auth user */
+
+onAuthStateChanged(
+
+auth,
+
+async(user)=>{
+
+currentUser=user;
+
+if(!user){
+
+window.location=
+"login.html";
+
+return;
+}
+
+checkVerification();
+
+});
+
+
+/* Check first order verification */
+
+async function checkVerification(){
+
+const verifyRef=
+doc(
+db,
+"VerifiedUsers",
+currentUser.uid
+);
+
+const snap=
+await getDoc(
+verifyRef
+);
+
+if(
+snap.exists()
+){
+
+isVerified=true;
+
+document.getElementById(
+"otpSection"
+).style.display=
+"none";
+
+}
+
+}
+
+
+/* Recaptcha */
+
+window.recaptchaVerifier=
+new RecaptchaVerifier(
+
+auth,
+
+"recaptcha-container",
+
+{
+size:"normal"
+}
+
+);
+
+
+/* Send OTP */
+
+sendOtpBtn.onclick=
+async()=>{
+
+try{
+
+const phone=
+
+"+91"+
+phoneInput.value;
+
+confirmationResult=
+
+await signInWithPhoneNumber(
+
+auth,
+phone,
+window.recaptchaVerifier
+
+);
+
+verifyStatus.innerHTML=
+"OTP sent";
+
+}
+catch(error){
+
+console.log(error);
+
+verifyStatus.innerHTML=
+error.message;
+
+}
+
+};
+
+
+/* Verify OTP */
+
+verifyOtpBtn.onclick=
+async()=>{
+
+try{
+
+const result=
+
+await confirmationResult.confirm(
+
+otpInput.value
+
+);
+
+await setDoc(
+
+doc(
+db,
+"VerifiedUsers",
+currentUser.uid
+),
+
+{
+
+verified:true
+
+}
+
+);
+
+isVerified=true;
+
+verifyStatus.innerHTML=
+"Phone Verified Successfully";
+
+document.getElementById(
+"otpSection"
+).style.display=
+"none";
+
+}
+catch(error){
+
+verifyStatus.innerHTML=
+"Wrong OTP";
+
+}
+
+};
+
+
+/* Place Order */
+
+document.getElementById(
+"placeOrder"
+)
+
+.addEventListener(
+
+"click",
+
+()=>{
+
+if(!isVerified){
+
+alert(
+"Please verify phone number first"
+);
+
+return;
+
+}
+
+alert(
+"Order placed successfully"
+);
+
+}
+
+);
+
+
+
 const stateSelect=
 document.getElementById(
 "state"
