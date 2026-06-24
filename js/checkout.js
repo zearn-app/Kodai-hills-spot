@@ -121,8 +121,14 @@ size:"normal"
 
 /* Send OTP */
 
+
 sendOtpBtn.onclick=
 async()=>{
+
+try{
+
+verifyStatus.innerHTML=
+"Sending...";
 
 const response=
 await fetch(
@@ -133,10 +139,7 @@ headers:{
 "Content-Type":"application/json"
 },
 body:JSON.stringify({
-
-phone:
-phoneInput.value
-
+phone:phoneInput.value
 })
 }
 );
@@ -144,16 +147,28 @@ phoneInput.value
 const data=
 await response.json();
 
+console.log(data);
+
 if(data.success){
 
 verifyStatus.innerHTML=
-"OTP Sent";
+"OTP Sent Successfully";
 
 }
 else{
 
 verifyStatus.innerHTML=
 data.message;
+
+}
+
+}
+catch(error){
+
+console.log(error);
+
+verifyStatus.innerHTML=
+"Failed";
 
 }
 
