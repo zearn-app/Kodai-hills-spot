@@ -1,338 +1,259 @@
-import { db, auth } from "./firebase.js";
-
-import{
-doc,
-getDoc,
-setDoc,
-collection,
-addDoc
-}
-from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
-
-import{
-onAuthStateChanged
-}
-from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
-
-
-const params=new URLSearchParams(
-window.location.search
+const stateSelect=
+document.getElementById(
+"state"
 );
 
-const productId=params.get("id");
-
-const qty=parseInt(
-params.get("qty")
-)||1;
-
-let currentUser=null;
-let currentProduct=null;
-let savedAddress=null;
+const districtSelect=
+document.getElementById(
+"district"
+);
 
 
-onAuthStateChanged(
+const statesAndDistricts={
 
-auth,
+"Andhra Pradesh":[
+"Anantapur",
+"Chittoor",
+"Guntur",
+"Kadapa",
+"Krishna",
+"Kurnool",
+"Nellore",
+"Prakasam",
+"Srikakulam",
+"Visakhapatnam",
+"Vizianagaram"
+],
 
-async(user)=>{
+"Arunachal Pradesh":[
+"Itanagar",
+"Tawang",
+"West Siang"
+],
 
-if(!user){
+"Assam":[
+"Guwahati",
+"Dibrugarh",
+"Silchar",
+"Nagaon"
+],
 
-window.location="login.html";
+"Bihar":[
+"Patna",
+"Gaya",
+"Muzaffarpur",
+"Bhagalpur"
+],
 
-return;
+"Chhattisgarh":[
+"Raipur",
+"Bilaspur",
+"Durg"
+],
 
-}
+"Goa":[
+"North Goa",
+"South Goa"
+],
 
-currentUser=user;
+"Gujarat":[
+"Ahmedabad",
+"Surat",
+"Rajkot",
+"Vadodara"
+],
 
-await loadSavedAddress();
+"Haryana":[
+"Gurgaon",
+"Faridabad",
+"Panipat"
+],
 
-loadProduct();
+"Himachal Pradesh":[
+"Shimla",
+"Kullu",
+"Manali"
+],
+
+"Jharkhand":[
+"Ranchi",
+"Jamshedpur",
+"Dhanbad"
+],
+
+"Karnataka":[
+"Bangalore",
+"Mysore",
+"Mangalore",
+"Hubli"
+],
+
+"Kerala":[
+"Thiruvananthapuram",
+"Kochi",
+"Kozhikode",
+"Kollam"
+],
+
+"Madhya Pradesh":[
+"Bhopal",
+"Indore",
+"Gwalior"
+],
+
+"Maharashtra":[
+"Mumbai",
+"Pune",
+"Nagpur",
+"Nashik"
+],
+
+"Manipur":[
+"Imphal"
+],
+
+"Meghalaya":[
+"Shillong"
+],
+
+"Mizoram":[
+"Aizawl"
+],
+
+"Nagaland":[
+"Kohima"
+],
+
+"Odisha":[
+"Bhubaneswar",
+"Cuttack",
+"Puri"
+],
+
+"Punjab":[
+"Amritsar",
+"Ludhiana",
+"Jalandhar"
+],
+
+"Rajasthan":[
+"Jaipur",
+"Jodhpur",
+"Udaipur"
+],
+
+"Sikkim":[
+"Gangtok"
+],
+
+"Tamil Nadu":[
+"Chennai",
+"Coimbatore",
+"Madurai",
+"Tirunelveli",
+"Salem",
+"Tiruppur",
+"Erode",
+"Trichy",
+"Kanyakumari",
+"Dindigul",
+"Thanjavur"
+],
+
+"Telangana":[
+"Hyderabad",
+"Warangal",
+"Karimnagar"
+],
+
+"Tripura":[
+"Agartala"
+],
+
+"Uttar Pradesh":[
+"Lucknow",
+"Kanpur",
+"Agra",
+"Varanasi"
+],
+
+"Uttarakhand":[
+"Dehradun",
+"Haridwar"
+],
+
+"West Bengal":[
+"Kolkata",
+"Howrah",
+"Darjeeling"
+]
+
+};
+
+
+/* Load States */
+
+Object.keys(
+statesAndDistricts
+)
+
+.forEach(state=>{
+
+stateSelect.innerHTML+=`
+
+<option>
+
+${state}
+
+</option>
+
+`;
 
 });
 
 
-async function loadSavedAddress(){
+/* Load Districts */
 
-const snapshot=
-await getDoc(
+stateSelect.addEventListener(
 
-doc(
-db,
-"Users",
-currentUser.uid
-)
+"change",
 
-);
+()=>{
 
-if(snapshot.exists()){
+districtSelect.innerHTML=`
 
-const data=
-snapshot.data();
+<option value="">
 
-if(data.address){
+Select District
 
-savedAddress=
-data.address;
+</option>
 
-document.getElementById(
-"savedAddress"
-).classList.remove(
-"hidden"
-);
+`;
 
-document.getElementById(
-"addressForm"
-).classList.add(
-"hidden"
-);
+const districts=
 
-document.getElementById(
-"addressText"
-).innerHTML=`
+statesAndDistricts[
+stateSelect.value
+];
 
-<b>${savedAddress.name}</b><br>
+districts.forEach(
 
-${savedAddress.phone}<br>
+district=>{
 
-${savedAddress.area},
-${savedAddress.street}<br>
+districtSelect.innerHTML+=`
 
-${savedAddress.district},
-${savedAddress.state}
--${savedAddress.pincode}
+<option>
+
+${district}
+
+</option>
 
 `;
 
 }
 
-}
-
-}
-
-
-async function loadProduct(){
-
-const snapshot=
-await getDoc(
-doc(
-db,
-"Products",
-productId
-)
-);
-
-currentProduct=
-snapshot.data();
-
-document.getElementById(
-"productImage"
-).src=
-currentProduct.Image;
-
-document.getElementById(
-"productName"
-).innerText=
-currentProduct.name;
-
-document.getElementById(
-"productPrice"
-).innerText=
-"₹"+
-currentProduct.price;
-
-document.getElementById(
-"productQty"
-).innerText=
-"Qty : "+qty;
-
-const subtotal=
-Number(
-currentProduct.price
-)*qty;
-
-const total=
-subtotal+40;
-
-document.getElementById(
-"subtotal"
-).innerText=
-"₹"+subtotal;
-
-document.getElementById(
-"total"
-).innerText=
-"₹"+total;
-
-}
-
-
-
-document.getElementById(
-"placeOrder"
-)
-
-.onclick=
-
-async()=>{
-
-
-if(!savedAddress){
-
-savedAddress={
-
-name:
-document.getElementById(
-"name"
-).value,
-
-phone:
-document.getElementById(
-"phone"
-).value,
-
-state:
-document.getElementById(
-"state"
-).value,
-
-district:
-document.getElementById(
-"district"
-).value,
-
-area:
-document.getElementById(
-"area"
-).value,
-
-street:
-document.getElementById(
-"street"
-).value,
-
-pincode:
-document.getElementById(
-"pincode"
-).value
-
-};
-
-
-if(
-
-Object.values(
-savedAddress
-).includes("")
-
-){
-
-alert(
-"Fill all address fields"
-);
-
-return;
-
-}
-
-
-await setDoc(
-
-doc(
-db,
-"Users",
-currentUser.uid
-),
-
-{
-
-address:
-savedAddress
-
-},
-
-{
-
-merge:true
-
-}
-
 );
 
 }
 
-
-const payment=
-document.getElementById(
-"payment"
-).value;
-
-const subtotal=
-Number(
-currentProduct.price
-)*qty;
-
-const total=
-subtotal+40;
-
-
-await addDoc(
-
-collection(
-db,
-"Orders"
-),
-
-{
-
-uid:
-currentUser.uid,
-
-name:
-currentProduct.name,
-
-price:
-currentProduct.price,
-
-image:
-currentProduct.Image,
-
-quantity:
-qty,
-
-customerName:
-savedAddress.name,
-
-phone:
-savedAddress.phone,
-
-address:
-savedAddress,
-
-payment:
-payment,
-
-total:
-total,
-
-status:
-"Pending",
-
-orderDate:
-new Date()
-.toISOString()
-
-}
-
 );
-
-
-alert(
-"Order placed successfully"
-);
-
-window.location=
-"orders.html";
-
-};
