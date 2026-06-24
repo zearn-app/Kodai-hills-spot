@@ -24,14 +24,14 @@ document.getElementById(
 "searchInput"
 );
 
-const priceFilter=
-document.getElementById(
-"priceFilter"
-);
-
 const categoryCards=
 document.querySelectorAll(
 ".category-card"
+);
+
+const filterBtns=
+document.querySelectorAll(
+".filter-btn"
 );
 
 let allProducts=[];
@@ -39,6 +39,8 @@ let allProducts=[];
 let selectedCategory="";
 
 let currentUser=null;
+
+let priceFilterValue="";
 
 
 /* Login state */
@@ -56,7 +58,7 @@ currentUser=user;
 );
 
 
-/* Load products */
+/* Load Products */
 
 async function loadProducts(){
 
@@ -107,12 +109,11 @@ productsDiv.innerHTML=
 }
 
 
-/* Show products */
+/* Show Products */
 
 function showProducts(products){
 
 productsDiv.innerHTML="";
-
 
 if(products.length===0){
 
@@ -122,7 +123,6 @@ productsDiv.innerHTML=
 return;
 
 }
-
 
 products.forEach((product)=>{
 
@@ -153,6 +153,7 @@ ${product.name}
 class="btn"
 
 onclick="addToCart(
+event,
 '${product.id}',
 '${product.name}',
 '${product.price}',
@@ -177,6 +178,7 @@ onclick="addToCart(
 window.addToCart=
 
 async(
+event,
 id,
 name,
 price,
@@ -240,13 +242,12 @@ error.message
 };
 
 
-/* Filter products */
+/* Filter Products */
 
 function filterProducts(){
 
 let filtered=
 [...allProducts];
-
 
 const search=
 
@@ -264,6 +265,8 @@ item.name
 );
 
 
+/* Category filter */
+
 if(selectedCategory!==""){
 
 filtered=
@@ -271,6 +274,7 @@ filtered.filter(item=>
 
 item.category
 .toLowerCase()===
+
 selectedCategory
 .toLowerCase()
 
@@ -279,10 +283,10 @@ selectedCategory
 }
 
 
-/* Price sorting */
+/* Price filter */
 
 if(
-priceFilter.value==="low"
+priceFilterValue==="low"
 ){
 
 filtered.sort(
@@ -298,7 +302,7 @@ Number(b.price)
 }
 
 else if(
-priceFilter.value==="high"
+priceFilterValue==="high"
 ){
 
 filtered.sort(
@@ -314,7 +318,7 @@ Number(a.price)
 }
 
 else if(
-priceFilter.value==="buy"
+priceFilterValue==="buy"
 ){
 
 filtered.sort(
@@ -346,15 +350,6 @@ filterProducts
 );
 
 
-/* Price Filter */
-
-priceFilter
-.addEventListener(
-"change",
-filterProducts
-);
-
-
 /* Category Click */
 
 categoryCards
@@ -370,6 +365,37 @@ card.innerText
 .replace("🥔","")
 .replace("🌿","")
 .trim();
+
+filterProducts();
+
+};
+
+});
+
+
+/* Custom Filter Click */
+
+filterBtns
+.forEach(btn=>{
+
+btn.onclick=()=>{
+
+filterBtns
+.forEach(item=>{
+
+item.classList.remove(
+"active-filter"
+);
+
+});
+
+btn.classList.add(
+"active-filter"
+);
+
+priceFilterValue=
+
+btn.dataset.value;
 
 filterProducts();
 
