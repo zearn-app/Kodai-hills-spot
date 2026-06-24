@@ -292,7 +292,7 @@ Total : ₹0
 
 <button
 class="checkout"
-onclick="window.location='checkout.html'">
+id="checkoutBtn">
 
 Proceed To Checkout
 
@@ -337,5 +337,35 @@ Profile
 
 <script type="module" src="js/cart.js"></script>
 
+
+<script type="module">
+
+import {auth}
+from "./js/firebase.js";
+
+document
+.getElementById(
+"checkoutBtn"
+)
+
+.onclick=()=>{
+
+if(auth.currentUser){
+
+window.location=
+"checkout.html";
+
+}
+
+else{
+
+window.location=
+"login.html";
+
+}
+
+};
+
+</script>
 </body>
 </html>
