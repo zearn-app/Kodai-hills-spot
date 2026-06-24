@@ -7,7 +7,8 @@ query,
 where,
 getDocs,
 deleteDoc,
-doc
+doc,
+addDoc
 }
 from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
@@ -30,22 +31,20 @@ document.getElementById(
 let cart=[];
 
 
-/* Check login */
+/* login */
 
 onAuthStateChanged(
 
 auth,
 
-(user)=>{
+async(user)=>{
 
-if(!user){
 
-window.location=
-"login.html";
+if(user){
 
-return;
-
-}
+await moveLocalCart(
+user.uid
+);
 
 loadCart(
 user.uid
@@ -53,21 +52,88 @@ user.uid
 
 }
 
+else{
+
+loadGuestCart();
+
+}
+
+});
+
+
+/* move local cart */
+
+async function moveLocalCart(uid){
+
+let guestCart=
+
+JSON.parse(
+
+localStorage.getItem(
+"guestCart"
+)
+
+)||[];
+
+
+if(
+guestCart.length===0
+)return;
+
+
+for(let item of guestCart){
+
+await addDoc(
+
+collection(
+db,
+"Cart"
+),
+
+{
+
+uid:uid,
+
+...item
+
+}
+
 );
 
+}
 
-/* Load Cart */
+
+localStorage.removeItem(
+"guestCart"
+);
+
+}
+
+
+/* guest cart */
+
+function loadGuestCart(){
+
+cart=
+
+JSON.parse(
+
+localStorage.getItem(
+"guestCart"
+)
+
+)||[];
+
+showCart();
+
+}
+
+
+/* firebase cart */
 
 async function loadCart(uid){
 
-try{
-
-cartItems.innerHTML=
-"Loading...";
-
-const q=
-
-query(
+const q=query(
 
 collection(
 db,
@@ -83,7 +149,6 @@ uid
 );
 
 const snapshot=
-
 await getDocs(q);
 
 cart=[];
@@ -93,30 +158,19 @@ snapshot.forEach((item)=>{
 cart.push({
 
 docId:item.id,
+
 ...item.data()
 
 });
 
 });
 
-
 showCart();
 
 }
-catch(error){
-
-console.log(error);
-
-cartItems.innerHTML=
-
-"<h2>Error loading cart</h2>";
-
-}
-
-}
 
 
-/* Show cart */
+/* display */
 
 function showCart(){
 
@@ -127,18 +181,10 @@ let total=0;
 
 if(cart.length===0){
 
-cartItems.innerHTML=`
-
-<h2>
-
-Cart Empty
-
-</h2>
-
-`;
+cartItems.innerHTML=
+"<h2>Cart Empty</h2>";
 
 totalDiv.innerText=
-
 "Total : ₹0";
 
 return;
@@ -146,30 +192,23 @@ return;
 }
 
 
-cart.forEach((item,index)=>{
+cart.forEach((item)=>{
 
-total +=
-
-Number(item.price)*
-Number(item.quantity);
+total+=
+item.price*
+item.quantity;
 
 
 cartItems.innerHTML+=`
 
-<div class="card"
-
-onclick="window.location='product-details.html?id=${item.productId}'"
-
-style="cursor:pointer">
+<div class="card">
 
 <img src="${item.image}">
 
 <div class="details">
 
 <h3>
-
 ${item.name}
-
 </h3>
 
 <div class="price">
@@ -180,20 +219,33 @@ ${item.name}
 
 <p>
 
-Quantity :
+Quantity:
 ${item.quantity}
 
 </p>
 
-<button
-class="remove"
+${
+item.docId ?
 
-onclick="event.stopPropagation();
-removeItem('${item.docId}')">
+`<button
+class="remove"
+onclick="removeItem('${item.docId}')">
 
 Remove
 
-</button>
+</button>`
+
+:
+
+`<button
+class="remove"
+onclick="removeGuest('${item.productId}')">
+
+Remove
+
+</button>`
+
+}
 
 </div>
 
@@ -205,19 +257,15 @@ Remove
 
 
 totalDiv.innerText=
-
 "Total : ₹"+total;
 
 }
 
 
-/* Remove */
+/* remove firebase */
 
 window.removeItem=
-
 async(docId)=>{
-
-try{
 
 await deleteDoc(
 
@@ -229,25 +277,35 @@ docId
 
 );
 
-cart=
+location.reload();
 
+};
+
+
+/* remove guest */
+
+window.removeGuest=
+(id)=>{
+
+cart=
 cart.filter(
 
-item=>
+x=>
 
-item.docId!==docId
+x.productId!=id
+
+);
+
+localStorage.setItem(
+
+"guestCart",
+
+JSON.stringify(
+cart
+)
 
 );
 
 showCart();
-
-}
-catch(error){
-
-alert(
-error.message
-);
-
-}
 
 };
