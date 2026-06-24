@@ -1,16 +1,25 @@
 import twilio from "twilio";
 
-const client=twilio(
+const client = twilio(
 process.env.TWILIO_SID,
 process.env.TWILIO_AUTH
 );
 
 export default async function handler(req,res){
 
-const {phone}=req.body;
-
 try{
 
+const {phone}=req.body;
+
+if(!phone){
+
+return res.status(400).json({
+success:false,
+message:"Phone missing"
+});
+}
+
+const result=
 await client.verify.v2
 .services(
 process.env.VERIFY_SERVICE
@@ -21,14 +30,17 @@ to:"+91"+phone,
 channel:"sms"
 });
 
-res.json({
-success:true
+return res.status(200).json({
+success:true,
+sid:result.sid
 });
 
 }
 catch(error){
 
-res.json({
+console.log(error);
+
+return res.status(500).json({
 success:false,
 message:error.message
 });
