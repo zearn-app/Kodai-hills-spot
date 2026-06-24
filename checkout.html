@@ -4,7 +4,8 @@
 <head>
 
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport"
+content="width=device-width,initial-scale=1">
 
 <title>Kodai Hills Spot - Checkout</title>
 
@@ -86,20 +87,14 @@ font-weight:bold;
 margin-top:5px;
 }
 
-input,select{
+input,
+select{
 width:100%;
 padding:14px;
 border:1px solid #ddd;
 border-radius:12px;
 margin-top:10px;
 outline:none;
-}
-
-.payment-box{
-background:#f5f5f5;
-padding:15px;
-border-radius:15px;
-margin-top:10px;
 }
 
 .row{
@@ -133,6 +128,7 @@ background:#2e7d32;
 color:white;
 font-size:18px;
 font-weight:bold;
+cursor:pointer;
 }
 
 .addressCard{
@@ -154,6 +150,18 @@ background:#2e7d32;
 color:white;
 border:none;
 border-radius:10px;
+cursor:pointer;
+}
+
+.old-price{
+text-decoration:line-through;
+color:red;
+margin-right:6px;
+}
+
+.free{
+color:#2e7d32;
+font-weight:bold;
 }
 
 </style>
@@ -164,7 +172,8 @@ border-radius:10px;
 
 <div class="header">
 
-<img src="assets/logo.png" class="logo">
+<img src="logo.png"
+class="logo">
 
 <div class="title">
 Kodai Hills Spot
@@ -205,7 +214,6 @@ placeholder="Full Name">
 id="phone"
 placeholder="Phone Number">
 
-
 <select id="state">
 
 <option value="">
@@ -213,7 +221,6 @@ Select State
 </option>
 
 </select>
-
 
 <select id="district">
 
@@ -223,51 +230,17 @@ Select District
 
 </select>
 
-
 <input
 id="area"
 placeholder="Area">
-
 
 <input
 id="street"
 placeholder="Street">
 
-
 <input
 id="pincode"
 placeholder="Pincode">
-<input
-id="phone"
-placeholder="Phone Number">
-
-<div id="recaptcha-container"></div>
-
-<div id="otpSection">
-
-<button
-id="sendOtpBtn"
-type="button">
-
-Send Verification Code
-
-</button>
-
-<input
-id="otp"
-placeholder="Enter OTP">
-
-<button
-id="verifyOtpBtn"
-type="button">
-
-Verify OTP
-
-</button>
-
-<p id="verifyStatus"></p>
-
-</div>
 
 </div>
 
@@ -293,11 +266,15 @@ Loading...
 <div
 class="price"
 id="productPrice">
+
 ₹0
+
 </div>
 
 <p id="productQty">
+
 Qty : 1
+
 </p>
 
 </div>
@@ -307,41 +284,6 @@ Qty : 1
 </div>
 
 
-
-<div class="section">
-
-<div class="heading">
-💳 Payment Method
-</div>
-
-<div class="payment-box">
-
-<select id="payment">
-
-<option>
-Cash On Delivery
-</option>
-
-<option>
-UPI
-</option>
-
-<option>
-Debit Card
-</option>
-
-<option>
-Credit Card
-</option>
-
-</select>
-
-</div>
-
-</div>
-
-
-
 <div class="section">
 
 <div class="heading">
@@ -349,20 +291,51 @@ Credit Card
 </div>
 
 <div class="row">
+
 <span>Subtotal</span>
-<span id="subtotal">₹0</span>
+
+<span id="subtotal">
+
+₹0
+
+</span>
+
 </div>
 
 <div class="row">
+
 <span>Delivery</span>
-<span>₹40</span>
+
+<span>
+
+<span class="old-price">
+
+₹50
+
+</span>
+
+<span class="free">
+
+FREE
+
+</span>
+
+</span>
+
 </div>
 
 <hr style="margin:10px 0">
 
 <div class="row total">
+
 <span>Total</span>
-<span id="total">₹0</span>
+
+<span id="total">
+
+₹0
+
+</span>
+
 </div>
 
 </div>
@@ -387,13 +360,15 @@ function changeAddress(){
 
 document.getElementById(
 "savedAddress"
-).classList.add(
+)
+.classList.add(
 "hidden"
 );
 
 document.getElementById(
 "addressForm"
-).classList.remove(
+)
+.classList.remove(
 "hidden"
 );
 
@@ -401,7 +376,8 @@ document.getElementById(
 
 </script>
 
-<script type="module" src="js/checkout.js"></script>
+<script type="module"
+src="js/checkout.js"></script>
 
 </body>
 </html>
