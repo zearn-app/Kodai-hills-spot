@@ -230,17 +230,28 @@ import {
 collection,
 query,
 where,
-getDocs
+getDocs,
+deleteDoc,
+doc
 }
 from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
+const cartItems=
+document.getElementById(
+"cartItems"
+);
+
 let firstProductId="";
+
 
 async function loadCart(){
 
 const user=auth.currentUser;
 
 if(!user)return;
+
+cartItems.innerHTML=
+"Loading...";
 
 const q=query(
 collection(db,"Cart"),
@@ -250,11 +261,40 @@ where("uid","==",user.uid)
 const snapshot=
 await getDocs(q);
 
+cartItems.innerHTML="";
+
 let total=0;
 
-snapshot.forEach((doc)=>{
+if(snapshot.empty){
 
-const item=doc.data();
+cartItems.innerHTML=`
+
+<div style="
+text-align:center;
+padding:30px;
+font-size:18px;
+">
+
+🛒 Cart is empty
+
+</div>
+
+`;
+
+document.getElementById(
+"total"
+).innerText=
+"Total : ₹0";
+
+return;
+
+}
+
+
+snapshot.forEach((cartDoc)=>{
+
+const item=
+cartDoc.data();
 
 if(!firstProductId){
 
@@ -262,9 +302,53 @@ firstProductId=
 item.productId;
 }
 
-total+=Number(item.price);
+total+=
+Number(item.price);
+
+cartItems.innerHTML+=`
+
+<div class="card">
+
+<img src="${item.image}">
+
+<div class="details">
+
+<h3>
+
+${item.name}
+
+</h3>
+
+<div class="price">
+
+₹${item.price}
+
+</div>
+
+<p>
+
+Quantity : ${item.quantity||1}
+
+</p>
+
+<button
+class="remove"
+onclick="removeItem(
+'${cartDoc.id}'
+)">
+
+Remove
+
+</button>
+
+</div>
+
+</div>
+
+`;
 
 });
+
 
 document.getElementById(
 "total"
@@ -272,6 +356,36 @@ document.getElementById(
 `Total : ₹${total}`;
 
 }
+
+
+/* Remove Item */
+
+window.removeItem=
+async(id)=>{
+
+try{
+
+await deleteDoc(
+doc(
+db,
+"Cart",
+id
+)
+);
+
+loadCart();
+
+}
+catch(error){
+
+console.log(error);
+
+}
+
+};
+
+
+/* Login check */
 
 auth.onAuthStateChanged(
 
@@ -282,19 +396,23 @@ if(user){
 loadCart();
 
 }
+else{
+
+window.location=
+"login.html";
 
 }
 
-);
+}
 
+
+/* Checkout */
 
 document.getElementById(
 "checkoutBtn"
 )
 
 .onclick=()=>{
-
-if(auth.currentUser){
 
 if(firstProductId){
 
@@ -310,18 +428,10 @@ alert(
 
 }
 
-}
-
-else{
-
-window.location=
-"login.html";
-
-}
-
 };
 
-</script>
+);
 
+</script>
 </body>
 </html>
