@@ -1,15 +1,22 @@
-import { auth } from "./firebase.js";
+import { auth, db }
+from "./firebase.js";
 
 import {
 onAuthStateChanged
 }
 from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
 
+import {
+doc,
+getDoc
+}
+from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
+
 
 let currentUser=null;
 
 
-/* Auth Check */
+/* Auth */
 
 onAuthStateChanged(
 
@@ -21,9 +28,7 @@ currentUser=user;
 
 if(!user){
 
-window.location=
-"login.html";
-
+window.location="login.html";
 return;
 
 }
@@ -35,50 +40,94 @@ loadProduct();
 );
 
 
-/* Load Product */
+/* Product Load */
 
-function loadProduct(){
+async function loadProduct(){
+
+try{
 
 const params=
 new URLSearchParams(
 window.location.search
 );
 
-const name=
-params.get("name")||"Product";
+const productId=
+params.get("id");
 
-const price=
-params.get("price")||0;
-
-const image=
-params.get("image")||"";
-
-const qty=
-params.get("qty")||1;
+if(!productId){
 
 document.getElementById(
 "productName"
-).innerText=name;
+).innerText=
+"No Product";
+
+return;
+
+}
+
+const productRef=
+doc(
+db,
+"Products",
+productId
+);
+
+const productSnap=
+await getDoc(
+productRef
+);
+
+if(!productSnap.exists()){
+
+document.getElementById(
+"productName"
+).innerText=
+"Product Not Found";
+
+return;
+
+}
+
+const product=
+productSnap.data();
+
+document.getElementById(
+"productName"
+).innerText=
+product.name;
 
 document.getElementById(
 "productPrice"
-).innerText=`₹${price}`;
+).innerText=
+`₹${product.price}`;
 
 document.getElementById(
 "productImage"
-).src=image;
+).src=
+product.Image;
 
 document.getElementById(
 "productQty"
-).innerText=`Qty : ${qty}`;
+).innerText=
+"Qty : 1";
 
 document.getElementById(
 "subtotal"
-).innerText=`₹${price}`;
+).innerText=
+`₹${product.price}`;
 
 document.getElementById(
 "total"
-).innerText=`₹${price}`;
+).innerText=
+`₹${product.price}`;
+
+}
+
+catch(error){
+
+console.log(error);
+
+}
 
 }
 
@@ -150,6 +199,7 @@ return;
 
 alert(
 "Order placed successfully"
+
 );
 
 }
@@ -169,28 +219,23 @@ document.getElementById(
 "district"
 );
 
-
 const statesAndDistricts={
 
 "Tamil Nadu":[
 "Chennai",
 "Coimbatore",
 "Madurai",
-"Tirunelveli",
-"Salem",
 "Trichy"
 ],
 
 "Kerala":[
 "Kochi",
-"Kollam",
-"Kozhikode"
+"Kollam"
 ],
 
 "Karnataka":[
 "Bangalore",
-"Mysore",
-"Mangalore"
+"Mysore"
 ]
 
 };
@@ -202,15 +247,8 @@ statesAndDistricts
 
 .forEach(state=>{
 
-stateSelect.innerHTML+=`
-
-<option>
-
-${state}
-
-</option>
-
-`;
+stateSelect.innerHTML+=
+`<option>${state}</option>`;
 
 });
 
@@ -221,35 +259,20 @@ stateSelect.addEventListener(
 
 ()=>{
 
-districtSelect.innerHTML=`
-
-<option>
-
-Select District
-
-</option>
-
-`;
+districtSelect.innerHTML=
+`<option>Select District</option>`;
 
 const districts=
-
 statesAndDistricts[
 stateSelect.value
-];
+]||[];
 
 districts.forEach(
 
 district=>{
 
-districtSelect.innerHTML+=`
-
-<option>
-
-${district}
-
-</option>
-
-`;
+districtSelect.innerHTML+=
+`<option>${district}</option>`;
 
 }
 
