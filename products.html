@@ -24,6 +24,8 @@ padding:15px;
 padding-bottom:90px;
 }
 
+/* Header */
+
 .header{
 display:flex;
 align-items:center;
@@ -44,6 +46,9 @@ font-weight:bold;
 color:#2e7d32;
 }
 
+
+/* Search */
+
 .search{
 width:100%;
 padding:15px;
@@ -53,6 +58,40 @@ margin-bottom:15px;
 box-shadow:0 2px 10px rgba(0,0,0,.1);
 }
 
+
+/* Category scroll */
+
+.category-scroll{
+display:flex;
+overflow:auto;
+gap:12px;
+margin-bottom:15px;
+padding-bottom:5px;
+}
+
+.category-scroll::-webkit-scrollbar{
+display:none;
+}
+
+.category-card{
+min-width:120px;
+padding:12px;
+background:white;
+border-radius:12px;
+text-align:center;
+font-weight:bold;
+box-shadow:0 2px 10px rgba(0,0,0,.1);
+cursor:pointer;
+}
+
+.category-card:hover{
+background:#2e7d32;
+color:white;
+}
+
+
+/* Amount filter */
+
 .filter{
 width:100%;
 padding:15px;
@@ -60,7 +99,11 @@ border:none;
 border-radius:15px;
 margin-bottom:20px;
 box-shadow:0 2px 10px rgba(0,0,0,.1);
+background:white;
 }
+
+
+/* Products */
 
 .products{
 display:grid;
@@ -101,7 +144,11 @@ background:#2e7d32;
 border:none;
 border-radius:10px;
 color:white;
+cursor:pointer;
 }
+
+
+/* Bottom nav */
 
 .bottom-nav{
 position:fixed;
@@ -123,6 +170,7 @@ text-align:center;
 
 .active{
 color:#2e7d32;
+font-weight:bold;
 }
 
 </style>
@@ -131,6 +179,8 @@ color:#2e7d32;
 
 <body>
 
+
+<!-- Header -->
 
 <div class="header">
 
@@ -146,38 +196,63 @@ Products
 </div>
 
 
+<!-- Search -->
+
 <input
 class="search"
 id="searchInput"
 placeholder="🔍 Search products">
 
 
+<!-- Categories like Amazon/Flipkart -->
+
+<div class="category-scroll">
+
+<div class="category-card">
+🍫 Chocolate
+</div>
+
+<div class="category-card">
+🥑 Fruits
+</div>
+
+<div class="category-card">
+🥔 Vegetables
+</div>
+
+<div class="category-card">
+🌿 Organic Products
+</div>
+
+</div>
+
+
+<!-- Amount filter -->
+
 <select
 class="filter"
-id="categoryFilter">
+id="priceFilter">
 
 <option value="">
-All Categories
+Sort Products
 </option>
 
-<option>
-Chocolate
+<option value="low">
+Price : Low → High
 </option>
 
-<option>
-Honey
+<option value="high">
+Price : High → Low
 </option>
 
-<option>
-Herbs
-</option>
-
-<option>
-Oils
+<option value="buy">
+Most Buyed
 </option>
 
 </select>
 
+
+<!-- Products -->
 
 <div
 class="products"
@@ -187,6 +262,8 @@ Loading...
 
 </div>
 
+
+<!-- Bottom Navigation -->
 
 <nav class="bottom-nav">
 
@@ -209,8 +286,6 @@ class="active">
 
 </a>
 
-<!-- Profile button added dynamically -->
-
 <div id="profileNav"></div>
 
 </nav>
@@ -226,12 +301,10 @@ onAuthStateChanged
 }
 from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
 
-
 const profileNav=
 document.getElementById(
 "profileNav"
 );
-
 
 onAuthStateChanged(
 
