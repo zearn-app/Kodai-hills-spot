@@ -4,7 +4,8 @@
 <head>
 
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport"
+content="width=device-width,initial-scale=1">
 
 <title>Kodai Hills Spot - Cart</title>
 
@@ -19,228 +20,141 @@ font-family:Arial,sans-serif;
 
 body{
 background:#f5f5f5;
-padding-bottom:90px;
+padding-bottom:160px;
 }
 
-/* Navbar */
-
 .navbar{
-
 background:white;
 padding:15px;
-
 display:flex;
 justify-content:space-between;
 align-items:center;
-
 position:sticky;
 top:0;
-
 box-shadow:0 2px 10px rgba(0,0,0,.1);
-
+z-index:100;
 }
 
 .logo-box{
-
 display:flex;
 align-items:center;
 gap:10px;
-
 }
 
 .logo{
-
 width:45px;
 height:45px;
-
 border-radius:50%;
 object-fit:cover;
-
 border:2px solid #2e7d32;
-
 }
 
 .logo-text{
-
 font-size:22px;
 font-weight:bold;
 color:#2e7d32;
-
 }
-
-/* Cart Header */
 
 .cart-header{
-
 padding:20px;
-
 font-size:25px;
 font-weight:bold;
-
 }
 
-/* Cart items */
-
 #cartItems{
-
 padding:15px;
-
 }
 
 .card{
-
 background:white;
-
 padding:15px;
-
 margin-bottom:15px;
-
 border-radius:15px;
-
 display:flex;
-
 gap:15px;
-
 box-shadow:0 2px 10px rgba(0,0,0,.1);
-
 }
 
 .card img{
-
 width:100px;
 height:100px;
-
 border-radius:10px;
-
 object-fit:cover;
-
 }
 
 .details{
-
 flex:1;
-
 }
 
 .details h3{
-
 margin-bottom:8px;
-
 }
 
 .price{
-
 color:#2e7d32;
 font-weight:bold;
-
 margin-bottom:8px;
-
 }
 
 .remove{
-
 padding:8px 15px;
-
 border:none;
-
 border-radius:8px;
-
 background:#e53935;
-
 color:white;
-
+cursor:pointer;
 }
 
-/* Bottom summary */
-
 .summary{
-
 position:fixed;
-
 bottom:75px;
-
 left:0;
-
 width:100%;
-
 background:white;
-
 padding:15px;
-
 box-shadow:0 -2px 10px rgba(0,0,0,.1);
-
 }
 
 .total{
-
 font-size:22px;
-
 font-weight:bold;
-
 color:#2e7d32;
-
 margin-bottom:10px;
-
 }
 
 .checkout{
-
 width:100%;
-
 padding:14px;
-
 border:none;
-
 border-radius:12px;
-
 background:#2e7d32;
-
 color:white;
-
 font-size:17px;
-
+cursor:pointer;
 }
 
-/* Bottom nav */
-
 .bottom-nav{
-
 position:fixed;
-
 bottom:0;
 left:0;
-
 width:100%;
-
 background:white;
-
 display:flex;
-
 justify-content:space-around;
-
 padding:15px;
-
 box-shadow:0 -2px 10px rgba(0,0,0,.1);
-
 }
 
 .bottom-nav a{
-
 text-decoration:none;
-
 color:black;
-
 font-size:14px;
-
 text-align:center;
-
 }
 
 .active{
-
 color:#2e7d32;
 font-weight:bold;
-
 }
 
 </style>
@@ -248,7 +162,6 @@ font-weight:bold;
 </head>
 
 <body>
-
 
 <nav class="navbar">
 
@@ -276,6 +189,8 @@ Kodai Hills Spot
 
 
 <div id="cartItems">
+
+Loading...
 
 </div>
 
@@ -305,37 +220,34 @@ Proceed To Checkout
 
 <a href="index.html">
 
-🏠<br>
-Home
+🏠<br>Home
 
 </a>
 
 <a href="products.html">
 
-🛍️<br>
-Products
+🛍️<br>Products
 
 </a>
 
 <a href="cart.html"
 class="active">
 
-🛒<br>
-Cart
+🛒<br>Cart
 
 </a>
 
 <a href="profile.html">
 
-👤<br>
-Profile
+👤<br>Profile
 
 </a>
 
 </nav>
 
 
-<script type="module" src="js/cart.js"></script>
+<script type="module"
+src="js/cart.js"></script>
 
 
 <script type="module">
@@ -352,8 +264,26 @@ document
 
 if(auth.currentUser){
 
+const firstProduct=
+document.querySelector(
+".card"
+);
+
+if(!firstProduct){
+
+alert(
+"Cart is empty"
+);
+
+return;
+
+}
+
+const productId=
+firstProduct.dataset.id;
+
 window.location=
-"checkout.html";
+`checkout.html?id=${productId}`;
 
 }
 
@@ -367,5 +297,7 @@ window.location=
 };
 
 </script>
+
 </body>
+
 </html>
