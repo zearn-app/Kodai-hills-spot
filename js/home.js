@@ -29,6 +29,49 @@ document.getElementById(
 );
 
 
+/* Add styles dynamically */
+
+const style=document.createElement(
+"style"
+);
+
+style.innerHTML=`
+
+.card{
+position:relative;
+}
+
+.stock-badge{
+
+position:absolute;
+top:8px;
+right:8px;
+background:red;
+color:white;
+padding:5px 10px;
+border-radius:20px;
+font-size:12px;
+font-weight:bold;
+z-index:2;
+
+}
+
+.pack{
+
+margin-top:5px;
+font-size:13px;
+color:#666;
+font-weight:bold;
+
+}
+
+`;
+
+document.head.appendChild(
+style
+);
+
+
 /* Load Products */
 
 async function loadProducts(){
@@ -39,21 +82,27 @@ productsDiv.innerHTML=
 "<h3>Loading...</h3>";
 
 const snapshot=
+
 await getDocs(
+
 collection(
 db,
 "Products"
 )
+
 );
 
 productsDiv.innerHTML="";
+
 
 if(snapshot.empty){
 
 productsDiv.innerHTML=`
 
 <h3>
+
 No Products Available
+
 </h3>
 
 `;
@@ -68,15 +117,26 @@ snapshot.forEach((doc)=>{
 const data=
 doc.data();
 
+
 const realPrice=
 Number(
 data.price||0
 );
 
-/* Make strike price larger */
 
 const oldPrice=
+data.oldPrice||
 realPrice+50;
+
+
+const packQty=
+data.packQty||
+"";
+
+
+const fewStock=
+data.fewStock||
+false;
 
 
 productsDiv.innerHTML+=`
@@ -86,6 +146,23 @@ class="card"
 onclick="openProduct(
 '${doc.id}'
 )">
+
+
+${
+fewStock
+?
+
+`<div class="stock-badge">
+
+Few Stock
+
+</div>`
+
+:
+
+""
+}
+
 
 <img
 src="${
@@ -97,6 +174,7 @@ onerror="
 this.src='logo.png'
 ">
 
+
 <h3>
 
 ${
@@ -105,6 +183,23 @@ data.name||
 }
 
 </h3>
+
+
+${
+packQty
+
+?
+
+`<div class="pack">
+
+📦 ${packQty}
+
+</div>`
+
+:
+
+""
+}
 
 
 <div
@@ -117,6 +212,7 @@ class="old-price">
 
 </span>
 
+
 <span
 class="new-price">
 
@@ -125,6 +221,13 @@ class="new-price">
 </span>
 
 </div>
+
+
+<button class="btn">
+
+🛒 Add Cart
+
+</button>
 
 </div>
 
@@ -155,9 +258,11 @@ Error Loading Products
 }
 
 
+
 /* Open Product */
 
 window.openProduct=
+
 (id)=>{
 
 window.location=
@@ -165,6 +270,7 @@ window.location=
 `product-details.html?id=${id}`;
 
 };
+
 
 
 /* Auth Check */
@@ -216,12 +322,15 @@ loginFloat.style.display=
 );
 
 
+
 /* Category Click */
 
 const categoryCards=
+
 document.querySelectorAll(
 ".category-card"
 );
+
 
 categoryCards.forEach(
 
@@ -237,6 +346,7 @@ card.querySelector(
 
 .innerText;
 
+
 window.location=
 
 `products.html?category=${encodeURIComponent(category)}`;
@@ -248,6 +358,7 @@ window.location=
 );
 
 
+
 /* Search */
 
 const searchInput=
@@ -255,6 +366,7 @@ const searchInput=
 document.querySelector(
 ".search input"
 );
+
 
 if(searchInput){
 
