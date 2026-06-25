@@ -436,63 +436,6 @@ Loading...
 </nav>
 
 
-<script type="module">
-
-import { auth }
-from "./js/firebase.js";
-
-import {
-onAuthStateChanged
-}
-from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
-
-
-const profileNav=
-document.getElementById(
-"profileNav"
-);
-
-
-onAuthStateChanged(
-
-auth,
-
-(user)=>{
-
-if(user){
-
-profileNav.href=
-"profile.html";
-
-profileNav.innerHTML=`
-
-👤<br>
-Yours
-
-`;
-
-}
-
-else{
-
-profileNav.href=
-"login.html";
-
-profileNav.innerHTML=`
-
-🔐<br>
-Login
-
-`;
-
-}
-
-}
-
-);
-
-</script>
-
 
 <script
 type="module"
