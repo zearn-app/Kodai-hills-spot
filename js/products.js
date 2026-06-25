@@ -32,6 +32,49 @@ let selectedCategory="";
 let currentUser=null;
 
 
+/* Dynamic extra styles */
+
+const style=document.createElement(
+"style"
+);
+
+style.innerHTML=`
+
+.card{
+position:relative;
+}
+
+.stock-badge{
+
+position:absolute;
+top:8px;
+right:8px;
+background:red;
+color:white;
+padding:5px 10px;
+border-radius:20px;
+font-size:11px;
+font-weight:bold;
+z-index:10;
+
+}
+
+.pack{
+
+font-size:13px;
+margin-top:5px;
+color:#666;
+font-weight:bold;
+
+}
+
+`;
+
+document.head.appendChild(
+style
+);
+
+
 /* User Auth */
 
 onAuthStateChanged(
@@ -95,6 +138,7 @@ productsDiv.innerHTML=
 }
 
 
+
 /* Show Products */
 
 function showProducts(products){
@@ -110,23 +154,73 @@ return;
 
 }
 
+
 products.forEach((product)=>{
+
+const oldPrice=
+
+product.oldPrice||
+
+(Number(product.price)+50);
+
 
 productsDiv.innerHTML+=`
 
 <div class="card">
 
+
+${
+product.fewStock
+
+?
+
+`<div class="stock-badge">
+
+Few Stock
+
+</div>`
+
+:
+
+""
+}
+
+
 <img
 src="${product.Image}"
+
 onclick="openProduct(
 '${product.id}'
-)">
+)"
+
+onerror="
+this.src='logo.png'
+">
+
 
 <h3>
 
 ${product.name}
 
 </h3>
+
+
+${
+product.packQty
+
+?
+
+`<div class="pack">
+
+📦 ${product.packQty}
+
+</div>`
+
+:
+
+""
+}
+
 
 <div>
 
@@ -137,9 +231,10 @@ font-size:14px;
 margin-right:8px;
 ">
 
-₹${product.oldPrice || (Number(product.price)+50)}
+₹${oldPrice}
 
 </span>
+
 
 <span
 class="price">
@@ -149,6 +244,7 @@ class="price">
 </span>
 
 </div>
+
 
 <button
 class="btn"
@@ -172,14 +268,18 @@ onclick="addToCart(
 }
 
 
+
 /* Open Product */
 
-window.openProduct=(id)=>{
+window.openProduct=
+
+(id)=>{
 
 window.location=
 `product-details.html?id=${id}`;
 
 };
+
 
 
 /* Add Cart */
@@ -214,17 +314,11 @@ db,
 {
 
 uid:currentUser.uid,
-
 productId:id,
-
 name:name,
-
 price:Number(price),
-
 image:image,
-
 quantity:1,
-
 createdAt:Date.now()
 
 }
@@ -250,6 +344,7 @@ error.message
 };
 
 
+
 /* Filter */
 
 function filterProducts(){
@@ -261,6 +356,7 @@ let filtered=
 /* Search */
 
 const search=
+
 searchInput.value
 .toLowerCase();
 
@@ -349,6 +445,7 @@ filtered
 );
 
 }
+
 
 
 /* Events */
