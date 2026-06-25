@@ -13,14 +13,21 @@ onAuthStateChanged
 }
 from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
 
+
 const productsDiv=
-document.getElementById("products");
+document.getElementById(
+"products"
+);
 
 const searchInput=
-document.getElementById("searchInput");
+document.getElementById(
+"searchInput"
+);
 
 const priceFilter=
-document.getElementById("priceFilter");
+document.getElementById(
+"priceFilter"
+);
 
 const categoryCards=
 document.querySelectorAll(
@@ -32,9 +39,10 @@ let selectedCategory="";
 let currentUser=null;
 
 
-/* Dynamic extra styles */
+/* Extra styles */
 
-const style=document.createElement(
+const style=
+document.createElement(
 "style"
 );
 
@@ -75,7 +83,7 @@ style
 );
 
 
-/* User Auth */
+/* Auth */
 
 onAuthStateChanged(
 
@@ -100,14 +108,18 @@ productsDiv.innerHTML=
 "Loading Products...";
 
 const snapshot=
+
 await getDocs(
+
 collection(
 db,
 "Products"
 )
+
 );
 
 allProducts=[];
+
 
 snapshot.forEach((doc)=>{
 
@@ -120,6 +132,7 @@ id:doc.id,
 
 });
 
+
 showProducts(
 allProducts
 );
@@ -128,10 +141,19 @@ allProducts
 
 catch(error){
 
-console.log(error);
+console.log(
+error
+);
 
-productsDiv.innerHTML=
-"<h3>Error Loading Products</h3>";
+productsDiv.innerHTML=`
+
+<h3>
+
+Error Loading Products
+
+</h3>
+
+`;
 
 }
 
@@ -145,10 +167,18 @@ function showProducts(products){
 
 productsDiv.innerHTML="";
 
+
 if(products.length===0){
 
-productsDiv.innerHTML=
-"<h3>No Products Found</h3>";
+productsDiv.innerHTML=`
+
+<h3>
+
+No Products Found
+
+</h3>
+
+`;
 
 return;
 
@@ -159,9 +189,15 @@ products.forEach((product)=>{
 
 const oldPrice=
 
-product.oldPrice||
+product.oldPrice
 
-(Number(product.price)+50);
+?
+
+product.oldPrice
+
+:
+
+Number(product.price||0)+50;
 
 
 productsDiv.innerHTML+=`
@@ -170,7 +206,7 @@ productsDiv.innerHTML+=`
 
 
 ${
-product.fewStock
+product.fewStock===true
 
 ?
 
@@ -187,7 +223,10 @@ Few Stock
 
 
 <img
-src="${product.Image}"
+src="${
+product.Image||
+"logo.png"
+}"
 
 onclick="openProduct(
 '${product.id}'
@@ -200,7 +239,7 @@ this.src='logo.png'
 
 <h3>
 
-${product.name}
+${product.name||"No Name"}
 
 </h3>
 
@@ -236,8 +275,7 @@ margin-right:8px;
 </span>
 
 
-<span
-class="price">
+<span class="price">
 
 ₹${product.price}
 
@@ -248,11 +286,9 @@ class="price">
 
 <button
 class="btn"
+
 onclick="addToCart(
-'${product.id}',
-'${product.name}',
-'${product.price}',
-'${product.Image}'
+'${product.id}'
 )">
 
 🛒 Add Cart
@@ -276,6 +312,7 @@ window.openProduct=
 (id)=>{
 
 window.location=
+
 `product-details.html?id=${id}`;
 
 };
@@ -286,12 +323,7 @@ window.location=
 
 window.addToCart=
 
-async(
-id,
-name,
-price,
-image
-)=>{
+async(id)=>{
 
 try{
 
@@ -304,6 +336,29 @@ return;
 
 }
 
+
+const product=
+
+allProducts.find(
+
+item=>
+
+item.id===id
+
+);
+
+
+if(!product){
+
+alert(
+"Product not found"
+);
+
+return;
+
+}
+
+
 await addDoc(
 
 collection(
@@ -314,16 +369,46 @@ db,
 {
 
 uid:currentUser.uid,
+
 productId:id,
-name:name,
-price:Number(price),
-image:image,
+
+name:
+product.name,
+
+price:
+Number(
+product.price
+),
+
+image:
+product.Image,
+
 quantity:1,
-createdAt:Date.now()
+
+
+oldPrice:
+product.oldPrice||
+
+(
+Number(product.price)
++50
+),
+
+fewStock:
+product.fewStock||
+false,
+
+packQty:
+product.packQty||
+"",
+
+createdAt:
+Date.now()
 
 }
 
 );
+
 
 alert(
 "Added to cart"
@@ -333,7 +418,9 @@ alert(
 
 catch(error){
 
-console.log(error);
+console.log(
+error
+);
 
 alert(
 error.message
@@ -360,12 +447,17 @@ const search=
 searchInput.value
 .toLowerCase();
 
+
 filtered=
-filtered.filter(item=>
+filtered.filter(
+
+item=>
 
 item.name
 .toLowerCase()
-.includes(search)
+.includes(
+search
+)
 
 );
 
@@ -375,7 +467,9 @@ item.name
 if(selectedCategory!=""){
 
 filtered=
-filtered.filter(item=>
+filtered.filter(
+
+item=>
 
 item.category
 ?.toLowerCase()
@@ -401,7 +495,9 @@ filtered.sort(
 (a,b)=>
 
 Number(a.price)
+
 -
+
 Number(b.price)
 
 );
@@ -417,7 +513,9 @@ filtered.sort(
 (a,b)=>
 
 Number(b.price)
+
 -
+
 Number(a.price)
 
 );
@@ -433,12 +531,15 @@ filtered.sort(
 (a,b)=>
 
 (b.buyCount||0)
+
 -
+
 (a.buyCount||0)
 
 );
 
 }
+
 
 showProducts(
 filtered
@@ -483,11 +584,13 @@ c.style.color=
 
 });
 
+
 card.style.background=
 "#2e7d32";
 
 card.style.color=
 "white";
+
 
 selectedCategory=
 
@@ -499,6 +602,7 @@ card.innerText
 .replace("🌿","")
 
 .trim();
+
 
 filterProducts();
 
