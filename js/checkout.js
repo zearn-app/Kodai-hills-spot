@@ -229,8 +229,8 @@ if(
 ){
 
 showPopup(
-"Missing Fields",
-"Please fill all fields"
+"Missing Information",
+"Please complete all required details"
 );
 
 return;
