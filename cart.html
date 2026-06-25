@@ -220,7 +220,6 @@ Proceed To Checkout
 
 </nav>
 
-
 <script type="module">
 
 import {auth,db}
@@ -241,6 +240,11 @@ document.getElementById(
 "cartItems"
 );
 
+const totalDiv=
+document.getElementById(
+"total"
+);
+
 let firstProductId="";
 
 
@@ -248,14 +252,21 @@ async function loadCart(){
 
 const user=auth.currentUser;
 
-if(!user)return;
+if(!user){
+window.location="login.html";
+return;
+}
 
 cartItems.innerHTML=
 "Loading...";
 
 const q=query(
 collection(db,"Cart"),
-where("uid","==",user.uid)
+where(
+"uid",
+"==",
+user.uid
+)
 );
 
 const snapshot=
@@ -269,32 +280,23 @@ if(snapshot.empty){
 
 cartItems.innerHTML=`
 
-<div style="
+<h2 style="
 text-align:center;
-padding:30px;
-font-size:18px;
+margin-top:50px;
 ">
 
-🛒 Cart is empty
+Cart Empty
 
-</div>
+</h2>
 
 `;
 
-document.getElementById(
-"total"
-).innerText=
-"Total : ₹0";
-
 return;
-
 }
 
+snapshot.forEach((itemDoc)=>{
 
-snapshot.forEach((cartDoc)=>{
-
-const item=
-cartDoc.data();
+const item=itemDoc.data();
 
 if(!firstProductId){
 
@@ -307,9 +309,16 @@ Number(item.price);
 
 cartItems.innerHTML+=`
 
-<div class="card">
+<div 
+class="card"
+data-id="${item.productId}"
+>
 
-<img src="${item.image}">
+<img
+src="${item.image}"
+onerror="
+this.src='logo.png'
+">
 
 <div class="details">
 
@@ -327,15 +336,18 @@ ${item.name}
 
 <p>
 
-Quantity : ${item.quantity||1}
+Qty : 
+${item.quantity||1}
 
 </p>
 
 <button
 class="remove"
-onclick="removeItem(
-'${cartDoc.id}'
-)">
+onclick="
+removeItem(
+'${itemDoc.id}'
+)
+">
 
 Remove
 
@@ -349,10 +361,7 @@ Remove
 
 });
 
-
-document.getElementById(
-"total"
-).innerText=
+totalDiv.innerText=
 `Total : ₹${total}`;
 
 }
@@ -362,8 +371,6 @@ document.getElementById(
 
 window.removeItem=
 async(id)=>{
-
-try{
 
 await deleteDoc(
 doc(
@@ -375,17 +382,10 @@ id
 
 loadCart();
 
-}
-catch(error){
-
-console.log(error);
-
-}
-
 };
 
 
-/* Login check */
+/* Auth Check */
 
 auth.onAuthStateChanged(
 
@@ -396,6 +396,7 @@ if(user){
 loadCart();
 
 }
+
 else{
 
 window.location=
@@ -403,34 +404,31 @@ window.location=
 
 }
 
-}
+});
 
 
 /* Checkout */
 
-document.getElementById(
+document
+.getElementById(
 "checkoutBtn"
 )
 
 .onclick=()=>{
 
-if(firstProductId){
+if(!firstProductId){
+
+alert(
+"Cart Empty"
+);
+
+return;
+}
 
 window.location=
 `checkout.html?id=${firstProductId}`;
 
-}
-else{
-
-alert(
-"Cart is empty"
-);
-
-}
-
 };
-
-);
 
 </script>
 </body>
