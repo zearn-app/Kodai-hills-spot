@@ -15,72 +15,24 @@ from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
 
 
 const productsDiv=
-document.getElementById(
-"products"
-);
+document.getElementById("products");
 
 const searchInput=
-document.getElementById(
-"searchInput"
-);
+document.getElementById("searchInput");
 
 const priceFilter=
-document.getElementById(
-"priceFilter"
-);
+document.getElementById("priceFilter");
 
 const categoryCards=
-document.querySelectorAll(
-".category-card"
-);
+document.querySelectorAll(".category-card");
+
+const profileNav=
+document.getElementById("profileNav");
+
 
 let allProducts=[];
 let selectedCategory="";
 let currentUser=null;
-
-
-/* Extra styles */
-
-const style=
-document.createElement(
-"style"
-);
-
-style.innerHTML=`
-
-.card{
-position:relative;
-}
-
-.stock-badge{
-
-position:absolute;
-top:8px;
-right:8px;
-background:red;
-color:white;
-padding:5px 10px;
-border-radius:20px;
-font-size:11px;
-font-weight:bold;
-z-index:10;
-
-}
-
-.pack{
-
-font-size:13px;
-margin-top:5px;
-color:#666;
-font-weight:bold;
-
-}
-
-`;
-
-document.head.appendChild(
-style
-);
 
 
 /* Auth */
@@ -93,19 +45,64 @@ auth,
 
 currentUser=user;
 
+
+/* Bottom navbar login/profile */
+
+if(profileNav){
+
+if(user){
+
+profileNav.href=
+"profile.html";
+
+profileNav.innerHTML=`
+
+👤<br>
+Yours
+
+`;
+
+}
+
+else{
+
+profileNav.href=
+"login.html";
+
+profileNav.innerHTML=`
+
+🔐<br>
+Login
+
+`;
+
+}
+
+}
+
 }
 
 );
 
 
-/* Load Products */
+/* Product Loading */
 
 async function loadProducts(){
 
 try{
 
-productsDiv.innerHTML=
-"Loading Products...";
+productsDiv.innerHTML=`
+
+<div style="
+text-align:center;
+padding:20px;
+">
+
+Loading Products...
+
+</div>
+
+`;
 
 const snapshot=
 
@@ -133,21 +130,21 @@ id:doc.id,
 });
 
 
-showProducts(
-allProducts
-);
+showProducts(allProducts);
 
 }
 
 catch(error){
 
-console.log(
-error
-);
+console.log(error);
 
 productsDiv.innerHTML=`
 
-<h3>
+<h3 style="
+text-align:center;
+color:red;
+padding:20px;
+">
 
 Error Loading Products
 
@@ -158,7 +155,6 @@ Error Loading Products
 }
 
 }
-
 
 
 /* Show Products */
@@ -172,7 +168,10 @@ if(products.length===0){
 
 productsDiv.innerHTML=`
 
-<h3>
+<h3 style="
+text-align:center;
+padding:20px;
+">
 
 No Products Found
 
@@ -189,52 +188,45 @@ products.forEach((product)=>{
 
 const oldPrice=
 
-product.oldPrice
+product.oldPrice ||
 
-?
-
-product.oldPrice
-
-:
-
-Number(product.price||0)+50;
+(Number(product.price||0)+50);
 
 
 productsDiv.innerHTML+=`
 
 <div class="card">
 
-
 ${
 product.fewStock===true
 
 ?
 
-`<div class="stock-badge">
+`
+
+<div class="stock-badge">
 
 Few Stock
 
-</div>`
+</div>
+
+`
 
 :
 
 ""
+
 }
 
-
 <img
-src="${
-product.Image||
-"logo.png"
-}"
 
-onclick="openProduct(
-'${product.id}'
-)"
+src="${product.Image||'logo.png'}"
 
-onerror="
-this.src='logo.png'
-">
+onclick="openProduct('${product.id}')"
+
+onerror="this.src='logo.png'"
+
+>
 
 
 <h3>
@@ -249,35 +241,36 @@ product.packQty
 
 ?
 
-`<div class="pack">
+`
+
+<div class="pack">
 
 📦 ${product.packQty}
 
-</div>`
+</div>
+
+`
 
 :
 
 ""
+
 }
 
 
-<div>
-
-<span style="
-text-decoration:line-through;
-color:red;
-font-size:14px;
-margin-right:8px;
+<div style="
+margin-top:10px;
 ">
+
+<span class="old-price">
 
 ₹${oldPrice}
 
 </span>
 
-
 <span class="price">
 
-₹${product.price}
+₹${product.price||0}
 
 </span>
 
@@ -285,11 +278,12 @@ margin-right:8px;
 
 
 <button
+
 class="btn"
 
-onclick="addToCart(
-'${product.id}'
-)">
+onclick="addToCart('${product.id}')"
+
+>
 
 🛒 Add Cart
 
@@ -319,7 +313,7 @@ window.location=
 
 
 
-/* Add Cart */
+/* Add To Cart */
 
 window.addToCart=
 
@@ -341,9 +335,7 @@ const product=
 
 allProducts.find(
 
-item=>
-
-item.id===id
+item=>item.id===id
 
 );
 
@@ -368,41 +360,39 @@ db,
 
 {
 
-uid:currentUser.uid,
+uid:
+currentUser.uid,
 
-productId:id,
+productId:
+id,
 
 name:
 product.name,
 
 price:
-Number(
-product.price
-),
+Number(product.price),
 
 image:
 product.Image,
 
 quantity:1,
 
-
 oldPrice:
-product.oldPrice||
 
-(
-Number(product.price)
-+50
-),
+product.oldPrice ||
+
+(Number(product.price)+50),
 
 fewStock:
-product.fewStock||
-false,
+
+product.fewStock||false,
 
 packQty:
-product.packQty||
-"",
+
+product.packQty||"",
 
 createdAt:
+
 Date.now()
 
 }
@@ -418,13 +408,9 @@ alert(
 
 catch(error){
 
-console.log(
-error
-);
+console.log(error);
 
-alert(
-error.message
-);
+alert(error.message);
 
 }
 
@@ -437,6 +423,7 @@ error.message
 function filterProducts(){
 
 let filtered=
+
 [...allProducts];
 
 
@@ -447,17 +434,17 @@ const search=
 searchInput.value
 .toLowerCase();
 
-
 filtered=
+
 filtered.filter(
 
 item=>
 
-item.name
+(item.name||"")
+
 .toLowerCase()
-.includes(
-search
-)
+
+.includes(search)
 
 );
 
@@ -467,11 +454,13 @@ search
 if(selectedCategory!=""){
 
 filtered=
+
 filtered.filter(
 
 item=>
 
 item.category
+
 ?.toLowerCase()
 
 ===
@@ -486,9 +475,7 @@ selectedCategory
 
 /* Sort */
 
-if(
-priceFilter.value==="low"
-){
+if(priceFilter.value==="low"){
 
 filtered.sort(
 
@@ -504,9 +491,7 @@ Number(b.price)
 
 }
 
-else if(
-priceFilter.value==="high"
-){
+else if(priceFilter.value==="high"){
 
 filtered.sort(
 
@@ -522,9 +507,7 @@ Number(a.price)
 
 }
 
-else if(
-priceFilter.value==="buy"
-){
+else if(priceFilter.value==="buy"){
 
 filtered.sort(
 
@@ -541,37 +524,44 @@ filtered.sort(
 }
 
 
-showProducts(
-filtered
-);
+showProducts(filtered);
 
 }
 
 
-
 /* Events */
 
-searchInput
-.addEventListener(
+searchInput.addEventListener(
+
 "input",
+
 filterProducts
+
 );
 
-priceFilter
-.addEventListener(
+
+priceFilter.addEventListener(
+
 "change",
+
 filterProducts
+
 );
 
 
-categoryCards
-.forEach(card=>{
+categoryCards.forEach(
+
+(card)=>{
 
 card.onclick=()=>{
 
+
 document
+
 .querySelectorAll(
+
 ".category-card"
+
 )
 
 .forEach(c=>{
@@ -597,8 +587,11 @@ selectedCategory=
 card.innerText
 
 .replace("🍫","")
+
 .replace("🥑","")
+
 .replace("🥔","")
+
 .replace("🌿","")
 
 .trim();
@@ -608,7 +601,11 @@ filterProducts();
 
 };
 
-});
+}
 
+);
+
+
+/* Start */
 
 loadProducts();
