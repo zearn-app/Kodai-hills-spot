@@ -18,7 +18,7 @@ let totalAmount=0;
 let currentProduct=null;
 
 
-/* Auth */
+/* AUTH */
 
 onAuthStateChanged(
 
@@ -31,7 +31,6 @@ currentUser=user;
 if(!user){
 
 window.location="login.html";
-
 return;
 
 }
@@ -43,7 +42,7 @@ loadProduct();
 );
 
 
-/* Product Load */
+/* PRODUCT LOAD */
 
 async function loadProduct(){
 
@@ -57,13 +56,17 @@ window.location.search
 const productId=
 params.get("id");
 
+console.log(
+"Product ID:",
+productId
+);
 
 if(!productId){
 
 document.getElementById(
 "productName"
 ).innerText=
-"No Product";
+"No Product Selected";
 
 return;
 
@@ -76,7 +79,6 @@ db,
 "Products",
 productId
 );
-
 
 const productSnap=
 await getDoc(
@@ -99,31 +101,33 @@ return;
 const product=
 productSnap.data();
 
+console.log(product);
+
 currentProduct=
 product;
 
 totalAmount=
 Number(
-product.price
+product.price || 0
 );
 
 
 document.getElementById(
 "productName"
 ).innerText=
-product.name;
+product.name || "No Name";
 
 
 document.getElementById(
 "productPrice"
 ).innerText=
-`₹${product.price}`;
+`₹${totalAmount}`;
 
 
 document.getElementById(
 "productImage"
 ).src=
-product.Image;
+product.Image || "logo.png";
 
 
 document.getElementById(
@@ -135,26 +139,29 @@ document.getElementById(
 document.getElementById(
 "subtotal"
 ).innerText=
-`₹${product.price}`;
+`₹${totalAmount}`;
 
 
 document.getElementById(
 "total"
 ).innerText=
-`₹${product.price}`;
+`₹${totalAmount}`;
 
 }
 
 catch(error){
 
-console.log(error);
+console.log(
+"Load Error:",
+error
+);
 
 }
 
 }
 
 
-/* Place Order + Razorpay */
+/* PLACE ORDER */
 
 document
 .getElementById(
@@ -170,48 +177,40 @@ document
 const name=
 document.getElementById(
 "name"
-).value;
-
+).value.trim();
 
 const phone=
 document.getElementById(
 "phone"
-).value;
-
+).value.trim();
 
 const state=
 document.getElementById(
 "state"
 ).value;
 
-
 const district=
 document.getElementById(
 "district"
 ).value;
 
-
 const area=
 document.getElementById(
 "area"
-).value;
-
+).value.trim();
 
 const street=
 document.getElementById(
 "street"
-).value;
-
+).value.trim();
 
 const pincode=
 document.getElementById(
 "pincode"
-).value;
-
+).value.trim();
 
 
 if(
-
 !name||
 !phone||
 !state||
@@ -219,7 +218,6 @@ if(
 !area||
 !street||
 !pincode
-
 ){
 
 alert(
@@ -231,15 +229,18 @@ return;
 }
 
 
+if(!currentProduct){
+
+alert(
+"Product not loaded"
+);
+
+return;
+
+}
 
 
-
-
-
-
-
-
-/* Razorpay */
+/* RAZORPAY */
 
 const options={
 
@@ -264,8 +265,11 @@ image:
 handler:function(response){
 
 alert(
-"✅ Payment Success\n\nPayment ID : "+
+
+"✅ Payment Success\n\nPayment ID:\n"+
+
 response.razorpay_payment_id
+
 );
 
 },
@@ -276,12 +280,15 @@ name:name,
 
 contact:phone,
 
-email:currentUser.email
+email:
+currentUser?.email || ""
 
 },
 
 theme:{
+
 color:"#2e7d32"
+
 },
 
 modal:{
@@ -305,7 +312,7 @@ options
 );
 
 
-/* Payment Failed */
+/* PAYMENT FAILED */
 
 razorpay.on(
 
@@ -316,6 +323,7 @@ function(response){
 alert(
 
 "❌ Payment Failed\n\n"+
+
 response.error.description
 
 );
@@ -324,22 +332,14 @@ response.error.description
 
 );
 
-
 razorpay.open();
 
+}
+
+);
 
 
-
-
-
-
-
-
-
-
-
-
-/* State + District */
+/* STATE + DISTRICT */
 
 const stateSelect=
 document.getElementById(
@@ -395,14 +395,13 @@ stateSelect.addEventListener(
 
 districtSelect.innerHTML=
 
-`<option>Select District</option>`;
-
+"<option>Select District</option>";
 
 const districts=
 
 statesAndDistricts[
 stateSelect.value
-]||[];
+] || [];
 
 
 districts.forEach(
