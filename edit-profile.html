@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport"
+content="width=device-width,initial-scale=1">
+
+<title>Edit Profile</title>
+
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Arial,sans-serif;
+}
+
+body{
+background:#f0f4f3;
+padding:20px;
+padding-bottom:30px;
+}
+
+.card{
+
+background:white;
+padding:25px;
+border-radius:25px;
+box-shadow:0 5px 20px rgba(0,0,0,.1);
+
+}
+
+.heading{
+
+font-size:24px;
+font-weight:bold;
+color:#2e7d32;
+text-align:center;
+margin-bottom:25px;
+
+}
+
+.input-box{
+
+margin-top:15px;
+
+}
+
+label{
+
+display:block;
+margin-bottom:8px;
+font-weight:bold;
+color:#333;
+
+}
+
+input{
+
+width:100%;
+padding:14px;
+border:1px solid #ddd;
+border-radius:12px;
+outline:none;
+font-size:15px;
+
+}
+
+input:focus{
+
+border:2px solid #2e7d32;
+
+}
+
+.btn{
+
+width:100%;
+padding:15px;
+border:none;
+border-radius:14px;
+margin-top:20px;
+font-size:16px;
+font-weight:bold;
+cursor:pointer;
+
+}
+
+.save{
+
+background:#2e7d32;
+color:white;
+
+}
+
+.back{
+
+background:#777;
+color:white;
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="card">
+
+<div class="heading">
+
+✏️ Edit Profile
+
+</div>
+
+
+<div class="input-box">
+<label>Name</label>
+
+<input
+type="text"
+id="name"
+placeholder="Enter name">
+</div>
+
+
+<div class="input-box">
+<label>Phone</label>
+
+<input
+type="number"
+id="phone"
+placeholder="Enter phone">
+</div>
+
+
+<div class="input-box">
+<label>Street</label>
+
+<input
+type="text"
+id="street"
+placeholder="Street">
+</div>
+
+
+<div class="input-box">
+<label>Area</label>
+
+<input
+type="text"
+id="area"
+placeholder="Area">
+</div>
+
+
+<div class="input-box">
+<label>District</label>
+
+<input
+type="text"
+id="district"
+placeholder="District">
+</div>
+
+
+<div class="input-box">
+<label>State</label>
+
+<input
+type="text"
+id="state"
+placeholder="State">
+</div>
+
+
+<div class="input-box">
+<label>Pincode</label>
+
+<input
+type="number"
+id="pincode"
+placeholder="Pincode">
+</div>
+
+
+<button
+class="btn save"
+id="saveBtn">
+
+💾 Save Profile
+
+</button>
+
+
+<button
+class="btn back"
+onclick="window.location='profile.html'">
+
+⬅ Back
+
+</button>
+
+</div>
+
+
+
+<script type="module">
+
+import {db,auth}
+from "./js/firebase.js";
+
+import {
+
+doc,
+getDoc,
+updateDoc
+
+}
+from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
+
+import {
+
+onAuthStateChanged
+
+}
+from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
+
+
+const nameEl=
+document.getElementById("name");
+
+const phoneEl=
+document.getElementById("phone");
+
+const streetEl=
+document.getElementById("street");
+
+const areaEl=
+document.getElementById("area");
+
+const districtEl=
+document.getElementById("district");
+
+const stateEl=
+document.getElementById("state");
+
+const pincodeEl=
+document.getElementById("pincode");
+
+const saveBtn=
+document.getElementById("saveBtn");
+
+
+let currentUser;
+
+
+onAuthStateChanged(
+
+auth,
+
+async(user)=>{
+
+if(!user){
+
+window.location=
+"login.html";
+
+return;
+
+}
+
+currentUser=user;
+
+try{
+
+const userRef=
+doc(
+db,
+"Users",
+user.uid
+);
+
+const snapshot=
+await getDoc(userRef);
+
+if(snapshot.exists()){
+
+const data=
+snapshot.data();
+
+nameEl.value=
+data.name || "";
+
+phoneEl.value=
+data.phone || "";
+
+
+if(data.address){
+
+streetEl.value=
+data.address.street || "";
+
+areaEl.value=
+data.address.area || "";
+
+districtEl.value=
+data.address.district || "";
+
+stateEl.value=
+data.address.state || "";
+
+pincodeEl.value=
+data.address.pincode || "";
+
+}
+
+}
+
+}
+
+catch(error){
+
+console.log(error);
+
+}
+
+});
+
+
+saveBtn.onclick=
+
+async()=>{
+
+try{
+
+saveBtn.innerText=
+"Saving...";
+
+saveBtn.disabled=true;
+
+
+const userRef=
+doc(
+db,
+"Users",
+currentUser.uid
+);
+
+
+await updateDoc(
+
+userRef,
+
+{
+
+name:
+nameEl.value,
+
+phone:
+phoneEl.value,
+
+address:{
+
+street:
+streetEl.value,
+
+area:
+areaEl.value,
+
+district:
+districtEl.value,
+
+state:
+stateEl.value,
+
+pincode:
+pincodeEl.value
+
+}
+
+}
+
+);
+
+
+alert(
+"Profile Updated Successfully"
+);
+
+window.location=
+"profile.html";
+
+}
+
+catch(error){
+
+alert(
+error.message
+);
+
+}
+
+finally{
+
+saveBtn.innerText=
+"💾 Save Profile";
+
+saveBtn.disabled=false;
+
+}
+
+};
+
+</script>
+
+</body>
+</html>
