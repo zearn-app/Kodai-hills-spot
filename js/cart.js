@@ -1,239 +1,19 @@
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-
-<title>Kodai Hills Spot - Cart</title>
-
-<style>
-
-*{
-margin:0;
-padding:0;
-box-sizing:border-box;
-font-family:Arial,sans-serif;
-}
-
-body{
-background:#f5f5f5;
-padding-bottom:90px;
-}
-
-.navbar{
-background:white;
-padding:15px;
-display:flex;
-justify-content:space-between;
-align-items:center;
-position:sticky;
-top:0;
-box-shadow:0 2px 10px rgba(0,0,0,.1);
-}
-
-.logo-box{
-display:flex;
-align-items:center;
-gap:10px;
-}
-
-.logo{
-width:45px;
-height:45px;
-border-radius:50%;
-object-fit:cover;
-border:2px solid #2e7d32;
-}
-
-.logo-text{
-font-size:22px;
-font-weight:bold;
-color:#2e7d32;
-}
-
-.cart-header{
-padding:20px;
-font-size:25px;
-font-weight:bold;
-}
-
-#cartItems{
-padding:15px;
-}
-
-.card{
-background:white;
-padding:15px;
-margin-bottom:15px;
-border-radius:15px;
-display:flex;
-gap:15px;
-box-shadow:0 2px 10px rgba(0,0,0,.1);
-}
-
-.card img{
-width:100px;
-height:100px;
-border-radius:10px;
-object-fit:cover;
-}
-
-.details{
-flex:1;
-}
-
-.price{
-color:#2e7d32;
-font-weight:bold;
-margin:8px 0;
-}
-
-.remove{
-padding:8px 15px;
-border:none;
-border-radius:8px;
-background:#e53935;
-color:white;
-}
-
-.summary{
-position:fixed;
-bottom:75px;
-left:0;
-width:100%;
-background:white;
-padding:15px;
-box-shadow:0 -2px 10px rgba(0,0,0,.1);
-}
-
-.total{
-font-size:22px;
-font-weight:bold;
-color:#2e7d32;
-margin-bottom:10px;
-}
-
-.checkout{
-width:100%;
-padding:14px;
-border:none;
-border-radius:12px;
-background:#2e7d32;
-color:white;
-font-size:17px;
-cursor:pointer;
-}
-
-.bottom-nav{
-position:fixed;
-bottom:0;
-left:0;
-width:100%;
-background:white;
-display:flex;
-justify-content:space-around;
-padding:15px;
-box-shadow:0 -2px 10px rgba(0,0,0,.1);
-}
-
-.bottom-nav a{
-text-decoration:none;
-color:black;
-font-size:14px;
-text-align:center;
-}
-
-.active{
-color:#2e7d32;
-font-weight:bold;
-}
-
-</style>
-</head>
-
-<body>
-
-<nav class="navbar">
-
-<div class="logo-box">
-
-<img src="logo.png" class="logo">
-
-<div class="logo-text">
-Kodai Hills Spot
-</div>
-
-</div>
-
-</nav>
-
-
-<div class="cart-header">
-
-🛒 My Cart
-
-</div>
-
-
-<div id="cartItems">
-
-</div>
-
-
-<div class="summary">
-
-<div class="total" id="total">
-
-Total : ₹0
-
-</div>
-
-<button
-class="checkout"
-id="checkoutBtn">
-
-Proceed To Checkout
-
-</button>
-
-</div>
-
-
-<nav class="bottom-nav">
-
-<a href="index.html">
-🏠<br>Home
-</a>
-
-<a href="products.html">
-🛍️<br>Products
-</a>
-
-<a href="cart.html" class="active">
-🛒<br>Cart
-</a>
-
-<a href="profile.html">
-👤<br>Profile
-</a>
-
-</nav>
-
-<script type="module">
-
 import {auth,db}
-from "./js/firebase.js";
+from "./firebase.js";
 
 import {
+
 collection,
 query,
 where,
 getDocs,
 deleteDoc,
 doc
+
 }
+
 from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
+
 
 const cartItems=
 document.getElementById(
@@ -245,109 +25,251 @@ document.getElementById(
 "total"
 );
 
+const checkoutBtn=
+document.getElementById(
+"checkoutBtn"
+);
+
 let firstProductId="";
 
 
+/* POPUP */
+
+window.showPopup=(
+
+title,
+message
+
+)=>{
+
+document.getElementById(
+"popupTitle"
+).innerText=
+title;
+
+document.getElementById(
+"popupMessage"
+).innerText=
+message;
+
+document.getElementById(
+"popupBox"
+).style.display=
+"flex";
+
+};
+
+
+window.closePopup=()=>{
+
+document.getElementById(
+"popupBox"
+).style.display=
+"none";
+
+};
+
+
+/* LOAD CART */
+
 async function loadCart(){
 
-const user=auth.currentUser;
+try{
+
+const user=
+auth.currentUser;
+
 
 if(!user){
-window.location="login.html";
+
+window.location=
+"login.html";
+
 return;
+
 }
 
-cartItems.innerHTML=
-"Loading...";
 
-const q=query(
-collection(db,"Cart"),
+cartItems.innerHTML=`
+
+<div style="
+text-align:center;
+padding:30px;
+font-size:18px;
+">
+
+Loading Products...
+
+</div>
+
+`;
+
+
+const q=
+
+query(
+
+collection(
+db,
+"Cart"
+),
+
 where(
 "uid",
 "==",
 user.uid
 )
+
 );
 
+
 const snapshot=
-await getDocs(q);
+
+await getDocs(
+q
+);
+
 
 cartItems.innerHTML="";
 
+
 let total=0;
+
+firstProductId="";
+
 
 if(snapshot.empty){
 
 cartItems.innerHTML=`
 
-<h2 style="
+<div style="
 text-align:center;
-margin-top:50px;
+padding:50px;
+animation:fadeIn 1s;
 ">
 
-Cart Empty
+<h2>
+
+🛒 Cart Empty
 
 </h2>
 
+</div>
+
 `;
 
+totalDiv.innerText=
+
+"Total : ₹0";
+
 return;
+
 }
 
-snapshot.forEach((itemDoc)=>{
 
-const item=itemDoc.data();
+let index=0;
 
-if(!firstProductId){
+
+snapshot.forEach(
+
+(itemDoc)=>{
+
+const item=
+itemDoc.data();
+
+
+if(
+!firstProductId
+){
 
 firstProductId=
 item.productId;
 }
 
-total+=
-Number(item.price);
 
-cartItems.innerHTML+=`
+const price=
 
-<div 
-class="card"
-data-id="${item.productId}"
->
+Number(
+item.price||0
+);
+
+
+total+=price;
+
+
+const card=
+
+document.createElement(
+"div"
+);
+
+
+card.className=
+"card";
+
+
+card.style.animationDelay=
+
+`${index*.25}s`;
+
+
+card.innerHTML=`
 
 <img
-src="${item.image}"
+
+src="${
+item.image||'logo.png'
+}"
+
 onerror="
 this.src='logo.png'
-">
+"
+
+>
+
 
 <div class="details">
 
+
 <h3>
 
-${item.name}
+${
+item.name||
+"No Product"
+}
 
 </h3>
 
+
 <div class="price">
 
-₹${item.price}
+₹${price}
 
 </div>
 
+
 <p>
 
-Qty : 
-${item.quantity||1}
+Qty :
+
+${
+item.quantity||1
+}
 
 </p>
 
+
 <button
+
 class="remove"
-onclick="
-removeItem(
+
+onclick="removeItem(
+
 '${itemDoc.id}'
-)
-">
+
+)"
+
+>
 
 Remove
 
@@ -355,37 +277,103 @@ Remove
 
 </div>
 
-</div>
-
 `;
 
-});
+
+cartItems.appendChild(
+card
+);
+
+
+index++;
+
+}
+
+);
+
 
 totalDiv.innerText=
+
 `Total : ₹${total}`;
+
+
+}
+
+catch(error){
+
+console.log(
+error
+);
+
+showPopup(
+
+"Error",
+
+"Unable to load cart"
+
+);
+
+}
 
 }
 
 
-/* Remove Item */
+
+/* REMOVE ITEM */
 
 window.removeItem=
+
 async(id)=>{
 
+try{
+
 await deleteDoc(
+
 doc(
+
 db,
 "Cart",
 id
+
 )
+
 );
 
+
+showPopup(
+
+"Removed",
+
+"Product removed successfully"
+
+);
+
+
 loadCart();
+
+}
+
+catch(error){
+
+console.log(
+error
+);
+
+showPopup(
+
+"Error",
+
+"Unable to remove item"
+
+);
+
+}
 
 };
 
 
-/* Auth Check */
+
+/* AUTH CHECK */
 
 auth.onAuthStateChanged(
 
@@ -400,6 +388,7 @@ loadCart();
 else{
 
 window.location=
+
 "login.html";
 
 }
@@ -407,29 +396,31 @@ window.location=
 });
 
 
-/* Checkout */
 
-document
-.getElementById(
-"checkoutBtn"
-)
+/* CHECKOUT */
 
-.onclick=()=>{
+checkoutBtn.onclick=()=>{
 
-if(!firstProductId){
 
-alert(
-"Cart Empty"
+if(
+!firstProductId
+){
+
+showPopup(
+
+"Cart Empty",
+
+"Please add products"
+
 );
 
 return;
+
 }
 
+
 window.location=
+
 `checkout.html?id=${firstProductId}`;
 
 };
-
-</script>
-</body>
-</html>
