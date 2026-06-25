@@ -30,22 +30,6 @@ overflow-x:hidden;
 
 from{
 opacity:0;
-transform:translateY(20px);
-}
-
-to{
-opacity:1;
-transform:translateY(0);
-}
-
-}
-
-/* Animations */
-
-@keyframes fadeIn{
-
-from{
-opacity:0;
 transform:translateY(35px);
 }
 
@@ -74,7 +58,7 @@ transform:translateY(0);
 
 from{
 opacity:0;
-transform:scale(.6);
+transform:scale(.8);
 }
 
 to{
@@ -84,23 +68,81 @@ transform:scale(1);
 
 }
 
-/* Content animation */
+/* Back Button */
 
-.cart-header,
-.summary{
+.back-container{
 
-animation:fadeIn 1s ease;
+padding:15px;
+
+animation:fadeIn .6s ease;
 
 }
 
-/* Card */
+.back-btn{
+
+display:inline-flex;
+align-items:center;
+justify-content:center;
+
+width:45px;
+height:45px;
+
+border-radius:50%;
+
+background:white;
+
+font-size:25px;
+
+cursor:pointer;
+
+text-decoration:none;
+color:black;
+
+box-shadow:0 2px 10px rgba(0,0,0,.1);
+
+transition:.3s;
+
+}
+
+.back-btn:active{
+
+transform:scale(.92);
+
+}
+
+/* Content */
+
+.cart-header,
+#cartItems,
+.summary{
+
+animation:fadeIn .5s ease;
+
+}
+
+.cart-header{
+
+padding:0 15px;
+font-size:25px;
+font-weight:bold;
+margin-bottom:15px;
+
+}
+
+#cartItems{
+
+padding:15px;
+
+}
 
 .card{
 
 background:white;
 padding:15px;
 margin-bottom:15px;
+
 border-radius:20px;
+
 display:flex;
 gap:15px;
 
@@ -120,85 +162,13 @@ transform:translateY(-5px);
 
 }
 
-@keyframes popupShow{
-
-from{
-opacity:0;
-transform:scale(.8);
-}
-
-to{
-opacity:1;
-transform:scale(1);
-}
-
-}
-
-/* Navbar */
-
-.navbar{
-
-background:white;
-padding:15px;
-display:flex;
-align-items:center;
-box-shadow:0 2px 10px rgba(0,0,0,.1);
-
-position:sticky;
-top:0;
-z-index:100;
-
-}
-
-.logo-box{
-
-display:flex;
-align-items:center;
-gap:10px;
-
-}
-
-.logo{
-
-width:45px;
-height:45px;
-border-radius:50%;
-object-fit:cover;
-border:2px solid #2e7d32;
-
-}
-
-.logo-text{
-
-font-size:22px;
-font-weight:bold;
-color:#2e7d32;
-
-}
-
-/* Content animation */
-
-.cart-header,
-#cartItems,
-.summary{
-
-animation:fadeIn .5s ease;
-
-}
-
-
-#cartItems{
-
-padding:15px;
-
-}
-
-
 .card img{
 
 width:100px;
 height:100px;
+
 border-radius:12px;
+
 object-fit:cover;
 
 }
@@ -212,8 +182,10 @@ flex:1;
 .price{
 
 margin:10px 0;
+
 font-size:20px;
 font-weight:bold;
+
 color:#2e7d32;
 
 }
@@ -221,10 +193,14 @@ color:#2e7d32;
 .remove{
 
 padding:10px 15px;
+
 border:none;
 border-radius:10px;
+
 background:#e53935;
+
 color:white;
+
 cursor:pointer;
 
 transition:.3s;
@@ -242,12 +218,14 @@ transform:scale(.95);
 .summary{
 
 position:fixed;
+
 bottom:75px;
 left:0;
 
 width:100%;
 
 background:white;
+
 padding:15px;
 
 box-shadow:0 -2px 10px rgba(0,0,0,.1);
@@ -258,7 +236,9 @@ box-shadow:0 -2px 10px rgba(0,0,0,.1);
 
 font-size:22px;
 font-weight:bold;
+
 color:#2e7d32;
+
 margin-bottom:10px;
 
 }
@@ -266,14 +246,18 @@ margin-bottom:10px;
 .checkout{
 
 width:100%;
+
 padding:14px;
+
 border:none;
 border-radius:15px;
 
 background:#2e7d32;
+
 color:white;
 
 font-size:18px;
+
 cursor:pointer;
 
 transition:.3s;
@@ -297,10 +281,12 @@ transform:scale(.97);
 .bottom-nav{
 
 position:fixed;
+
 bottom:0;
 left:0;
 
 width:100%;
+
 background:white;
 
 display:flex;
@@ -317,8 +303,11 @@ z-index:999;
 .bottom-nav a{
 
 text-decoration:none;
+
 color:black;
+
 font-size:14px;
+
 text-align:center;
 
 transition:.3s;
@@ -343,6 +332,7 @@ font-weight:bold;
 .popup-container{
 
 position:fixed;
+
 top:0;
 left:0;
 
@@ -350,6 +340,7 @@ width:100%;
 height:100%;
 
 display:none;
+
 justify-content:center;
 align-items:center;
 
@@ -362,11 +353,13 @@ z-index:9999;
 .popup{
 
 background:white;
+
 width:300px;
 
 padding:25px;
 
 border-radius:25px;
+
 text-align:center;
 
 animation:popupShow .3s;
@@ -379,6 +372,7 @@ width:80px;
 height:80px;
 
 border-radius:50%;
+
 border:2px solid #2e7d32;
 
 margin-bottom:15px;
@@ -406,6 +400,7 @@ border:none;
 border-radius:10px;
 
 background:#2e7d32;
+
 color:white;
 
 cursor:pointer;
@@ -418,22 +413,16 @@ cursor:pointer;
 
 <body>
 
-<nav class="navbar">
+<div class="back-container">
 
-<div class="logo-box">
+<a href="javascript:history.back()"
+class="back-btn">
 
-<img src="logo.png"
-class="logo">
+←
 
-<div class="logo-text">
-
-Kodai Hills Spot
+</a>
 
 </div>
-
-</div>
-
-</nav>
 
 <div class="cart-header">
 
@@ -449,7 +438,8 @@ Loading...
 
 <div class="summary">
 
-<div class="total"
+<div
+class="total"
 id="total">
 
 Total : ₹0
@@ -466,36 +456,12 @@ Proceed To Checkout
 
 </div>
 
-<nav class="bottom-nav">
 
-<a href="index.html">
 
-🏠<br>Home
 
-</a>
 
-<a href="products.html">
-
-🛍️<br>Products
-
-</a>
-
-<a href="cart.html"
-class="active">
-
-🛒<br>Cart
-
-</a>
-
-<a href="profile.html">
-
-👤<br>Profile
-
-</a>
-
-</nav>
-
-<div id="popupBox"
+<div
+id="popupBox"
 class="popup-container">
 
 <div class="popup">
@@ -544,8 +510,11 @@ popupBox.style.display=
 
 </script>
 
-<script type="module"
-src="js/cart.js"></script>
+<script
+type="module"
+src="js/cart.js">
+
+</script>
 
 </body>
 </html>
