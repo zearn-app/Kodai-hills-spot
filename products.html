@@ -4,8 +4,7 @@
 <head>
 
 <meta charset="UTF-8">
-<meta name="viewport"
-content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 
 <title>Products</title>
 
@@ -25,79 +24,76 @@ padding-bottom:90px;
 overflow-x:hidden;
 }
 
-/* Main content animation */
-
-.main-content{
-animation:pageLoad 1.2s ease;
-}
-
-@keyframes pageLoad{
-
-0%{
-opacity:0;
-transform:translateY(30px);
-}
-
-100%{
-opacity:1;
-transform:translateY(0);
-}
-
-}
-
-@keyframes cardShow{
-
-0%{
-opacity:0;
-transform:translateY(50px);
-}
-
-100%{
-opacity:1;
-transform:translateY(0);
-}
-
-}
-
-@keyframes popupShow{
-
-0%{
-opacity:0;
-transform:scale(.75);
-}
-
-100%{
-opacity:1;
-transform:scale(1);
-}
-
-}
-
 /* Header */
 
 .header{
+display:flex;
+align-items:center;
+justify-content:space-between;
+margin-bottom:20px;
+}
 
+.left-header{
 display:flex;
 align-items:center;
 gap:10px;
-margin-bottom:20px;
-
 }
 
 .logo{
-
 width:50px;
 height:50px;
 border-radius:50%;
 border:2px solid #2e7d32;
-
 }
 
 .title{
-
 font-size:25px;
 font-weight:bold;
 color:#2e7d32;
+}
+
+/* Floating cart */
+
+.cart-btn{
+
+position:fixed;
+
+top:20px;
+right:15px;
+
+width:55px;
+height:55px;
+
+border-radius:50%;
+
+background:white;
+
+display:flex;
+justify-content:center;
+align-items:center;
+
+text-decoration:none;
+font-size:26px;
+
+box-shadow:0 3px 15px rgba(0,0,0,.2);
+
+z-index:9999;
+
+}
+
+.cart-dot{
+
+position:absolute;
+
+top:10px;
+right:10px;
+
+width:10px;
+height:10px;
+
+background:red;
+
+border-radius:50%;
 
 }
 
@@ -107,6 +103,7 @@ color:#2e7d32;
 
 width:100%;
 padding:15px;
+
 border:none;
 border-radius:15px;
 
@@ -115,14 +112,6 @@ margin-bottom:15px;
 background:white;
 
 box-shadow:0 2px 10px rgba(0,0,0,.08);
-
-transition:.4s;
-
-}
-
-.search:focus{
-
-transform:scale(1.02);
 
 outline:none;
 
@@ -138,14 +127,10 @@ gap:12px;
 
 margin-bottom:15px;
 
-padding-bottom:5px;
-
 }
 
 .category-scroll::-webkit-scrollbar{
-
 display:none;
-
 }
 
 .category-card{
@@ -166,17 +151,6 @@ box-shadow:0 2px 10px rgba(0,0,0,.08);
 
 cursor:pointer;
 
-transition:.4s;
-
-}
-
-.category-card:hover{
-
-background:#2e7d32;
-color:white;
-
-transform:translateY(-5px);
-
 }
 
 /* Filter */
@@ -184,11 +158,9 @@ transform:translateY(-5px);
 .filter{
 
 width:100%;
-
 padding:15px;
 
 border:none;
-
 border-radius:15px;
 
 margin-bottom:20px;
@@ -204,6 +176,7 @@ box-shadow:0 2px 10px rgba(0,0,0,.08);
 .products{
 
 display:grid;
+
 grid-template-columns:repeat(2,1fr);
 
 gap:15px;
@@ -220,15 +193,7 @@ border-radius:15px;
 
 box-shadow:0 2px 10px rgba(0,0,0,.1);
 
-animation:cardShow .8s ease forwards;
-
-transition:.4s;
-
-}
-
-.card:hover{
-
-transform:translateY(-5px);
+position:relative;
 
 }
 
@@ -257,14 +222,11 @@ font-size:18px;
 font-weight:bold;
 color:#2e7d32;
 
-margin:8px 0;
-
 }
 
 .btn{
 
 width:100%;
-
 padding:10px;
 
 background:#2e7d32;
@@ -275,19 +237,48 @@ border-radius:10px;
 
 color:white;
 
-cursor:pointer;
-
-transition:.3s;
+margin-top:10px;
 
 }
 
-.btn:active{
+.stock-badge{
 
-transform:scale(.95);
+position:absolute;
+top:8px;
+right:8px;
+
+background:red;
+color:white;
+
+padding:5px 10px;
+
+border-radius:20px;
+
+font-size:11px;
 
 }
 
-/* Bottom Navbar */
+.pack{
+
+font-size:13px;
+font-weight:bold;
+color:#666;
+
+margin-top:5px;
+
+}
+
+.old-price{
+
+text-decoration:line-through;
+color:red;
+font-size:14px;
+
+margin-right:8px;
+
+}
+
+/* Bottom nav */
 
 .bottom-nav{
 
@@ -301,34 +292,20 @@ width:100%;
 background:white;
 
 display:flex;
-
 justify-content:space-around;
 
 padding:15px;
 
 box-shadow:0 -2px 10px rgba(0,0,0,.1);
 
-z-index:9999;
-
 }
 
 .bottom-nav a{
 
 text-decoration:none;
-
 color:black;
 
 text-align:center;
-
-font-size:14px;
-
-transition:.3s;
-
-}
-
-.bottom-nav a:active{
-
-transform:scale(.92);
 
 }
 
@@ -339,97 +316,25 @@ font-weight:bold;
 
 }
 
-/* Popup */
-
-.popup-container{
-
-position:fixed;
-
-top:0;
-left:0;
-
-width:100%;
-height:100%;
-
-display:none;
-
-justify-content:center;
-align-items:center;
-
-background:rgba(0,0,0,.5);
-
-z-index:10000;
-
-}
-
-.popup{
-
-background:white;
-
-width:300px;
-
-padding:25px;
-
-border-radius:25px;
-
-text-align:center;
-
-animation:popupShow .35s ease;
-
-}
-
-.popup img{
-
-width:80px;
-height:80px;
-
-border-radius:50%;
-
-border:2px solid #2e7d32;
-
-margin-bottom:15px;
-
-}
-
-.popup h2{
-
-color:#2e7d32;
-
-margin-bottom:10px;
-
-}
-
-.popup p{
-
-margin-bottom:20px;
-
-}
-
-.popup button{
-
-padding:12px 30px;
-
-border:none;
-
-border-radius:10px;
-
-background:#2e7d32;
-
-color:white;
-
-cursor:pointer;
-
-}
-
 </style>
 
 </head>
 
 <body>
 
-<div class="main-content">
+
+<a href="cart.html" class="cart-btn">
+
+🛒
+
+<div class="cart-dot"></div>
+
+</a>
+
 
 <div class="header">
+
+<div class="left-header">
 
 <img src="logo.png" class="logo">
 
@@ -441,6 +346,9 @@ Products
 
 </div>
 
+</div>
+
+
 <input
 class="search"
 id="searchInput"
@@ -449,13 +357,21 @@ placeholder="🔍 Search products">
 
 <div class="category-scroll">
 
-<div class="category-card">🍫 Chocolate</div>
+<div class="category-card">
+🍫 Chocolate
+</div>
 
-<div class="category-card">🥑 Fruits</div>
+<div class="category-card">
+🥑 Fruits
+</div>
 
-<div class="category-card">🥔 Vegetables</div>
+<div class="category-card">
+🥔 Vegetables
+</div>
 
-<div class="category-card">🌿 Organic</div>
+<div class="category-card">
+🌿 Organic
+</div>
 
 </div>
 
@@ -464,22 +380,30 @@ placeholder="🔍 Search products">
 class="filter"
 id="priceFilter">
 
-<option value="">Sort Products</option>
+<option value="">
+Sort Products
+</option>
 
-<option value="low">Price Low → High</option>
+<option value="low">
+Price Low → High
+</option>
 
-<option value="high">Price High → Low</option>
+<option value="high">
+Price High → Low
+</option>
 
-<option value="buy">Most Buyed</option>
+<option value="buy">
+Most Buyed
+</option>
 
 </select>
 
 
-<div class="products" id="products">
+<div
+class="products"
+id="products">
 
 Loading...
-
-</div>
 
 </div>
 
@@ -487,66 +411,94 @@ Loading...
 <nav class="bottom-nav">
 
 <a href="index.html">
-🏠<br>Home
+
+🏠<br>
+Home
+
 </a>
 
-<a href="products.html"
+<a
+href="products.html"
 class="active">
-🛍️<br>Products
+
+🛍️<br>
+Products
+
 </a>
 
-<a href="cart.html">
-🛒<br>Cart
-</a>
+<a
+id="profileNav">
 
-<div id="profileNav"></div>
+Loading...
+
+</a>
 
 </nav>
 
 
-<div
-id="popupBox"
-class="popup-container">
+<script type="module">
 
-<div class="popup">
+import { auth }
+from "./js/firebase.js";
 
-<img src="logo.png">
+import {
+onAuthStateChanged
+}
+from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
 
-<h2 id="popupTitle"></h2>
 
-<p id="popupMessage"></p>
+const profileNav=
+document.getElementById(
+"profileNav"
+);
 
-<button onclick="closePopup()">
 
-OK
+onAuthStateChanged(
 
-</button>
+auth,
 
-</div>
+(user)=>{
 
-</div>
+if(user){
 
-<script>
+profileNav.href=
+"profile.html";
 
-function showPopup(title,message){
+profileNav.innerHTML=`
 
-popupTitle.innerText=title;
+👤<br>
+Yours
 
-popupMessage.innerText=message;
-
-popupBox.style.display="flex";
+`;
 
 }
 
-function closePopup(){
+else{
 
-popupBox.style.display="none";
+profileNav.href=
+"login.html";
+
+profileNav.innerHTML=`
+
+🔐<br>
+Login
+
+`;
 
 }
+
+}
+
+);
 
 </script>
 
-<script type="module" src="js/products.js"></script>
+
+<script
+type="module"
+src="./js/products.js">
+
+</script>
 
 </body>
 </html>
