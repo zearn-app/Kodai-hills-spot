@@ -230,7 +230,7 @@ if(
 
 showPopup(
 "Missing Information",
-"Please complete all required details"
+"Please enter all required details"
 );
 
 return;
