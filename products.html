@@ -23,20 +23,22 @@ background:#f5f5f5;
 padding:15px;
 padding-bottom:90px;
 overflow-x:hidden;
-animation:pageLoad 1s;
 }
 
+/* Main content animation */
 
-/* Animations */
+.main-content{
+animation:pageLoad 1.2s ease;
+}
 
 @keyframes pageLoad{
 
-from{
+0%{
 opacity:0;
-transform:translateY(20px);
+transform:translateY(30px);
 }
 
-to{
+100%{
 opacity:1;
 transform:translateY(0);
 }
@@ -45,12 +47,12 @@ transform:translateY(0);
 
 @keyframes cardShow{
 
-from{
+0%{
 opacity:0;
 transform:translateY(50px);
 }
 
-to{
+100%{
 opacity:1;
 transform:translateY(0);
 }
@@ -59,41 +61,45 @@ transform:translateY(0);
 
 @keyframes popupShow{
 
-from{
+0%{
 opacity:0;
-transform:scale(.7);
+transform:scale(.75);
 }
 
-to{
+100%{
 opacity:1;
 transform:scale(1);
 }
 
 }
 
-
 /* Header */
 
 .header{
+
 display:flex;
 align-items:center;
 gap:10px;
 margin-bottom:20px;
+
 }
 
 .logo{
+
 width:50px;
 height:50px;
 border-radius:50%;
 border:2px solid #2e7d32;
+
 }
 
 .title{
+
 font-size:25px;
 font-weight:bold;
 color:#2e7d32;
-}
 
+}
 
 /* Search */
 
@@ -103,9 +109,12 @@ width:100%;
 padding:15px;
 border:none;
 border-radius:15px;
+
 margin-bottom:15px;
 
-box-shadow:0 2px 10px rgba(0,0,0,.1);
+background:white;
+
+box-shadow:0 2px 10px rgba(0,0,0,.08);
 
 transition:.4s;
 
@@ -115,17 +124,20 @@ transition:.4s;
 
 transform:scale(1.02);
 
+outline:none;
+
 }
 
-
-/* Categories */
+/* Category */
 
 .category-scroll{
 
 display:flex;
 overflow:auto;
 gap:12px;
+
 margin-bottom:15px;
+
 padding-bottom:5px;
 
 }
@@ -150,7 +162,7 @@ text-align:center;
 
 font-weight:bold;
 
-box-shadow:0 2px 10px rgba(0,0,0,.1);
+box-shadow:0 2px 10px rgba(0,0,0,.08);
 
 cursor:pointer;
 
@@ -160,19 +172,19 @@ transition:.4s;
 
 .category-card:hover{
 
-transform:translateY(-5px);
-
 background:#2e7d32;
 color:white;
 
-}
+transform:translateY(-5px);
 
+}
 
 /* Filter */
 
 .filter{
 
 width:100%;
+
 padding:15px;
 
 border:none;
@@ -183,19 +195,16 @@ margin-bottom:20px;
 
 background:white;
 
-box-shadow:0 2px 10px rgba(0,0,0,.1);
+box-shadow:0 2px 10px rgba(0,0,0,.08);
 
 }
-
 
 /* Products */
 
 .products{
 
 display:grid;
-
-grid-template-columns:
-repeat(2,1fr);
+grid-template-columns:repeat(2,1fr);
 
 gap:15px;
 
@@ -211,7 +220,7 @@ border-radius:15px;
 
 box-shadow:0 2px 10px rgba(0,0,0,.1);
 
-animation:cardShow .8s;
+animation:cardShow .8s ease forwards;
 
 transition:.4s;
 
@@ -226,7 +235,6 @@ transform:translateY(-5px);
 .card img{
 
 width:100%;
-
 height:140px;
 
 object-fit:cover;
@@ -246,12 +254,10 @@ font-size:16px;
 .price{
 
 font-size:18px;
-
 font-weight:bold;
-
 color:#2e7d32;
 
-margin:5px 0;
+margin:8px 0;
 
 }
 
@@ -281,8 +287,7 @@ transform:scale(.95);
 
 }
 
-
-/* Bottom nav */
+/* Bottom Navbar */
 
 .bottom-nav{
 
@@ -303,7 +308,7 @@ padding:15px;
 
 box-shadow:0 -2px 10px rgba(0,0,0,.1);
 
-z-index:999;
+z-index:9999;
 
 }
 
@@ -315,13 +320,15 @@ color:black;
 
 text-align:center;
 
+font-size:14px;
+
 transition:.3s;
 
 }
 
-.bottom-nav a:hover{
+.bottom-nav a:active{
 
-transform:translateY(-3px);
+transform:scale(.92);
 
 }
 
@@ -331,7 +338,6 @@ color:#2e7d32;
 font-weight:bold;
 
 }
-
 
 /* Popup */
 
@@ -352,7 +358,7 @@ align-items:center;
 
 background:rgba(0,0,0,.5);
 
-z-index:9999;
+z-index:10000;
 
 }
 
@@ -368,7 +374,7 @@ border-radius:25px;
 
 text-align:center;
 
-animation:popupShow .4s;
+animation:popupShow .35s ease;
 
 }
 
@@ -421,11 +427,11 @@ cursor:pointer;
 
 <body>
 
+<div class="main-content">
 
 <div class="header">
 
-<img src="logo.png"
-class="logo">
+<img src="logo.png" class="logo">
 
 <div class="title">
 
@@ -435,7 +441,6 @@ Products
 
 </div>
 
-
 <input
 class="search"
 id="searchInput"
@@ -444,21 +449,13 @@ placeholder="🔍 Search products">
 
 <div class="category-scroll">
 
-<div class="category-card">
-🍫 Chocolate
-</div>
+<div class="category-card">🍫 Chocolate</div>
 
-<div class="category-card">
-🥑 Fruits
-</div>
+<div class="category-card">🥑 Fruits</div>
 
-<div class="category-card">
-🥔 Vegetables
-</div>
+<div class="category-card">🥔 Vegetables</div>
 
-<div class="category-card">
-🌿 Organic
-</div>
+<div class="category-card">🌿 Organic</div>
 
 </div>
 
@@ -467,30 +464,22 @@ placeholder="🔍 Search products">
 class="filter"
 id="priceFilter">
 
-<option value="">
-Sort Products
-</option>
+<option value="">Sort Products</option>
 
-<option value="low">
-Price Low → High
-</option>
+<option value="low">Price Low → High</option>
 
-<option value="high">
-Price High → Low
-</option>
+<option value="high">Price High → Low</option>
 
-<option value="buy">
-Most Buyed
-</option>
+<option value="buy">Most Buyed</option>
 
 </select>
 
 
-<div
-class="products"
-id="products">
+<div class="products" id="products">
 
 Loading...
+
+</div>
 
 </div>
 
@@ -498,22 +487,16 @@ Loading...
 <nav class="bottom-nav">
 
 <a href="index.html">
-
 🏠<br>Home
-
 </a>
 
 <a href="products.html"
 class="active">
-
 🛍️<br>Products
-
 </a>
 
 <a href="cart.html">
-
 🛒<br>Cart
-
 </a>
 
 <div id="profileNav"></div>
@@ -543,81 +526,27 @@ OK
 
 </div>
 
-
 <script>
 
-function showPopup(
-title,
-message
-){
+function showPopup(title,message){
 
-popupTitle.innerText=
-title;
+popupTitle.innerText=title;
 
-popupMessage.innerText=
-message;
+popupMessage.innerText=message;
 
-popupBox.style.display=
-"flex";
+popupBox.style.display="flex";
 
 }
 
 function closePopup(){
 
-popupBox.style.display=
-"none";
+popupBox.style.display="none";
 
 }
 
 </script>
 
-
-<script type="module">
-
-import {auth}
-from "./js/firebase.js";
-
-import {
-onAuthStateChanged
-}
-from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
-
-
-const profileNav=
-document.getElementById(
-"profileNav"
-);
-
-
-onAuthStateChanged(
-
-auth,
-
-(user)=>{
-
-if(user){
-
-profileNav.innerHTML=`
-
-<a href="profile.html">
-
-👤<br>Profile
-
-</a>
-
-`;
-
-}
-
-});
-
-</script>
-
-
-<script type="module"
-src="js/products.js">
-
-</script>
+<script type="module" src="js/products.js"></script>
 
 </body>
 </html>
