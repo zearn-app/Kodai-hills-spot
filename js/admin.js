@@ -19,72 +19,45 @@ from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
 
 const productsDiv=
-document.getElementById(
-"products"
-);
+document.getElementById("products");
 
 const ordersDiv=
-document.getElementById(
-"allOrders"
-);
+document.getElementById("allOrders");
 
 let selectedOrderId=null;
 
 
+/* ADMIN CHECK */
 
-/* ADMIN LOGIN CHECK */
-
-onAuthStateChanged(
-
-auth,
-
-(user)=>{
+onAuthStateChanged(auth,(user)=>{
 
 if(!user){
 
-window.location=
-"index.html";
-
+window.location="index.html";
 return;
 
 }
 
-if(
-user.email!==
-"kodaihillsspot@gmail.com"
-){
+if(user.email!=="kodaihillsspot@gmail.com"){
 
-alert(
-"Access denied"
-);
+alert("Access denied");
 
-window.location=
-"home.html";
+window.location="home.html";
 
 return;
 
 }
 
 loadStats();
-
 loadProducts();
-
 loadOrders();
 
-}
-
-);
+});
 
 
-
-/* USER PAGE */
-
-document
-.getElementById(
+document.getElementById(
 "userBtn"
-)
-
-.onclick=()=>{
+).onclick=()=>{
 
 window.location=
 "srkxditit.html";
@@ -95,51 +68,53 @@ window.location=
 
 /* ADD PRODUCT */
 
-document
-.getElementById(
+document.getElementById(
 "addBtn"
-)
-
-.onclick=
+).onclick=
 
 async()=>{
 
 try{
 
 const name=
-document
-.getElementById(
+document.getElementById(
 "name"
-)
-.value.trim();
+).value.trim();
 
 const price=
-document
-.getElementById(
+document.getElementById(
 "price"
-)
-.value.trim();
+).value.trim();
+
+const oldPrice=
+document.getElementById(
+"oldPrice"
+).value.trim();
+
+const packQty=
+document.getElementById(
+"packQty"
+).value.trim();
 
 const category=
-document
-.getElementById(
+document.getElementById(
 "category"
-)
-.value;
+).value;
 
 const image=
-document
-.getElementById(
+document.getElementById(
 "image"
-)
-.value.trim();
+).value.trim();
 
 const description=
-document
-.getElementById(
+document.getElementById(
 "description"
-)
-.value.trim();
+).value.trim();
+
+const fewStock=
+document.getElementById(
+"fewStock"
+).checked;
 
 
 if(
@@ -149,9 +124,7 @@ if(
 !description
 ){
 
-alert(
-"Fill all fields"
-);
+alert("Fill all fields");
 
 return;
 
@@ -160,25 +133,25 @@ return;
 
 await addDoc(
 
-collection(
-db,
-"Products"
-),
+collection(db,"Products"),
 
 {
 
-name:name,
-price:price,
-category:category,
+name,
+price,
+oldPrice,
+packQty,
+category,
 Image:image,
-description:description
+description,
+fewStock
 
 }
 
 );
 
 alert(
-"Product added"
+"Product Added"
 );
 
 
@@ -191,6 +164,14 @@ document.getElementById(
 ).value="";
 
 document.getElementById(
+"oldPrice"
+).value="";
+
+document.getElementById(
+"packQty"
+).value="";
+
+document.getElementById(
 "image"
 ).value="";
 
@@ -198,17 +179,20 @@ document.getElementById(
 "description"
 ).value="";
 
+document.getElementById(
+"fewStock"
+).checked=false;
+
 
 loadProducts();
 
 loadStats();
 
 }
+
 catch(error){
 
-alert(
-error.message
-);
+alert(error.message);
 
 }
 
@@ -226,37 +210,26 @@ productsDiv.innerHTML=
 const snapshot=
 
 await getDocs(
-
-collection(
-db,
-"Products"
-)
-
+collection(db,"Products")
 );
 
 productsDiv.innerHTML="";
 
 
-snapshot.forEach(
+snapshot.forEach((item)=>{
 
-(item)=>{
-
-const data=
-item.data();
+const data=item.data();
 
 productsDiv.innerHTML+=`
 
-<div
-style="
+<div style="
 background:white;
 padding:15px;
 margin-bottom:15px;
 border-radius:15px;
 ">
 
-<img
-src="${data.Image}"
-
+<img src="${data.Image}"
 style="
 width:100%;
 height:150px;
@@ -264,22 +237,38 @@ object-fit:cover;
 border-radius:10px;
 ">
 
-<h3>
-${data.name}
-</h3>
+<h3>${data.name}</h3>
 
 <p>
-₹${data.price}
+Price: ₹${data.price}
+</p>
+
+<p>
+Old Price:
+<s>
+₹${data.oldPrice||0}
+</s>
+</p>
+
+<p>
+Pack:
+${data.packQty||"-"}
 </p>
 
 <p>
 ${data.category}
 </p>
 
+${
+data.fewStock
+?
+"<p style='color:red'>⚠ Few Stock Left</p>"
+:
+""
+}
+
 <button
-
 onclick="deleteProduct('${item.id}')"
-
 style="
 background:red;
 color:white;
@@ -296,28 +285,24 @@ Delete
 
 `;
 
-}
-
-);
+});
 
 }
 
 
 
-/* DELETE PRODUCT */
+/* DELETE */
 
 window.deleteProduct=
 
 async(id)=>{
 
 await deleteDoc(
-
 doc(
 db,
 "Products",
 id
 )
-
 );
 
 loadProducts();
@@ -335,40 +320,32 @@ async function loadStats(){
 const products=
 
 await getCountFromServer(
-
 collection(
 db,
 "Products"
 )
-
 );
 
 const orders=
 
 await getCountFromServer(
-
 collection(
 db,
 "Orders"
 )
-
 );
 
 
 document.getElementById(
 "totalProducts"
-)
-
-.innerText=
+).innerText=
 
 products.data().count;
 
 
 document.getElementById(
 "totalOrders"
-)
-
-.innerText=
+).innerText=
 
 orders.data().count;
 
@@ -385,26 +362,20 @@ ordersDiv.innerHTML="";
 const snapshot=
 
 await getDocs(
-
 collection(
 db,
 "Orders"
 )
-
 );
 
 
-snapshot.forEach(
+snapshot.forEach((item)=>{
 
-(item)=>{
-
-const data=
-item.data();
+const data=item.data();
 
 ordersDiv.innerHTML+=`
 
 <div
-
 onclick='openOrder(${JSON.stringify({
 id:item.id,
 ...data
@@ -418,154 +389,86 @@ border-radius:15px;
 cursor:pointer;
 ">
 
-<h3>
+<h3>${data.name||""}</h3>
 
-${data.name||""}
+<p>${data.email||""}</p>
 
-</h3>
-
-<p>
-
-${data.email||""}
-
-</p>
+<p>₹${data.price||0}</p>
 
 <p>
-
-₹${data.price||0}
-
-</p>
-
-<p>
-
 Status:
 ${data.status||"Pending"}
-
 </p>
 
 </div>
 
 `;
 
-}
-
-);
+});
 
 }
 
 
 
-/* OPEN ORDER POPUP */
+/* OPEN ORDER */
 
-window.openOrder=
+window.openOrder=(data)=>{
 
-(data)=>{
-
-selectedOrderId=
-data.id;
-
+selectedOrderId=data.id;
 
 document.getElementById(
 "statusPopup"
-).style.display=
-"flex";
-
+).style.display="flex";
 
 document.getElementById(
 "orderId"
-).innerText=
-data.id||"-";
+).innerText=data.id||"-";
 
 document.getElementById(
 "productName"
-).innerText=
-data.name||"-";
+).innerText=data.name||"-";
 
 document.getElementById(
 "quantity"
-).innerText=
-data.quantity||1;
+).innerText=data.quantity||1;
 
 document.getElementById(
 "totalPrice"
-).innerText=
-"₹"+(data.price||0);
-
+).innerText="₹"+(data.price||0);
 
 document.getElementById(
 "userName"
-).innerText=
-data.userName||"-";
+).innerText=data.userName||"-";
 
 document.getElementById(
 "userEmail"
-).innerText=
-data.email||"-";
+).innerText=data.email||"-";
 
 document.getElementById(
 "userPhone"
-).innerText=
-data.phone||"-";
+).innerText=data.phone||"-";
 
 document.getElementById(
 "userAddress"
-).innerText=
-data.address||"-";
-
-
-document.getElementById(
-"statusSelect"
-).value=
-data.status||"Pending";
+).innerText=data.address||"-";
 
 };
 
 
 
-/* CLOSE POPUP */
-
-window.closePopup=
-
-()=>{
+window.closePopup=()=>{
 
 document.getElementById(
 "statusPopup"
-).style.display=
-"none";
+).style.display="none";
 
 };
 
 
-
-/* STATUS CHANGE */
-
-statusSelect.onchange=
-
-()=>{
-
-trackingId.style.display=
-
-statusSelect.value==="Accepted"
-
-?
-
-"block"
-
-:
-
-"none";
-
-};
-
-
-
-/* UPDATE ORDER */
 
 updateBtn.onclick=
 
 async()=>{
-
-try{
 
 await updateDoc(
 
@@ -597,20 +500,11 @@ trackingId.value
 );
 
 alert(
-"Order updated"
+"Order Updated"
 );
 
 closePopup();
 
 loadOrders();
-
-}
-catch(error){
-
-alert(
-error.message
-);
-
-}
 
 };
