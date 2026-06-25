@@ -18,6 +18,37 @@ let totalAmount=0;
 let currentProduct=null;
 
 
+/* POPUP */
+
+function showPopup(
+title,
+message
+){
+
+document.getElementById(
+"popupTitle"
+).innerText=title;
+
+document.getElementById(
+"popupMessage"
+).innerText=message;
+
+document.getElementById(
+"popupBox"
+).style.display="flex";
+
+}
+
+window.closePopup=()=>{
+
+document.getElementById(
+"popupBox"
+).style.display="none";
+
+};
+
+
+
 /* AUTH */
 
 onAuthStateChanged(
@@ -31,6 +62,7 @@ currentUser=user;
 if(!user){
 
 window.location="login.html";
+
 return;
 
 }
@@ -42,7 +74,6 @@ loadProduct();
 );
 
 
-/* PRODUCT LOAD */
 
 async function loadProduct(){
 
@@ -56,11 +87,6 @@ window.location.search
 const productId=
 params.get("id");
 
-console.log(
-"Product ID:",
-productId
-);
-
 if(!productId){
 
 document.getElementById(
@@ -71,7 +97,6 @@ document.getElementById(
 return;
 
 }
-
 
 const productRef=
 doc(
@@ -85,7 +110,6 @@ await getDoc(
 productRef
 );
 
-
 if(!productSnap.exists()){
 
 document.getElementById(
@@ -97,50 +121,37 @@ return;
 
 }
 
-
 const product=
 productSnap.data();
-
-console.log(product);
 
 currentProduct=
 product;
 
 totalAmount=
 Number(
-product.price || 0
+product.price||0
 );
 
 
 document.getElementById(
 "productName"
 ).innerText=
-product.name || "No Name";
-
+product.name;
 
 document.getElementById(
 "productPrice"
 ).innerText=
 `₹${totalAmount}`;
 
-
 document.getElementById(
 "productImage"
 ).src=
-product.Image || "logo.png";
-
-
-document.getElementById(
-"productQty"
-).innerText=
-"Qty : 1";
-
+product.Image||"logo.png";
 
 document.getElementById(
 "subtotal"
 ).innerText=
 `₹${totalAmount}`;
-
 
 document.getElementById(
 "total"
@@ -151,10 +162,7 @@ document.getElementById(
 
 catch(error){
 
-console.log(
-"Load Error:",
-error
-);
+console.log(error);
 
 }
 
@@ -220,7 +228,8 @@ if(
 !pincode
 ){
 
-alert(
+showPopup(
+"Missing Fields",
 "Please fill all fields"
 );
 
@@ -228,19 +237,6 @@ return;
 
 }
 
-
-if(!currentProduct){
-
-alert(
-"Product not loaded"
-);
-
-return;
-
-}
-
-
-/* RAZORPAY */
 
 const options={
 
@@ -264,9 +260,11 @@ image:
 
 handler:function(response){
 
-alert(
+showPopup(
 
-"✅ Payment Success\n\nPayment ID:\n"+
+"Payment Success",
+
+"Payment ID:\n"+
 
 response.razorpay_payment_id
 
@@ -281,22 +279,24 @@ name:name,
 contact:phone,
 
 email:
-currentUser?.email || ""
+currentUser?.email||""
 
 },
 
 theme:{
-
 color:"#2e7d32"
-
 },
 
 modal:{
 
 ondismiss:function(){
 
-alert(
-"❌ Payment cancelled.\nTry again."
+showPopup(
+
+"Payment Cancelled",
+
+"Please try again"
+
 );
 
 }
@@ -312,109 +312,26 @@ options
 );
 
 
-/* PAYMENT FAILED */
-
 razorpay.on(
 
 "payment.failed",
 
-function(response){
+function(){
 
-alert(
+showPopup(
 
-"❌ Payment Failed\n\n"+
+"Payment Failed",
 
-response.error.description
+"Please try again"
 
 );
 
 }
 
 );
+
 
 razorpay.open();
-
-}
-
-);
-
-
-/* STATE + DISTRICT */
-
-const stateSelect=
-document.getElementById(
-"state"
-);
-
-const districtSelect=
-document.getElementById(
-"district"
-);
-
-
-const statesAndDistricts={
-
-"Tamil Nadu":[
-"Chennai",
-"Coimbatore",
-"Madurai",
-"Trichy"
-],
-
-"Kerala":[
-"Kochi",
-"Kollam"
-],
-
-"Karnataka":[
-"Bangalore",
-"Mysore"
-]
-
-};
-
-
-Object.keys(
-statesAndDistricts
-)
-
-.forEach(state=>{
-
-stateSelect.innerHTML+=
-
-`<option>${state}</option>`;
-
-});
-
-
-stateSelect.addEventListener(
-
-"change",
-
-()=>{
-
-districtSelect.innerHTML=
-
-"<option>Select District</option>";
-
-const districts=
-
-statesAndDistricts[
-stateSelect.value
-] || [];
-
-
-districts.forEach(
-
-district=>{
-
-districtSelect.innerHTML+=
-
-`<option>${district}</option>`;
-
-}
-
-);
 
 }
 
