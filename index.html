@@ -23,21 +23,17 @@ overflow-x:hidden;
 }
 
 
-/* Smooth animations */
+/* Animations */
 
 @keyframes fade{
-from{
-opacity:0;
-}
-to{
-opacity:1;
-}
+from{opacity:0;}
+to{opacity:1;}
 }
 
 @keyframes slideUp{
 from{
 opacity:0;
-transform:translateY(50px);
+transform:translateY(30px);
 }
 to{
 opacity:1;
@@ -57,61 +53,105 @@ transform:scale(1);
 }
 
 body{
-animation:fade .8s ease;
+animation:fade .8s;
 }
 
 
 /* NAVBAR */
 
 .navbar{
+
 background:white;
 padding:10px 15px;
+
 display:flex;
-justify-content:space-between;
 align-items:center;
+justify-content:space-between;
 
 position:sticky;
 top:0;
+
 z-index:100;
 
 box-shadow:0 2px 10px rgba(0,0,0,.1);
+
 }
 
-.logo-container{
-flex:1;
+.left-icons{
+
 display:flex;
-flex-direction:column;
 align-items:center;
-}
+gap:15px;
 
-.logo-container h5{
-font-size:16px;
-margin-bottom:5px;
-}
-
-.logo-img{
-width:80px;
-height:55px;
-object-fit:contain;
-}
-
-.logo-small{
-width:100px;
-object-fit:contain;
 }
 
 .menu-btn{
-font-size:32px;
+
+font-size:30px;
 cursor:pointer;
+
+}
+
+.cart-btn{
+
+font-size:26px;
+text-decoration:none;
+color:black;
+position:relative;
+
+}
+
+.cart-dot{
+
+position:absolute;
+top:-5px;
+right:-8px;
+
+width:10px;
+height:10px;
+
+background:red;
+border-radius:50%;
+
+}
+
+.logo-container{
+
+display:flex;
+flex-direction:column;
+align-items:center;
+
+}
+
+.logo-container h5{
+
+font-size:16px;
+margin-bottom:5px;
+
+}
+
+.logo-img{
+
+width:80px;
+height:55px;
+object-fit:contain;
+
+}
+
+.logo-small{
+
+width:100px;
+
 }
 
 
-/* MENU */
+/* SIDE MENU */
 
 .side-menu{
+
 position:fixed;
-top:0;
 left:-280px;
+top:0;
 
 width:250px;
 height:100%;
@@ -120,10 +160,12 @@ background:white;
 
 padding-top:60px;
 
-transition:.5s ease;
+transition:.5s;
+
 z-index:999;
 
 box-shadow:3px 0 15px rgba(0,0,0,.2);
+
 }
 
 .side-menu.active{
@@ -131,23 +173,30 @@ left:0;
 }
 
 .side-menu a{
+
 display:block;
 padding:18px;
+
 text-decoration:none;
 color:black;
-font-size:17px;
+
 border-bottom:1px solid #eee;
+
 }
 
 .close-btn{
+
 position:absolute;
 top:15px;
 right:15px;
-font-size:28px;
+
+font-size:30px;
 cursor:pointer;
+
 }
 
 .overlay-bg{
+
 position:fixed;
 top:0;
 left:0;
@@ -161,41 +210,51 @@ opacity:0;
 visibility:hidden;
 
 transition:.4s;
+
 z-index:998;
+
 }
 
 .overlay-bg.active{
+
 opacity:1;
 visibility:visible;
+
 }
 
 
-/* SLIDER */
+/* Slider */
 
 .hero{
+
 padding:10px;
+animation:slideUp .7s;
+
 }
 
 .slider{
 
 height:220px;
-border-radius:25px;
+
 overflow:hidden;
+border-radius:25px;
 
 position:relative;
 
 box-shadow:0 3px 15px rgba(0,0,0,.15);
 
-animation:slideUp .8s;
 }
 
 .slide{
+
 position:absolute;
 width:100%;
 height:100%;
 
 opacity:0;
+
 transition:1.2s;
+
 }
 
 .slide.active{
@@ -203,43 +262,54 @@ opacity:1;
 }
 
 .slide img{
+
 width:100%;
 height:100%;
+
 object-fit:contain;
 background:white;
+
 }
 
 
-/* SEARCH */
+/* Search */
 
 .search{
+
 padding:12px;
-animation:slideUp 1s;
+
 }
 
 .search input{
+
 width:100%;
+
 padding:15px;
+
 border:none;
 outline:none;
 
 border-radius:15px;
 
 box-shadow:0 2px 10px rgba(0,0,0,.1);
+
 }
 
 
-/* CATEGORY */
+/* Categories */
 
 .category-section{
+
 padding:12px;
-animation:slideUp 1.2s;
+
 }
 
 .category-scroll{
+
 display:flex;
 gap:12px;
 overflow:auto;
+
 }
 
 .category-scroll::-webkit-scrollbar{
@@ -249,39 +319,52 @@ display:none;
 .category-card{
 
 min-width:100px;
+
 background:white;
 
 padding:12px;
 
 border-radius:15px;
+
 text-align:center;
 
 box-shadow:0 2px 10px rgba(0,0,0,.1);
 
-transition:.4s;
+transition:.3s;
+
 }
 
 .category-card:active{
+
 transform:scale(.95);
+
 }
 
 
-/* PRODUCTS */
+/* Products */
 
 .section{
+
 padding:12px;
+
 }
 
 .title{
+
 font-size:22px;
 font-weight:bold;
+
 margin-bottom:12px;
+
 }
 
 .products{
+
 display:flex;
 overflow:auto;
+
 gap:15px;
+
 }
 
 .products::-webkit-scrollbar{
@@ -300,38 +383,19 @@ border-radius:15px;
 
 box-shadow:0 2px 10px rgba(0,0,0,.1);
 
-animation:slideUp 1.5s;
+animation:slideUp .7s;
+
 }
 
 .card img{
+
 width:100%;
 height:150px;
 
 object-fit:cover;
 
 border-radius:10px;
-}
 
-.card h3{
-margin-top:10px;
-font-size:16px;
-}
-
-.price-box{
-display:flex;
-gap:10px;
-margin:10px 0;
-}
-
-.old-price{
-color:red;
-text-decoration:line-through;
-}
-
-.new-price{
-color:#2e7d32;
-font-size:22px;
-font-weight:bold;
 }
 
 .btn{
@@ -345,19 +409,13 @@ border:none;
 border-radius:10px;
 
 background:#2e7d32;
+
 color:white;
 
-cursor:pointer;
-
-transition:.3s;
-}
-
-.btn:active{
-transform:scale(.95);
 }
 
 
-/* Bottom navbar */
+/* Bottom Navbar */
 
 .bottom-nav{
 
@@ -377,27 +435,26 @@ padding:15px;
 
 box-shadow:0 -2px 10px rgba(0,0,0,.1);
 
-z-index:999;
 }
 
 .bottom-nav a{
 
 text-decoration:none;
-
 color:black;
-
 font-size:14px;
-
 text-align:center;
+
 }
 
 .active{
+
 color:#2e7d32;
 font-weight:bold;
+
 }
 
 
-/* POPUP */
+/* Popup */
 
 .popup-container{
 
@@ -417,6 +474,7 @@ align-items:center;
 background:rgba(0,0,0,.5);
 
 z-index:9999;
+
 }
 
 .popup{
@@ -432,11 +490,14 @@ border-radius:25px;
 text-align:center;
 
 animation:popupShow .4s;
+
 }
 
 .popup img{
+
 width:80px;
 margin-bottom:15px;
+
 }
 
 .popup button{
@@ -449,6 +510,7 @@ border-radius:10px;
 
 background:#2e7d32;
 color:white;
+
 }
 
 </style>
@@ -463,15 +525,11 @@ color:white;
 
 <div class="close-btn"
 onclick="closeMenu()">
-
 ✕
-
 </div>
 
 <a href="#">ℹ️ About Us</a>
-
 <a href="#">📜 Certificates</a>
-
 <a href="#">📷 Instagram</a>
 
 </div>
@@ -479,15 +537,7 @@ onclick="closeMenu()">
 
 <nav class="navbar">
 
-<div class="logo-container">
-
-<h5>ⴕ ૐ ☪︎</h5>
-
-<img src="logo3.png" class="logo-img">
-
-<img src="logo4.png" class="logo-small">
-
-</div>
+<div class="left-icons">
 
 <div class="menu-btn"
 onclick="openMenu()">
@@ -495,6 +545,31 @@ onclick="openMenu()">
 ☰
 
 </div>
+
+</div>
+
+
+<div class="logo-container">
+
+<h5>ⴕ ૐ ☪︎</h5>
+
+<img src="logo3.png"
+class="logo-img">
+
+<img src="logo4.png"
+class="logo-small">
+
+</div>
+
+
+<a href="cart.html"
+class="cart-btn">
+
+🛒
+
+<div class="cart-dot"></div>
+
+</a>
 
 </nav>
 
@@ -521,9 +596,7 @@ onclick="openMenu()">
 
 
 <div class="search">
-
 <input placeholder="🔍 Search products">
-
 </div>
 
 
@@ -547,15 +620,11 @@ onclick="openMenu()">
 <section class="section">
 
 <div class="title">
-
- Product's
-
+Product's
 </div>
 
 <div class="products"
-id="products">
-
-</div>
+id="products"></div>
 
 </section>
 
@@ -572,12 +641,6 @@ class="active">
 <a href="products.html">
 
 🛍️<br>Products
-
-</a>
-
-<a href="cart.html">
-
-🛒<br>Cart
 
 </a>
 
@@ -602,9 +665,7 @@ class="popup-container">
 <p id="popupMessage"></p>
 
 <button onclick="closePopup()">
-
 OK
-
 </button>
 
 </div>
@@ -631,9 +692,8 @@ overlay.classList.remove("active");
 overlay.onclick=closeMenu;
 
 
-/* Slider */
-
-const slides=document.querySelectorAll(".slide");
+const slides=
+document.querySelectorAll(".slide");
 
 let current=0;
 
@@ -647,8 +707,6 @@ slides[current].classList.add("active");
 
 },4000);
 
-
-/* Popup */
 
 function showPopup(title,message){
 
@@ -667,7 +725,8 @@ popupBox.style.display="none";
 
 </script>
 
-<script type="module" src="./js/home.js"></script>
+<script type="module"
+src="./js/home.js"></script>
 
 </body>
 </html>
