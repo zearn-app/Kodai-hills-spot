@@ -137,7 +137,7 @@ font-size:14px;
 margin-right:8px;
 ">
 
-₹${product.oldPrice||product.price}
+₹${product.oldPrice || (Number(product.price)+50)}
 
 </span>
 
