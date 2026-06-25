@@ -14,6 +14,8 @@ from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
 
 let currentUser=null;
+let totalAmount=0;
+let currentProduct=null;
 
 
 /* Auth */
@@ -29,6 +31,7 @@ currentUser=user;
 if(!user){
 
 window.location="login.html";
+
 return;
 
 }
@@ -54,6 +57,7 @@ window.location.search
 const productId=
 params.get("id");
 
+
 if(!productId){
 
 document.getElementById(
@@ -65,6 +69,7 @@ return;
 
 }
 
+
 const productRef=
 doc(
 db,
@@ -72,10 +77,12 @@ db,
 productId
 );
 
+
 const productSnap=
 await getDoc(
 productRef
 );
+
 
 if(!productSnap.exists()){
 
@@ -88,33 +95,48 @@ return;
 
 }
 
+
 const product=
 productSnap.data();
+
+currentProduct=
+product;
+
+totalAmount=
+Number(
+product.price
+);
+
 
 document.getElementById(
 "productName"
 ).innerText=
 product.name;
 
+
 document.getElementById(
 "productPrice"
 ).innerText=
 `₹${product.price}`;
+
 
 document.getElementById(
 "productImage"
 ).src=
 product.Image;
 
+
 document.getElementById(
 "productQty"
 ).innerText=
 "Qty : 1";
 
+
 document.getElementById(
 "subtotal"
 ).innerText=
 `₹${product.price}`;
+
 
 document.getElementById(
 "total"
@@ -132,9 +154,10 @@ console.log(error);
 }
 
 
-/* Place Order */
+/* Place Order + Razorpay */
 
-document.getElementById(
+document
+.getElementById(
 "placeOrder"
 )
 
@@ -149,37 +172,46 @@ document.getElementById(
 "name"
 ).value;
 
+
 const phone=
 document.getElementById(
 "phone"
 ).value;
+
 
 const state=
 document.getElementById(
 "state"
 ).value;
 
+
 const district=
 document.getElementById(
 "district"
 ).value;
+
 
 const area=
 document.getElementById(
 "area"
 ).value;
 
+
 const street=
 document.getElementById(
 "street"
 ).value;
+
 
 const pincode=
 document.getElementById(
 "pincode"
 ).value;
 
+
+
 if(
+
 !name||
 !phone||
 !state||
@@ -187,6 +219,7 @@ if(
 !area||
 !street||
 !pincode
+
 ){
 
 alert(
@@ -197,14 +230,73 @@ return;
 
 }
 
+
+
+/* Razorpay */
+
+const options={
+
+key:
+"rzp_test_xxxxxxxxx",
+
+amount:
+totalAmount*100,
+
+currency:
+"INR",
+
+name:
+"Kodai Hills Spot",
+
+description:
+currentProduct.name,
+
+image:
+"logo.png",
+
+handler:function(response){
+
 alert(
-"Order placed successfully"
+
+"Payment Success\n\nPayment ID : "+
+
+response.razorpay_payment_id
 
 );
+
+},
+
+prefill:{
+
+name:name,
+
+contact:phone,
+
+email:
+currentUser.email
+
+},
+
+theme:{
+
+color:"#2e7d32"
+
+}
+
+};
+
+
+const razorpay=
+new Razorpay(
+options
+);
+
+razorpay.open();
 
 }
 
 );
+
 
 
 /* State + District */
@@ -218,6 +310,7 @@ const districtSelect=
 document.getElementById(
 "district"
 );
+
 
 const statesAndDistricts={
 
@@ -248,6 +341,7 @@ statesAndDistricts
 .forEach(state=>{
 
 stateSelect.innerHTML+=
+
 `<option>${state}</option>`;
 
 });
@@ -260,18 +354,23 @@ stateSelect.addEventListener(
 ()=>{
 
 districtSelect.innerHTML=
+
 `<option>Select District</option>`;
 
+
 const districts=
+
 statesAndDistricts[
 stateSelect.value
 ]||[];
+
 
 districts.forEach(
 
 district=>{
 
 districtSelect.innerHTML+=
+
 `<option>${district}</option>`;
 
 }
