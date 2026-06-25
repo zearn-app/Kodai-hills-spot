@@ -3,7 +3,8 @@
 
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport"
+content="width=device-width,initial-scale=1">
 
 <title>Kodai Hills Spot</title>
 
@@ -18,284 +19,529 @@ font-family:Arial,sans-serif;
 
 body{
 background:#f5f5f5;
-padding-bottom:90px;
+padding-bottom:95px;
 overflow-x:hidden;
 }
+
+
+/* Smooth animations */
+
+@keyframes fadeUp{
+
+from{
+opacity:0;
+transform:translateY(30px);
+}
+
+to{
+opacity:1;
+transform:translateY(0);
+}
+
+}
+
+@keyframes popupShow{
+
+from{
+opacity:0;
+transform:scale(.7);
+}
+
+to{
+opacity:1;
+transform:scale(1);
+}
+
+}
+
 
 /* Navbar */
 
 .navbar{
+
 background:white;
-padding:8px 15px;
+padding:10px 15px;
 display:flex;
 justify-content:space-between;
 align-items:center;
-border-radius:0 0 20px 20px;
+
 position:sticky;
 top:0;
 z-index:100;
+
 box-shadow:0 2px 10px rgba(0,0,0,.1);
+
 }
 
 .logo-container{
+
 display:flex;
 flex-direction:column;
 align-items:center;
 flex:1;
+
 }
 
 .logo-container h5{
+
 font-size:15px;
+
 }
 
 .logo-img{
+
 width:80px;
 height:55px;
 object-fit:contain;
+
 }
 
 .logo-small{
+
 width:100px;
-object-fit:contain;
+
 }
 
 .menu-btn{
+
 font-size:28px;
 cursor:pointer;
-font-weight:bold;
+
 }
 
-/* Side Menu */
+
+/* Side menu */
 
 .side-menu{
+
 position:fixed;
-left:-260px;
 top:0;
+left:-270px;
+
 width:250px;
 height:100%;
+
 background:white;
-z-index:999;
-box-shadow:3px 0 15px rgba(0,0,0,.2);
-transition:.4s;
+
 padding-top:60px;
+
+transition:.5s;
+
+z-index:1000;
+
+box-shadow:3px 0 15px rgba(0,0,0,.2);
+
 }
 
 .side-menu.active{
+
 left:0;
+
 }
 
 .side-menu a{
+
 display:block;
 padding:18px;
+
 text-decoration:none;
 color:black;
-font-size:18px;
+
 border-bottom:1px solid #eee;
+
 }
 
 .close-btn{
+
 position:absolute;
 right:15px;
 top:15px;
-font-size:28px;
+
+font-size:30px;
 cursor:pointer;
+
 }
 
 .overlay-bg{
+
 position:fixed;
 top:0;
 left:0;
+
 width:100%;
 height:100%;
+
 background:rgba(0,0,0,.4);
-display:none;
-z-index:998;
+
+opacity:0;
+visibility:hidden;
+
+transition:.4s;
+
+z-index:999;
+
 }
 
 .overlay-bg.active{
-display:block;
+
+opacity:1;
+visibility:visible;
+
 }
 
-/* Slider */
+
+/* Hero */
 
 .hero{
-padding:8px;
+
+padding:10px;
+animation:fadeUp 1s;
+
 }
 
 .slider{
-position:relative;
-width:100%;
-height:210px;
-border-radius:25px;
+
+height:220px;
 overflow:hidden;
+
+border-radius:25px;
+position:relative;
+
 box-shadow:0 2px 15px rgba(0,0,0,.2);
+
 }
 
 .slide{
-position:absolute;
-width:100%;
-height:100%;
-opacity:0;
-transition:1s;
-}
 
-.slide img{
+position:absolute;
+
 width:100%;
 height:100%;
-object-fit:contain;
-background:white;
+
+opacity:0;
+
+transition:1.5s;
+
 }
 
 .slide.active{
+
 opacity:1;
+
 }
+
+.slide img{
+
+width:100%;
+height:100%;
+
+object-fit:contain;
+background:white;
+
+}
+
 
 /* Search */
 
 .search{
+
 padding:12px;
+animation:fadeUp 1.2s;
+
 }
 
 .search input{
+
 width:100%;
 padding:14px;
+
 border:none;
 border-radius:15px;
+
 box-shadow:0 2px 10px rgba(0,0,0,.1);
+
+outline:none;
+
 }
+
 
 /* Categories */
 
 .category-section{
-padding:0 12px;
+
+padding:12px;
+animation:fadeUp 1.4s;
+
 }
 
 .category-scroll{
+
 display:flex;
 overflow:auto;
 gap:10px;
+
 }
 
 .category-scroll::-webkit-scrollbar{
+
 display:none;
+
 }
 
 .category-card{
+
 min-width:100px;
+
 background:white;
+
 padding:12px;
+
 border-radius:15px;
+
 text-align:center;
+
 box-shadow:0 2px 10px rgba(0,0,0,.1);
+
+transition:.4s;
+
 }
 
-.category-icon{
-font-size:25px;
+.category-card:hover{
+
+transform:translateY(-5px);
+
+background:#2e7d32;
+color:white;
+
 }
 
-.category-name{
-font-size:13px;
-font-weight:bold;
-}
 
 /* Products */
 
 .section{
+
 padding:12px;
+
 }
 
 .title{
-font-size:20px;
+
+font-size:22px;
 font-weight:bold;
+
 margin-bottom:10px;
+
 }
 
 .products{
+
 display:flex;
 overflow:auto;
 gap:15px;
+
 }
 
 .products::-webkit-scrollbar{
+
 display:none;
+
 }
 
 .card{
+
 background:white;
+
 min-width:180px;
+
 padding:10px;
+
 border-radius:15px;
+
 box-shadow:0 2px 10px rgba(0,0,0,.1);
+
+animation:fadeUp 1.5s;
+
+transition:.4s;
+
+}
+
+.card:hover{
+
+transform:translateY(-5px);
+
 }
 
 .card img{
+
 width:100%;
 height:150px;
-object-fit:cover;
-border-radius:10px;
-}
 
-.card h3{
-margin-top:8px;
-font-size:16px;
+object-fit:cover;
+
+border-radius:10px;
+
 }
 
 .price-box{
+
 display:flex;
-align-items:center;
 gap:8px;
-margin:8px 0;
+
+margin:10px 0;
+
 }
 
 .old-price{
+
 color:red;
-font-size:18px;
 text-decoration:line-through;
+
 }
 
 .new-price{
+
 color:#2e7d32;
 font-size:22px;
 font-weight:bold;
+
 }
 
 .btn{
+
 width:100%;
-padding:10px;
-background:#2e7d32;
-color:white;
+padding:12px;
+
 border:none;
 border-radius:10px;
+
+background:#2e7d32;
+color:white;
+
 cursor:pointer;
+
+transition:.3s;
+
 }
 
-/* Bottom Nav */
+.btn:active{
+
+transform:scale(.95);
+
+}
+
+
+/* Bottom navbar */
 
 .bottom-nav{
+
 position:fixed;
 bottom:0;
 left:0;
+
 width:100%;
+
 background:white;
+
 display:flex;
 justify-content:space-around;
+
 padding:15px;
+
 box-shadow:0 -2px 10px rgba(0,0,0,.1);
+
+z-index:999;
+
 }
 
 .bottom-nav a{
+
 text-decoration:none;
 color:black;
-font-size:14px;
 text-align:center;
+
+transition:.3s;
+
+}
+
+.bottom-nav a:active{
+
+transform:scale(.9);
+
 }
 
 .active{
+
 color:#2e7d32;
 font-weight:bold;
+
+}
+
+
+/* Popup */
+
+.popup-container{
+
+position:fixed;
+
+top:0;
+left:0;
+
+width:100%;
+height:100%;
+
+display:none;
+
+justify-content:center;
+align-items:center;
+
+background:rgba(0,0,0,.5);
+
+z-index:9999;
+
+}
+
+.popup{
+
+background:white;
+
+width:300px;
+
+padding:25px;
+
+border-radius:25px;
+
+text-align:center;
+
+animation:popupShow .4s;
+
+}
+
+.popup img{
+
+width:80px;
+height:80px;
+
+border-radius:50%;
+
+margin-bottom:15px;
+
+}
+
+.popup button{
+
+padding:12px 25px;
+
+border:none;
+
+border-radius:10px;
+
+background:#2e7d32;
+color:white;
+
 }
 
 </style>
+
 </head>
 
 <body>
@@ -305,15 +551,20 @@ font-weight:bold;
 <div class="side-menu" id="sideMenu">
 
 <div class="close-btn"
-onclick="closeMenu()">✕</div>
+onclick="closeMenu()">
 
-<a href="about.html">ℹ️ About Us</a>
-<a href="certificates.html">📜 Certificates</a>
-<a href="https://www.instagram.com/kodaihillsspot?igsh=MTNqOHlwamJiM2x3OA==">
-📷 Instagram Page
-</a>
+✕
 
 </div>
+
+<a href="#">ℹ️ About Us</a>
+
+<a href="#">📜 Certificates</a>
+
+<a href="#">📷 Instagram</a>
+
+</div>
+
 
 <nav class="navbar">
 
@@ -321,9 +572,11 @@ onclick="closeMenu()">✕</div>
 
 <h5>ⴕ ૐ ☪︎</h5>
 
-<img src="logo3.png" class="logo-img">
+<img src="logo3.png"
+class="logo-img">
 
-<img src="logo4.png" class="logo-small">
+<img src="logo4.png"
+class="logo-small">
 
 </div>
 
@@ -335,6 +588,7 @@ onclick="openMenu()">
 </div>
 
 </nav>
+
 
 <section class="hero">
 
@@ -352,143 +606,99 @@ onclick="openMenu()">
 <img src="im3.png">
 </div>
 
-<div class="slide">
-<img src="im4.png">
 </div>
 
 </div>
 
 </section>
 
-<div class="search">
 
-<input placeholder="🔍 Search products">
+<div id="popupBox"
+class="popup-container">
 
-</div>
+<div class="popup">
 
-<div class="category-section">
+<img src="logo.png">
 
-<div class="category-scroll">
+<h2 id="popupTitle"></h2>
 
-<div class="category-card">
-<div class="category-icon">🍫</div>
-<div class="category-name">Chocolate</div>
-</div>
+<p id="popupMessage"></p>
 
-<div class="category-card">
-<div class="category-icon">🥑</div>
-<div class="category-name">Fruits</div>
-</div>
-
-<div class="category-card">
-<div class="category-icon">🥔</div>
-<div class="category-name">Vegetables</div>
-</div>
-
-<div class="category-card">
-<div class="category-icon">🌿</div>
-<div class="category-name">Organic</div>
-</div>
-
-</div>
-
-</div>
-
-<section class="section">
-
-<div class="title">
-Featured Products
-</div>
-
-<div id="products" class="products">
-
-<!-- Example Product -->
-
-<div class="card">
-
-<img src="sample.jpg">
-
-<h3>Chocolate</h3>
-
-<div class="price-box">
-
-<span class="old-price">
-₹150
-</span>
-
-<span class="new-price">
-₹100
-</span>
-
-</div>
-
-<button class="btn">
-
-🛒 Add Cart
-
+<button onclick="closePopup()">
+OK
 </button>
 
 </div>
 
 </div>
 
-</section>
-
-<nav class="bottom-nav">
-
-<a href="index.html" class="active">
-🏠<br>Home
-</a>
-
-<a href="products.html">
-🛍️<br>Products
-</a>
-
-<a href="cart.html">
-🛒<br>Cart
-</a>
-
-<a href="profile.html">
-👤<br>Profile
-</a>
-
-</nav>
 
 <script>
 
 function openMenu(){
+
 sideMenu.classList.add("active");
 overlay.classList.add("active");
+
 }
 
 function closeMenu(){
+
 sideMenu.classList.remove("active");
 overlay.classList.remove("active");
+
 }
 
 overlay.onclick=closeMenu;
 
-const slides=document.querySelectorAll(".slide");
+
+/* Slider */
+
+const slides=
+document.querySelectorAll(".slide");
 
 let current=0;
 
 setInterval(()=>{
 
-slides[current].classList.remove("active");
+slides[current]
+.classList.remove("active");
 
 current++;
 
 if(current>=slides.length){
+
 current=0;
+
 }
 
-slides[current].classList.add("active");
+slides[current]
+.classList.add("active");
 
-},3000);
+},4000);
+
+
+/* Popup */
+
+function showPopup(title,message){
+
+popupTitle.innerText=title;
+popupMessage.innerText=message;
+
+popupBox.style.display="flex";
+
+}
+
+function closePopup(){
+
+popupBox.style.display="none";
+
+}
 
 </script>
 
-<script type="module" src="./js/home.js"></script>
+<script type="module"
+src="./js/home.js"></script>
 
 </body>
 </html>
