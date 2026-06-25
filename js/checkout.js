@@ -232,6 +232,13 @@ return;
 
 
 
+
+
+
+
+
+
+
 /* Razorpay */
 
 const options={
@@ -257,11 +264,8 @@ image:
 handler:function(response){
 
 alert(
-
-"Payment Success\n\nPayment ID : "+
-
+"✅ Payment Success\n\nPayment ID : "+
 response.razorpay_payment_id
-
 );
 
 },
@@ -272,14 +276,23 @@ name:name,
 
 contact:phone,
 
-email:
-currentUser.email
+email:currentUser.email
 
 },
 
 theme:{
-
 color:"#2e7d32"
+},
+
+modal:{
+
+ondismiss:function(){
+
+alert(
+"❌ Payment cancelled.\nTry again."
+);
+
+}
 
 }
 
@@ -291,11 +304,38 @@ new Razorpay(
 options
 );
 
-razorpay.open();
+
+/* Payment Failed */
+
+razorpay.on(
+
+"payment.failed",
+
+function(response){
+
+alert(
+
+"❌ Payment Failed\n\n"+
+response.error.description
+
+);
 
 }
 
 );
+
+
+razorpay.open();
+
+
+
+
+
+
+
+
+
+
 
 
 
