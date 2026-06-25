@@ -13,10 +13,10 @@ getDoc
 from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
 
-const nameEl=document.getElementById("name");
-const emailEl=document.getElementById("email");
-const phoneEl=document.getElementById("phone");
-const addressEl=document.getElementById("address");
+const nameEl = document.getElementById("name");
+const emailEl = document.getElementById("email");
+const phoneEl = document.getElementById("phone");
+const addressEl = document.getElementById("address");
 
 
 onAuthStateChanged(auth, async(user)=>{
@@ -30,47 +30,47 @@ return;
 
 try{
 
-const userRef=
+const userRef =
 doc(
 db,
 "users",
 user.uid
 );
 
-const userSnap=
+const userSnap =
 await getDoc(userRef);
 
 
 if(userSnap.exists()){
 
-const data=
+const data =
 userSnap.data();
 
-nameEl.innerText=
+nameEl.innerText =
 data.name || "No Name";
 
-emailEl.innerText=
+emailEl.innerText =
 data.email || user.email;
 
-phoneEl.innerText=
+phoneEl.innerText =
 data.phone || "No Phone";
 
-addressEl.innerText=
+addressEl.innerText =
 data.address || "No Address";
 
 }
 else{
 
-nameEl.innerText=
+nameEl.innerText =
 "User data not found";
 
-emailEl.innerText=
+emailEl.innerText =
 user.email;
 
-phoneEl.innerText=
+phoneEl.innerText =
 "-";
 
-addressEl.innerText=
+addressEl.innerText =
 "-";
 
 console.log(
@@ -85,7 +85,7 @@ catch(error){
 
 console.log(error);
 
-nameEl.innerText=
+nameEl.innerText =
 "Error loading profile";
 
 }
@@ -93,6 +93,22 @@ nameEl.innerText=
 });
 
 
+// Edit Profile Button
+document.getElementById(
+"editProfileBtn"
+)
+
+.addEventListener(
+"click",
+()=>{
+
+window.location =
+"edit-profile.html";
+
+});
+
+
+// Logout Button
 document.getElementById(
 "logoutBtn"
 )
@@ -103,7 +119,7 @@ async()=>{
 
 await signOut(auth);
 
-window.location=
+window.location =
 "login.html";
 
 });
