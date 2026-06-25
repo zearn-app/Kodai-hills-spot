@@ -20,10 +20,8 @@ body{
 background:#f5f5f5;
 padding-bottom:90px;
 overflow-x:hidden;
+animation:fade .8s;
 }
-
-
-/* Animations */
 
 @keyframes fade{
 from{opacity:0;}
@@ -52,120 +50,84 @@ transform:scale(1);
 }
 }
 
-body{
-animation:fade .8s;
-}
 
-
-/* NAVBAR */
+/* Navbar */
 
 .navbar{
-
 background:white;
 padding:10px 15px;
-
 display:flex;
 align-items:center;
 justify-content:space-between;
-
 position:sticky;
 top:0;
-
 z-index:100;
-
 box-shadow:0 2px 10px rgba(0,0,0,.1);
-
 }
 
 .left-icons{
-
 display:flex;
 align-items:center;
 gap:15px;
-
 }
 
 .menu-btn{
-
 font-size:30px;
 cursor:pointer;
-
 }
 
 .cart-btn{
-
 font-size:26px;
 text-decoration:none;
 color:black;
 position:relative;
-
 }
 
 .cart-dot{
-
 position:absolute;
 top:-5px;
 right:-8px;
-
 width:10px;
 height:10px;
-
 background:red;
 border-radius:50%;
-
 }
 
 .logo-container{
-
 display:flex;
 flex-direction:column;
 align-items:center;
-
 }
 
 .logo-container h5{
-
 font-size:16px;
 margin-bottom:5px;
-
 }
 
 .logo-img{
-
 width:80px;
 height:55px;
 object-fit:contain;
-
 }
 
 .logo-small{
-
 width:100px;
-
 }
 
 
-/* SIDE MENU */
+/* Side menu */
 
 .side-menu{
-
 position:fixed;
 left:-280px;
 top:0;
-
 width:250px;
 height:100%;
-
 background:white;
-
 padding-top:60px;
-
 transition:.5s;
-
 z-index:999;
-
 box-shadow:3px 0 15px rgba(0,0,0,.2);
-
 }
 
 .side-menu.active{
@@ -173,88 +135,61 @@ left:0;
 }
 
 .side-menu a{
-
 display:block;
 padding:18px;
-
 text-decoration:none;
 color:black;
-
 border-bottom:1px solid #eee;
-
 }
 
 .close-btn{
-
 position:absolute;
 top:15px;
 right:15px;
-
 font-size:30px;
 cursor:pointer;
-
 }
 
 .overlay-bg{
-
 position:fixed;
 top:0;
 left:0;
-
 width:100%;
 height:100%;
-
 background:rgba(0,0,0,.4);
-
 opacity:0;
 visibility:hidden;
-
 transition:.4s;
-
 z-index:998;
-
 }
 
 .overlay-bg.active{
-
 opacity:1;
 visibility:visible;
-
 }
 
 
 /* Slider */
 
 .hero{
-
 padding:10px;
 animation:slideUp .7s;
-
 }
 
 .slider{
-
 height:220px;
-
 overflow:hidden;
 border-radius:25px;
-
 position:relative;
-
 box-shadow:0 3px 15px rgba(0,0,0,.15);
-
 }
 
 .slide{
-
 position:absolute;
 width:100%;
 height:100%;
-
 opacity:0;
-
 transition:1.2s;
-
 }
 
 .slide.active{
@@ -262,54 +197,39 @@ opacity:1;
 }
 
 .slide img{
-
 width:100%;
 height:100%;
-
 object-fit:contain;
 background:white;
-
 }
 
 
 /* Search */
 
 .search{
-
 padding:12px;
-
 }
 
 .search input{
-
 width:100%;
-
 padding:15px;
-
 border:none;
 outline:none;
-
 border-radius:15px;
-
 box-shadow:0 2px 10px rgba(0,0,0,.1);
-
 }
 
 
 /* Categories */
 
 .category-section{
-
 padding:12px;
-
 }
 
 .category-scroll{
-
 display:flex;
 gap:12px;
 overflow:auto;
-
 }
 
 .category-scroll::-webkit-scrollbar{
@@ -317,226 +237,104 @@ display:none;
 }
 
 .category-card{
-
 min-width:100px;
-
 background:white;
-
 padding:12px;
-
 border-radius:15px;
-
 text-align:center;
-
 box-shadow:0 2px 10px rgba(0,0,0,.1);
-
-transition:.3s;
-
-}
-
-.category-card:active{
-
-transform:scale(.95);
-
 }
 
 
 /* Products */
 
 .section{
-
 padding:12px;
-
 }
 
 .title{
-
 font-size:22px;
 font-weight:bold;
-
 margin-bottom:12px;
-
 }
 
 .products{
-
 display:flex;
 overflow:auto;
-
 gap:15px;
-
 }
 
 .products::-webkit-scrollbar{
 display:none;
 }
 
-.card{
 
-background:white;
-
-min-width:180px;
-
-padding:10px;
-
-border-radius:15px;
-
-box-shadow:0 2px 10px rgba(0,0,0,.1);
-
-animation:slideUp .7s;
-
-}
-
-.card img{
-
-width:100%;
-height:150px;
-
-object-fit:cover;
-
-border-radius:10px;
-
-}
-
-.btn{
-
-width:100%;
-
-padding:12px;
-
-border:none;
-
-border-radius:10px;
-
-background:#2e7d32;
-
-color:white;
-
-}
-
-
-/* Bottom Navbar */
+/* Bottom navbar */
 
 .bottom-nav{
-
 position:fixed;
-
 bottom:0;
 left:0;
-
 width:100%;
-
 background:white;
-
 display:flex;
 justify-content:space-around;
-
 padding:15px;
-
 box-shadow:0 -2px 10px rgba(0,0,0,.1);
-
+z-index:999;
 }
 
 .bottom-nav a{
-
 text-decoration:none;
 color:black;
 font-size:14px;
 text-align:center;
-
 }
 
 .active{
-
 color:#2e7d32;
 font-weight:bold;
-
 }
 
 
 /* Popup */
 
 .popup-container{
-
 position:fixed;
-
 top:0;
 left:0;
-
 width:100%;
 height:100%;
-
 display:none;
-
 justify-content:center;
 align-items:center;
-
 background:rgba(0,0,0,.5);
-
 z-index:9999;
-
 }
 
 .popup{
-
 background:white;
-
 width:300px;
-
 padding:25px;
-
 border-radius:25px;
-
 text-align:center;
-
 animation:popupShow .4s;
-
 }
 
 .popup img{
-
 width:80px;
 margin-bottom:15px;
-
 }
 
 .popup button{
-
 padding:12px 25px;
-
 border:none;
-
 border-radius:10px;
-
 background:#2e7d32;
 color:white;
-
-}
-.price-box{
-display:flex;
-align-items:center;
-gap:10px;
-margin:10px 0;
 }
 
-.old-price{
-color:#ff3b30;
-font-size:16px;
-font-weight:500;
-
-text-decoration-line:line-through;
-text-decoration-thickness:2px;
-
-opacity:.7;
-}
-
-.new-price{
-color:#2e7d32;
-font-size:22px;
-font-weight:bold;
-}
 </style>
-
 </head>
 
 <body>
@@ -546,9 +344,7 @@ font-weight:bold;
 <div class="side-menu" id="sideMenu">
 
 <div class="close-btn"
-onclick="closeMenu()">
-✕
-</div>
+onclick="closeMenu()">✕</div>
 
 <a href="#">ℹ️ About Us</a>
 <a href="#">📜 Certificates</a>
@@ -570,7 +366,6 @@ onclick="openMenu()">
 
 </div>
 
-
 <div class="logo-container">
 
 <h5>ⴕ ૐ ☪︎</h5>
@@ -583,12 +378,10 @@ class="logo-small">
 
 </div>
 
-
 <a href="cart.html"
 class="cart-btn">
 
 🛒
-
 <div class="cart-dot"></div>
 
 </a>
@@ -642,7 +435,7 @@ class="cart-btn">
 <section class="section">
 
 <div class="title">
-Product's
+Products
 </div>
 
 <div class="products"
@@ -666,11 +459,7 @@ class="active">
 
 </a>
 
-<a href="profile.html">
-
-👤<br>your's
-
-</a>
+<a id="profileNav"></a>
 
 </nav>
 
@@ -695,53 +484,136 @@ OK
 </div>
 
 
+<script type="module">
+
+import {auth}
+from "./js/firebase.js";
+
+import {
+onAuthStateChanged
+}
+from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
+
+
+const profileNav=
+document.getElementById(
+"profileNav"
+);
+
+onAuthStateChanged(
+
+auth,
+
+(user)=>{
+
+if(user){
+
+profileNav.href=
+"profile.html";
+
+profileNav.innerHTML=`
+
+👤<br>Yours
+
+`;
+
+}else{
+
+profileNav.href=
+"login.html";
+
+profileNav.innerHTML=`
+
+🔐<br>Login
+
+`;
+
+}
+
+}
+
+);
+
+</script>
+
+
 <script>
 
 function openMenu(){
 
-sideMenu.classList.add("active");
-overlay.classList.add("active");
+sideMenu.classList.add(
+"active"
+);
+
+overlay.classList.add(
+"active"
+);
 
 }
 
 function closeMenu(){
 
-sideMenu.classList.remove("active");
-overlay.classList.remove("active");
+sideMenu.classList.remove(
+"active"
+);
+
+overlay.classList.remove(
+"active"
+);
 
 }
 
-overlay.onclick=closeMenu;
+overlay.onclick=
+closeMenu;
 
 
 const slides=
-document.querySelectorAll(".slide");
+document.querySelectorAll(
+".slide"
+);
 
 let current=0;
 
 setInterval(()=>{
 
-slides[current].classList.remove("active");
+slides[current]
+.classList.remove(
+"active"
+);
 
-current=(current+1)%slides.length;
+current=
+(current+1)
+%
+slides.length;
 
-slides[current].classList.add("active");
+slides[current]
+.classList.add(
+"active"
+);
 
 },4000);
 
 
-function showPopup(title,message){
+function showPopup(
+title,
+message
+){
 
-popupTitle.innerText=title;
-popupMessage.innerText=message;
+popupTitle.innerText=
+title;
 
-popupBox.style.display="flex";
+popupMessage.innerText=
+message;
+
+popupBox.style.display=
+"flex";
 
 }
 
 function closePopup(){
 
-popupBox.style.display="none";
+popupBox.style.display=
+"none";
 
 }
 
