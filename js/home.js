@@ -1,5 +1,4 @@
-import { db, auth }
-from "./firebase.js";
+import { db, auth } from "./firebase.js";
 
 import {
 collection,
@@ -14,50 +13,57 @@ from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
 
 
 const productsDiv =
-document.getElementById(
-"products"
-);
+document.getElementById("products");
 
-const profileLink =
-document.getElementById(
-"profileLink"
-);
+const profileNav =
+document.getElementById("profileNav");
 
-const loginFloat =
-document.getElementById(
-"loginFloat"
-);
+const searchInput =
+document.querySelector(".search input");
+
+const categoryCards =
+document.querySelectorAll(".category-card");
 
 
 /* Dynamic Styles */
 
-const style =
-document.createElement(
-"style"
-);
+const style=document.createElement("style");
 
-style.innerHTML = `
+style.innerHTML=`
 
 .card{
 position:relative;
 cursor:pointer;
+background:white;
+min-width:180px;
+padding:10px;
+border-radius:15px;
+box-shadow:0 2px 10px rgba(0,0,0,.1);
+animation:slideUp .7s;
+}
+
+.card img{
+width:100%;
+height:150px;
+object-fit:cover;
+border-radius:10px;
+}
+
+.card h3{
+margin-top:10px;
+font-size:16px;
 }
 
 .stock-badge{
 position:absolute;
 top:8px;
 right:8px;
-
 background:red;
 color:white;
-
 padding:5px 10px;
-
 border-radius:20px;
-
 font-size:12px;
 font-weight:bold;
-
 z-index:2;
 }
 
@@ -72,18 +78,14 @@ color:#666;
 display:flex;
 align-items:center;
 gap:10px;
-
 margin:10px 0;
 }
 
 .old-price{
 color:#ff3b30;
 font-size:15px;
-
 opacity:.7;
-
-text-decoration-line:line-through;
-text-decoration-thickness:2px;
+text-decoration:line-through;
 }
 
 .new-price{
@@ -92,11 +94,24 @@ font-size:22px;
 font-weight:bold;
 }
 
+.btn{
+width:100%;
+padding:12px;
+border:none;
+border-radius:10px;
+background:#2e7d32;
+color:white;
+cursor:pointer;
+}
+
+.btn:active{
+transform:scale(.95);
+}
+
 `;
 
-document.head.appendChild(
-style
-);
+document.head.appendChild(style);
+
 
 
 /* Load Products */
@@ -105,7 +120,7 @@ async function loadProducts(){
 
 try{
 
-productsDiv.innerHTML = `
+productsDiv.innerHTML=`
 
 <h3 style="
 text-align:center;
@@ -118,24 +133,16 @@ Loading...
 
 `;
 
-const snapshot =
-await getDocs(
-
-collection(
-db,
-"Products"
-)
-
+const snapshot = await getDocs(
+collection(db,"Products")
 );
 
-productsDiv.innerHTML = "";
+productsDiv.innerHTML="";
 
-
-/* Empty Products */
 
 if(snapshot.empty){
 
-productsDiv.innerHTML = `
+productsDiv.innerHTML=`
 
 <h3 style="
 text-align:center;
@@ -153,31 +160,27 @@ return;
 }
 
 
-/* Product Loop */
-
 snapshot.forEach((doc)=>{
 
-const data =
-doc.data();
+const data=doc.data();
 
-const realPrice =
-Number(
-data.price || 0
-);
+const realPrice=
+Number(data.price||0);
 
-const oldPrice =
+const oldPrice=
 Number(
 data.oldPrice ||
 (realPrice+50)
 );
 
-const packQty =
+const packQty=
 data.packQty || "";
 
-const fewStock =
+const fewStock=
 data.fewStock || false;
 
-productsDiv.innerHTML += `
+
+productsDiv.innerHTML+=`
 
 <div
 class="card"
@@ -199,25 +202,18 @@ Few Stock
 }
 
 <img
-src="${
-data.Image || "logo.png"
-}"
-
+src="${data.Image || 'logo.png'}"
 onerror="
 this.src='logo.png'
-"
->
+">
 
 <h3>
 
-${
-data.name || "No Name"
-}
+${data.name || "No Name"}
 
 </h3>
 
-${
-packQty ?
+${packQty ?
 
 `
 
@@ -232,6 +228,7 @@ packQty ?
 :
 
 ""
+
 }
 
 <div class="price-box">
@@ -250,7 +247,11 @@ packQty ?
 
 </div>
 
-<button class="btn">
+<button
+class="btn"
+onclick="
+event.stopPropagation()
+">
 
 🛒 Add Cart
 
@@ -266,12 +267,9 @@ packQty ?
 
 catch(error){
 
-console.log(
-"Product Error:",
-error
-);
+console.log(error);
 
-productsDiv.innerHTML = `
+productsDiv.innerHTML=`
 
 <h3 style="
 text-align:center;
@@ -290,17 +288,21 @@ Error Loading Products
 }
 
 
-/* Open Product */
 
-window.openProduct = (id)=>{
+/* Product Page */
 
-window.location =
+window.openProduct=(id)=>{
+
+window.location=
 `product-details.html?id=${id}`;
 
 };
 
 
-/* Auth Check */
+
+/* Login/Profile Check */
+
+if(profileNav){
 
 onAuthStateChanged(
 
@@ -310,69 +312,46 @@ auth,
 
 if(user){
 
-if(profileLink){
+profileNav.href=
+"profile.html";
 
-profileLink.style.display =
-"block";
-
-}
-
-if(loginFloat){
-
-loginFloat.style.display =
-"none";
-
-}
+profileNav.innerHTML=
+"👤<br>Yours";
 
 }
 
 else{
 
-if(profileLink){
+profileNav.href=
+"login.html";
 
-profileLink.style.display =
-"none";
-
-}
-
-if(loginFloat){
-
-loginFloat.style.display =
-"block";
-
-}
+profileNav.innerHTML=
+"🔐<br>Login";
 
 }
 
 }
 
 );
+
+}
+
 
 
 /* Category Click */
-
-const categoryCards =
-document.querySelectorAll(
-".category-card"
-);
 
 categoryCards.forEach(
 
 (card)=>{
 
-card.onclick = ()=>{
+card.onclick=()=>{
 
-const categoryElement =
-card.querySelector(
-".category-name"
-);
+const category=
+card.innerText
+.replace(/[🍫🥑🥔🌿]/g,"")
+.trim();
 
-const category =
-categoryElement
-? categoryElement.innerText
-: card.innerText;
-
-window.location =
+window.location=
 
 `products.html?category=${encodeURIComponent(category)}`;
 
@@ -383,12 +362,8 @@ window.location =
 );
 
 
-/* Search */
 
-const searchInput =
-document.querySelector(
-".search input"
-);
+/* Search */
 
 if(searchInput){
 
@@ -400,12 +375,12 @@ searchInput.addEventListener(
 
 if(event.key==="Enter"){
 
-const search =
+const search=
 searchInput.value.trim();
 
 if(search){
 
-window.location =
+window.location=
 
 `products.html?search=${encodeURIComponent(search)}`;
 
@@ -418,6 +393,7 @@ window.location =
 );
 
 }
+
 
 
 /* Start */
