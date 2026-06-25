@@ -235,6 +235,7 @@ doc
 }
 from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
+
 const cartItems=
 document.getElementById(
 "cartItems"
@@ -248,33 +249,103 @@ document.getElementById(
 let firstProductId="";
 
 
+/* Extra styles */
+
+const style=
+document.createElement(
+"style"
+);
+
+style.innerHTML=`
+
+.card{
+position:relative;
+}
+
+.stock-badge{
+
+position:absolute;
+top:10px;
+right:10px;
+background:red;
+color:white;
+padding:5px 10px;
+border-radius:20px;
+font-size:11px;
+font-weight:bold;
+
+}
+
+.pack{
+
+font-size:13px;
+color:#777;
+margin-top:4px;
+font-weight:bold;
+
+}
+
+.old-price{
+
+text-decoration:line-through;
+color:red;
+font-size:14px;
+margin-right:8px;
+
+}
+
+`;
+
+document.head.appendChild(
+style
+);
+
+
+
 async function loadCart(){
 
-const user=auth.currentUser;
+const user=
+auth.currentUser;
 
 if(!user){
-window.location="login.html";
+
+window.location=
+"login.html";
+
 return;
+
 }
+
 
 cartItems.innerHTML=
 "Loading...";
 
+
 const q=query(
-collection(db,"Cart"),
+
+collection(
+db,
+"Cart"
+),
+
 where(
 "uid",
 "==",
 user.uid
 )
+
 );
+
 
 const snapshot=
 await getDocs(q);
 
+
 cartItems.innerHTML="";
 
+
 let total=0;
+
 
 if(snapshot.empty){
 
@@ -292,33 +363,72 @@ Cart Empty
 `;
 
 return;
+
 }
+
 
 snapshot.forEach((itemDoc)=>{
 
-const item=itemDoc.data();
+const item=
+itemDoc.data();
+
 
 if(!firstProductId){
 
 firstProductId=
 item.productId;
+
 }
 
+
 total+=
-Number(item.price);
+Number(
+item.price
+);
+
+
+const oldPrice=
+
+item.oldPrice||
+
+(
+Number(item.price)
++50
+);
+
 
 cartItems.innerHTML+=`
 
-<div 
+<div
 class="card"
 data-id="${item.productId}"
 >
 
+
+${
+item.fewStock
+
+?
+
+`<div class="stock-badge">
+
+Few Stock
+
+</div>`
+
+:
+
+""
+}
+
+
 <img
 src="${item.image}"
+
 onerror="
 this.src='logo.png'
 ">
+
 
 <div class="details">
 
@@ -328,21 +438,54 @@ ${item.name}
 
 </h3>
 
-<div class="price">
+
+${
+item.packQty
+
+?
+
+`<div class="pack">
+
+📦 ${item.packQty}
+
+</div>`
+
+:
+
+""
+}
+
+
+<div>
+
+<span
+class="old-price">
+
+₹${oldPrice}
+
+</span>
+
+<span
+class="price">
 
 ₹${item.price}
 
+</span>
+
 </div>
+
 
 <p>
 
-Qty : 
+Qty :
 ${item.quantity||1}
 
 </p>
 
+
 <button
 class="remove"
+
 onclick="
 removeItem(
 '${itemDoc.id}'
@@ -361,23 +504,29 @@ Remove
 
 });
 
+
 totalDiv.innerText=
+
 `Total : ₹${total}`;
 
 }
 
 
-/* Remove Item */
+
+/* Remove */
 
 window.removeItem=
+
 async(id)=>{
 
 await deleteDoc(
+
 doc(
 db,
 "Cart",
 id
 )
+
 );
 
 loadCart();
@@ -385,7 +534,8 @@ loadCart();
 };
 
 
-/* Auth Check */
+
+/* Auth */
 
 auth.onAuthStateChanged(
 
@@ -407,6 +557,7 @@ window.location=
 });
 
 
+
 /* Checkout */
 
 document
@@ -423,9 +574,11 @@ alert(
 );
 
 return;
+
 }
 
 window.location=
+
 `checkout.html?id=${firstProductId}`;
 
 };
