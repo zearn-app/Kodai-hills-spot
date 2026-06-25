@@ -237,7 +237,7 @@ return;
 const options={
 
 key:
-"rzp_test_xxxxxxxxx",
+"rzp_test_T5tWAjBQVPNBI4",
 
 amount:
 totalAmount*100,
