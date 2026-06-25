@@ -2,8 +2,10 @@
 <html lang="en">
 
 <head>
+
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport"
+content="width=device-width,initial-scale=1">
 
 <title>Kodai Hills Spot - Cart</title>
 
@@ -25,11 +27,11 @@ padding-bottom:90px;
 background:white;
 padding:15px;
 display:flex;
-justify-content:space-between;
 align-items:center;
+box-shadow:0 2px 10px rgba(0,0,0,.1);
 position:sticky;
 top:0;
-box-shadow:0 2px 10px rgba(0,0,0,.1);
+z-index:100;
 }
 
 .logo-box{
@@ -63,6 +65,7 @@ padding:15px;
 }
 
 .card{
+position:relative;
 background:white;
 padding:15px;
 margin-bottom:15px;
@@ -79,22 +82,66 @@ border-radius:10px;
 object-fit:cover;
 }
 
+.stock-badge{
+
+position:absolute;
+top:10px;
+right:10px;
+background:red;
+color:white;
+padding:5px 10px;
+border-radius:20px;
+font-size:11px;
+font-weight:bold;
+
+}
+
 .details{
 flex:1;
 }
 
-.price{
-color:#2e7d32;
+.pack{
+
+font-size:13px;
+color:#777;
+margin-top:5px;
 font-weight:bold;
-margin:8px 0;
+
+}
+
+.price-box{
+
+display:flex;
+align-items:center;
+gap:8px;
+margin:10px 0;
+
+}
+
+.old-price{
+
+text-decoration:line-through;
+color:red;
+font-size:14px;
+
+}
+
+.price{
+
+font-size:18px;
+font-weight:bold;
+color:#2e7d32;
+
 }
 
 .remove{
+
 padding:8px 15px;
 border:none;
 border-radius:8px;
 background:#e53935;
 color:white;
+
 }
 
 .summary{
@@ -108,13 +155,16 @@ box-shadow:0 -2px 10px rgba(0,0,0,.1);
 }
 
 .total{
+
 font-size:22px;
 font-weight:bold;
 color:#2e7d32;
 margin-bottom:10px;
+
 }
 
 .checkout{
+
 width:100%;
 padding:14px;
 border:none;
@@ -123,9 +173,11 @@ background:#2e7d32;
 color:white;
 font-size:17px;
 cursor:pointer;
+
 }
 
 .bottom-nav{
+
 position:fixed;
 bottom:0;
 left:0;
@@ -135,21 +187,27 @@ display:flex;
 justify-content:space-around;
 padding:15px;
 box-shadow:0 -2px 10px rgba(0,0,0,.1);
+
 }
 
 .bottom-nav a{
+
 text-decoration:none;
 color:black;
 font-size:14px;
 text-align:center;
+
 }
 
 .active{
+
 color:#2e7d32;
 font-weight:bold;
+
 }
 
 </style>
+
 </head>
 
 <body>
@@ -158,10 +216,13 @@ font-weight:bold;
 
 <div class="logo-box">
 
-<img src="logo.png" class="logo">
+<img src="logo.png"
+class="logo">
 
 <div class="logo-text">
+
 Kodai Hills Spot
+
 </div>
 
 </div>
@@ -178,12 +239,15 @@ Kodai Hills Spot
 
 <div id="cartItems">
 
+Loading...
+
 </div>
 
 
 <div class="summary">
 
-<div class="total" id="total">
+<div class="total"
+id="total">
 
 Total : ₹0
 
@@ -210,7 +274,8 @@ Proceed To Checkout
 🛍️<br>Products
 </a>
 
-<a href="cart.html" class="active">
+<a href="cart.html"
+class="active">
 🛒<br>Cart
 </a>
 
@@ -220,19 +285,23 @@ Proceed To Checkout
 
 </nav>
 
+
 <script type="module">
 
 import {auth,db}
 from "./js/firebase.js";
 
 import {
+
 collection,
 query,
 where,
 getDocs,
 deleteDoc,
 doc
+
 }
+
 from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
 
@@ -249,59 +318,6 @@ document.getElementById(
 let firstProductId="";
 
 
-/* Extra styles */
-
-const style=
-document.createElement(
-"style"
-);
-
-style.innerHTML=`
-
-.card{
-position:relative;
-}
-
-.stock-badge{
-
-position:absolute;
-top:10px;
-right:10px;
-background:red;
-color:white;
-padding:5px 10px;
-border-radius:20px;
-font-size:11px;
-font-weight:bold;
-
-}
-
-.pack{
-
-font-size:13px;
-color:#777;
-margin-top:4px;
-font-weight:bold;
-
-}
-
-.old-price{
-
-text-decoration:line-through;
-color:red;
-font-size:14px;
-margin-right:8px;
-
-}
-
-`;
-
-document.head.appendChild(
-style
-);
-
-
-
 async function loadCart(){
 
 const user=
@@ -315,7 +331,6 @@ window.location=
 return;
 
 }
-
 
 cartItems.innerHTML=
 "Loading...";
@@ -342,7 +357,6 @@ await getDocs(q);
 
 
 cartItems.innerHTML="";
-
 
 let total=0;
 
@@ -382,31 +396,31 @@ item.productId;
 
 
 total+=
-Number(
-item.price
-);
+
+Number(item.price||0);
 
 
 const oldPrice=
 
-item.oldPrice||
+item.oldPrice
 
-(
-Number(item.price)
-+50
-);
+?
+
+item.oldPrice
+
+:
+
+Number(item.price||0)+50;
 
 
 cartItems.innerHTML+=`
 
-<div
-class="card"
-data-id="${item.productId}"
->
+<div class="card">
 
 
 ${
-item.fewStock
+
+item.fewStock===true
 
 ?
 
@@ -419,11 +433,13 @@ Few Stock
 :
 
 ""
+
 }
 
 
 <img
-src="${item.image}"
+
+src="${item.image||'logo.png'}"
 
 onerror="
 this.src='logo.png'
@@ -434,12 +450,13 @@ this.src='logo.png'
 
 <h3>
 
-${item.name}
+${item.name||"No Product"}
 
 </h3>
 
 
 ${
+
 item.packQty
 
 ?
@@ -453,20 +470,19 @@ item.packQty
 :
 
 ""
+
 }
 
 
-<div>
+<div class="price-box">
 
-<span
-class="old-price">
+<span class="old-price">
 
 ₹${oldPrice}
 
 </span>
 
-<span
-class="price">
+<span class="price">
 
 ₹${item.price}
 
@@ -484,6 +500,7 @@ ${item.quantity||1}
 
 
 <button
+
 class="remove"
 
 onclick="
@@ -512,7 +529,6 @@ totalDiv.innerText=
 }
 
 
-
 /* Remove */
 
 window.removeItem=
@@ -535,8 +551,6 @@ loadCart();
 
 
 
-/* Auth */
-
 auth.onAuthStateChanged(
 
 (user)=>{
@@ -556,9 +570,6 @@ window.location=
 
 });
 
-
-
-/* Checkout */
 
 document
 .getElementById(
@@ -584,5 +595,6 @@ window.location=
 };
 
 </script>
+
 </body>
 </html>
