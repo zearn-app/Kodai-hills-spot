@@ -14,25 +14,35 @@ onAuthStateChanged
 from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
 
 
-const productsDiv=
-document.getElementById("products");
+const productsDiv =
+document.getElementById(
+"products"
+);
 
-const searchInput=
-document.getElementById("searchInput");
+const searchInput =
+document.getElementById(
+"searchInput"
+);
 
-const priceFilter=
-document.getElementById("priceFilter");
+const priceFilter =
+document.getElementById(
+"priceFilter"
+);
 
-const categoryCards=
-document.querySelectorAll(".category-card");
+const categoryCards =
+document.querySelectorAll(
+".category-card"
+);
 
-const profileNav=
-document.getElementById("profileNav");
+const profileNav =
+document.getElementById(
+"profileNav"
+);
 
 
-let allProducts=[];
-let selectedCategory="";
-let currentUser=null;
+let allProducts = [];
+let selectedCategory = "";
+let currentUser = null;
 
 
 /* Auth */
@@ -43,19 +53,17 @@ auth,
 
 (user)=>{
 
-currentUser=user;
+currentUser = user;
 
 
-/* Bottom navbar login/profile */
-
-if(profileNav){
+/* Bottom Nav */
 
 if(user){
 
-profileNav.href=
+profileNav.href =
 "profile.html";
 
-profileNav.innerHTML=`
+profileNav.innerHTML = `
 
 👤<br>
 Yours
@@ -63,20 +71,17 @@ Yours
 `;
 
 }
-
 else{
 
-profileNav.href=
+profileNav.href =
 "login.html";
 
-profileNav.innerHTML=`
+profileNav.innerHTML = `
 
 🔐<br>
 Login
 
 `;
-
-}
 
 }
 
@@ -91,7 +96,7 @@ async function loadProducts(){
 
 try{
 
-productsDiv.innerHTML=`
+productsDiv.innerHTML = `
 
 <div style="
 text-align:center;
@@ -104,7 +109,7 @@ Loading Products...
 
 `;
 
-const snapshot=
+const snapshot =
 
 await getDocs(
 
@@ -115,7 +120,7 @@ db,
 
 );
 
-allProducts=[];
+allProducts = [];
 
 
 snapshot.forEach((doc)=>{
@@ -130,7 +135,9 @@ id:doc.id,
 });
 
 
-showProducts(allProducts);
+showProducts(
+allProducts
+);
 
 }
 
@@ -138,7 +145,7 @@ catch(error){
 
 console.log(error);
 
-productsDiv.innerHTML=`
+productsDiv.innerHTML = `
 
 <h3 style="
 text-align:center;
@@ -161,12 +168,12 @@ Error Loading Products
 
 function showProducts(products){
 
-productsDiv.innerHTML="";
+productsDiv.innerHTML = "";
 
 
 if(products.length===0){
 
-productsDiv.innerHTML=`
+productsDiv.innerHTML = `
 
 <h3 style="
 text-align:center;
@@ -186,19 +193,19 @@ return;
 
 products.forEach((product)=>{
 
-const oldPrice=
+const oldPrice =
 
 product.oldPrice ||
 
 (Number(product.price||0)+50);
 
 
-productsDiv.innerHTML+=`
+productsDiv.innerHTML += `
 
 <div class="card">
 
 ${
-product.fewStock===true
+product.fewStock
 
 ?
 
@@ -215,7 +222,6 @@ Few Stock
 :
 
 ""
-
 }
 
 <img
@@ -228,13 +234,11 @@ onerror="this.src='logo.png'"
 
 >
 
-
 <h3>
 
 ${product.name||"No Name"}
 
 </h3>
-
 
 ${
 product.packQty
@@ -254,9 +258,7 @@ product.packQty
 :
 
 ""
-
 }
-
 
 <div style="
 margin-top:10px;
@@ -275,7 +277,6 @@ margin-top:10px;
 </span>
 
 </div>
-
 
 <button
 
@@ -298,47 +299,39 @@ onclick="addToCart('${product.id}')"
 }
 
 
-
 /* Open Product */
 
-window.openProduct=
+window.openProduct = (id)=>{
 
-(id)=>{
-
-window.location=
+window.location =
 
 `product-details.html?id=${id}`;
 
 };
 
 
+/* Add Cart */
 
-/* Add To Cart */
-
-window.addToCart=
-
-async(id)=>{
+window.addToCart = async(id)=>{
 
 try{
 
 if(!currentUser){
 
-window.location=
+window.location =
 "login.html";
 
 return;
 
 }
 
-
-const product=
+const product =
 
 allProducts.find(
 
 item=>item.id===id
 
 );
-
 
 if(!product){
 
@@ -378,27 +371,21 @@ product.Image,
 quantity:1,
 
 oldPrice:
-
 product.oldPrice ||
-
 (Number(product.price)+50),
 
 fewStock:
-
-product.fewStock||false,
+product.fewStock || false,
 
 packQty:
-
-product.packQty||"",
+product.packQty || "",
 
 createdAt:
-
 Date.now()
 
 }
 
 );
-
 
 alert(
 "Added to cart"
@@ -410,31 +397,30 @@ catch(error){
 
 console.log(error);
 
-alert(error.message);
+alert(
+error.message
+);
 
 }
 
 };
 
 
-
 /* Filter */
 
 function filterProducts(){
 
-let filtered=
-
-[...allProducts];
+let filtered = [...allProducts];
 
 
 /* Search */
 
-const search=
+const search =
 
 searchInput.value
 .toLowerCase();
 
-filtered=
+filtered =
 
 filtered.filter(
 
@@ -453,14 +439,13 @@ item=>
 
 if(selectedCategory!=""){
 
-filtered=
+filtered =
 
 filtered.filter(
 
 item=>
 
 item.category
-
 ?.toLowerCase()
 
 ===
@@ -523,8 +508,9 @@ filtered.sort(
 
 }
 
-
-showProducts(filtered);
+showProducts(
+filtered
+);
 
 }
 
@@ -539,7 +525,6 @@ filterProducts
 
 );
 
-
 priceFilter.addEventListener(
 
 "change",
@@ -553,49 +538,34 @@ categoryCards.forEach(
 
 (card)=>{
 
-card.onclick=()=>{
+card.onclick = ()=>{
 
+categoryCards.forEach(c=>{
 
-document
-
-.querySelectorAll(
-
-".category-card"
-
-)
-
-.forEach(c=>{
-
-c.style.background=
+c.style.background =
 "white";
 
-c.style.color=
+c.style.color =
 "black";
 
 });
 
-
-card.style.background=
+card.style.background =
 "#2e7d32";
 
-card.style.color=
+card.style.color =
 "white";
 
-
-selectedCategory=
+selectedCategory =
 
 card.innerText
 
 .replace("🍫","")
-
 .replace("🥑","")
-
 .replace("🥔","")
-
 .replace("🌿","")
 
 .trim();
-
 
 filterProducts();
 
