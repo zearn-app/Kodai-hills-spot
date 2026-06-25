@@ -13,56 +13,83 @@ onAuthStateChanged
 from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
 
 
-const productsDiv=
+const productsDiv =
 document.getElementById(
 "products"
 );
 
-const profileLink=
+const profileLink =
 document.getElementById(
 "profileLink"
 );
 
-const loginFloat=
+const loginFloat =
 document.getElementById(
 "loginFloat"
 );
 
 
-/* Add styles dynamically */
+/* Dynamic Styles */
 
-const style=document.createElement(
+const style =
+document.createElement(
 "style"
 );
 
-style.innerHTML=`
+style.innerHTML = `
 
 .card{
 position:relative;
+cursor:pointer;
 }
 
 .stock-badge{
-
 position:absolute;
 top:8px;
 right:8px;
+
 background:red;
 color:white;
+
 padding:5px 10px;
+
 border-radius:20px;
+
 font-size:12px;
 font-weight:bold;
-z-index:2;
 
+z-index:2;
 }
 
 .pack{
-
 margin-top:5px;
 font-size:13px;
-color:#666;
 font-weight:bold;
+color:#666;
+}
 
+.price-box{
+display:flex;
+align-items:center;
+gap:10px;
+
+margin:10px 0;
+}
+
+.old-price{
+color:#ff3b30;
+font-size:15px;
+
+opacity:.7;
+
+text-decoration-line:line-through;
+text-decoration-thickness:2px;
+}
+
+.new-price{
+color:#2e7d32;
+font-size:22px;
+font-weight:bold;
 }
 
 `;
@@ -78,11 +105,20 @@ async function loadProducts(){
 
 try{
 
-productsDiv.innerHTML=
-"<h3>Loading...</h3>";
+productsDiv.innerHTML = `
 
-const snapshot=
+<h3 style="
+text-align:center;
+padding:20px;
+">
 
+Loading...
+
+</h3>
+
+`;
+
+const snapshot =
 await getDocs(
 
 collection(
@@ -92,14 +128,19 @@ db,
 
 );
 
-productsDiv.innerHTML="";
+productsDiv.innerHTML = "";
 
+
+/* Empty Products */
 
 if(snapshot.empty){
 
-productsDiv.innerHTML=`
+productsDiv.innerHTML = `
 
-<h3>
+<h3 style="
+text-align:center;
+padding:20px;
+">
 
 No Products Available
 
@@ -112,45 +153,38 @@ return;
 }
 
 
+/* Product Loop */
+
 snapshot.forEach((doc)=>{
 
-const data=
+const data =
 doc.data();
 
-
-const realPrice=
+const realPrice =
 Number(
-data.price||0
+data.price || 0
 );
 
+const oldPrice =
+Number(
+data.oldPrice ||
+(realPrice+50)
+);
 
-const oldPrice=
-data.oldPrice||
-realPrice+50;
+const packQty =
+data.packQty || "";
 
+const fewStock =
+data.fewStock || false;
 
-const packQty=
-data.packQty||
-"";
-
-
-const fewStock=
-data.fewStock||
-false;
-
-
-productsDiv.innerHTML+=`
+productsDiv.innerHTML += `
 
 <div
 class="card"
-onclick="openProduct(
-'${doc.id}'
-)">
+onclick="openProduct('${doc.id}')"
+>
 
-
-${
-fewStock
-?
+${fewStock ?
 
 `<div class="stock-badge">
 
@@ -161,67 +195,60 @@ Few Stock
 :
 
 ""
-}
 
+}
 
 <img
 src="${
-data.Image||
-'logo.png'
+data.Image || "logo.png"
 }"
 
 onerror="
 this.src='logo.png'
-">
-
+"
+>
 
 <h3>
 
 ${
-data.name||
-'No Name'
+data.name || "No Name"
 }
 
 </h3>
 
-
 ${
-packQty
+packQty ?
 
-?
+`
 
-`<div class="pack">
+<div class="pack">
 
 📦 ${packQty}
 
-</div>`
+</div>
+
+`
 
 :
 
 ""
 }
 
+<div class="price-box">
 
-<div
-class="price-box">
-
-<span
-class="old-price">
+<span class="old-price">
 
 ₹${oldPrice}
 
 </span>
 
-
-<span
-class="new-price">
+<span class="new-price">
 
 ₹${realPrice}
 
 </span>
 
 </div>
-
 
 <button class="btn">
 
@@ -240,12 +267,17 @@ class="new-price">
 catch(error){
 
 console.log(
+"Product Error:",
 error
 );
 
-productsDiv.innerHTML=`
+productsDiv.innerHTML = `
 
-<h3>
+<h3 style="
+text-align:center;
+padding:20px;
+color:red;
+">
 
 Error Loading Products
 
@@ -258,19 +290,14 @@ Error Loading Products
 }
 
 
-
 /* Open Product */
 
-window.openProduct=
+window.openProduct = (id)=>{
 
-(id)=>{
-
-window.location=
-
+window.location =
 `product-details.html?id=${id}`;
 
 };
-
 
 
 /* Auth Check */
@@ -285,14 +312,14 @@ if(user){
 
 if(profileLink){
 
-profileLink.style.display=
+profileLink.style.display =
 "block";
 
 }
 
 if(loginFloat){
 
-loginFloat.style.display=
+loginFloat.style.display =
 "none";
 
 }
@@ -303,14 +330,14 @@ else{
 
 if(profileLink){
 
-profileLink.style.display=
+profileLink.style.display =
 "none";
 
 }
 
 if(loginFloat){
 
-loginFloat.style.display=
+loginFloat.style.display =
 "block";
 
 }
@@ -322,32 +349,30 @@ loginFloat.style.display=
 );
 
 
-
 /* Category Click */
 
-const categoryCards=
-
+const categoryCards =
 document.querySelectorAll(
 ".category-card"
 );
-
 
 categoryCards.forEach(
 
 (card)=>{
 
-card.onclick=()=>{
+card.onclick = ()=>{
 
-const category=
-
+const categoryElement =
 card.querySelector(
 ".category-name"
-)
+);
 
-.innerText;
+const category =
+categoryElement
+? categoryElement.innerText
+: card.innerText;
 
-
-window.location=
+window.location =
 
 `products.html?category=${encodeURIComponent(category)}`;
 
@@ -358,15 +383,12 @@ window.location=
 );
 
 
-
 /* Search */
 
-const searchInput=
-
+const searchInput =
 document.querySelector(
 ".search input"
 );
-
 
 if(searchInput){
 
@@ -376,18 +398,14 @@ searchInput.addEventListener(
 
 (event)=>{
 
-if(
-event.key==="Enter"
-){
+if(event.key==="Enter"){
 
-const search=
-
-searchInput.value
-.trim();
+const search =
+searchInput.value.trim();
 
 if(search){
 
-window.location=
+window.location =
 
 `products.html?search=${encodeURIComponent(search)}`;
 
