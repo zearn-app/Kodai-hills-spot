@@ -238,6 +238,33 @@ selectedCategory
 
 }
 
+
+/* Price sorting */
+
+if(priceFilter==="low"){
+
+filtered.sort(
+
+(a,b)=>
+
+Number(a.price)-Number(b.price)
+
+);
+
+}
+
+if(priceFilter==="high"){
+
+filtered.sort(
+
+(a,b)=>
+
+Number(b.price)-Number(a.price)
+
+);
+
+}
+
 showProducts(filtered);
 
 }
