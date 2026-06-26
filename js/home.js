@@ -165,13 +165,17 @@ snapshot.forEach((doc)=>{
 const data=doc.data();
 
 const realPrice=
-Number(data.price||0);
+Number(data.price || 0);
 
 const oldPrice=
-Number(
-data.oldPrice ||
-(realPrice+50)
-);
+data.oldPrice
+?
+
+Number(data.oldPrice)
+
+:
+
+null;
 
 const packQty=
 data.packQty || "";
@@ -233,11 +237,27 @@ ${packQty ?
 
 <div class="price-box">
 
+${
+
+oldPrice
+
+?
+
+`
+
 <span class="old-price">
 
 ₹${oldPrice}
 
 </span>
+
+`
+
+:
+
+""
+
+}
 
 <span class="new-price">
 
