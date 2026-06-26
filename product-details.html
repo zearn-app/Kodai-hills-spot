@@ -219,6 +219,14 @@ Related Products
 
 </div>
 
+
+
+
+
+
+
+
+
 <script type="module">
 
 import { db, auth }
@@ -254,12 +262,15 @@ const cartBtn=document.getElementById("cartBtn");
 const buyBtn=document.getElementById("buyBtn");
 const relatedDiv=document.getElementById("related");
 
+
 const params=
 new URLSearchParams(
 window.location.search
 );
 
-const id=params.get("id");
+const id=
+params.get("id");
+
 
 let quantity=1;
 let currentUser=null;
@@ -272,45 +283,109 @@ onAuthStateChanged(
 
 auth,
 
-(user)=>{
+async(user)=>{
 
 currentUser=user;
+
+
+/* Move guest cart → Firebase */
+
+if(user){
+
+let guestCart=
+
+JSON.parse(
+
+localStorage.getItem(
+"guestCart"
+)
+
+)||[];
+
+
+if(guestCart.length>0){
+
+for(let item of guestCart){
+
+await addDoc(
+
+collection(
+db,
+"Cart"
+),
+
+{
+
+uid:user.uid,
+
+...item
+
+}
+
+);
+
+}
+
+
+localStorage.removeItem(
+"guestCart"
+);
+
+}
+
+}
 
 });
 
 
+
+/* Quantity */
+
 plusBtn.onclick=()=>{
 
 quantity++;
-countEl.innerText=quantity;
+
+countEl.innerText=
+quantity;
 
 };
+
 
 minusBtn.onclick=()=>{
 
 if(quantity>1){
 
 quantity--;
-countEl.innerText=quantity;
+
+countEl.innerText=
+quantity;
 
 }
 
 };
 
 
+
+/* Load Product */
+
 async function loadProduct(){
 
 const snapshot=
+
 await getDoc(
+
 doc(
 db,
 "Products",
 id
 )
+
 );
+
 
 currentProduct=
 snapshot.data();
+
 
 imageEl.src=
 currentProduct.Image;
@@ -328,10 +403,13 @@ currentProduct.category;
 descriptionEl.innerText=
 currentProduct.description;
 
+
 loadReviews();
+
 loadRelated();
 
 }
+
 
 
 /* Reviews */
@@ -340,7 +418,10 @@ async function loadReviews(){
 
 reviewsDiv.innerHTML="";
 
-const q=query(
+
+const q=
+
+query(
 
 collection(
 db,
@@ -355,8 +436,11 @@ id
 
 );
 
+
 const snapshot=
+
 await getDocs(q);
+
 
 if(snapshot.empty){
 
@@ -367,21 +451,27 @@ return;
 
 }
 
+
 snapshot.forEach((item)=>{
 
 const data=
 item.data();
+
 
 reviewsDiv.innerHTML+=`
 
 <div class="review">
 
 <div>
+
 ${data.rating}
+
 </div>
 
 <p>
+
 ${data.comment}
+
 </p>
 
 </div>
@@ -393,24 +483,31 @@ ${data.comment}
 }
 
 
-/* Related */
+
+/* Related Products */
 
 async function loadRelated(){
 
 relatedDiv.innerHTML="";
 
+
 const snapshot=
+
 await getDocs(
+
 collection(
 db,
 "Products"
 )
+
 );
+
 
 snapshot.forEach((item)=>{
 
 const data=
 item.data();
+
 
 if(item.id!==id){
 
@@ -419,16 +516,22 @@ relatedDiv.innerHTML+=`
 <div
 class="related-card"
 
-onclick="window.location='product-details.html?id=${item.id}'">
+onclick="window.location='product-details.html?id=${item.id}'"
+
+>
 
 <img src="${data.Image}">
 
 <h4>
+
 ${data.name}
+
 </h4>
 
 <p>
+
 ₹${data.price}
+
 </p>
 
 </div>
@@ -442,27 +545,34 @@ ${data.name}
 }
 
 
-/* Add cart */
 
-cartBtn.onclick=async()=>{
+/* Add To Cart */
+
+cartBtn.onclick=
+
+async()=>{
 
 
 const item={
 
 productId:id,
 
-name:currentProduct.name,
+name:
+currentProduct.name,
 
-price:currentProduct.price,
+price:
+currentProduct.price,
 
-image:currentProduct.Image,
+image:
+currentProduct.Image,
 
-quantity:quantity
+quantity:
+quantity
 
 };
 
 
-/* login user */
+/* Logged in */
 
 if(currentUser){
 
@@ -493,7 +603,7 @@ return;
 }
 
 
-/* guest user */
+/* Guest cart */
 
 let localCart=
 
@@ -503,10 +613,13 @@ localStorage.getItem(
 "guestCart"
 )
 
-)||[];
+)
+
+||[];
 
 
 localCart.push(item);
+
 
 localStorage.setItem(
 
@@ -518,6 +631,7 @@ localCart
 
 );
 
+
 alert(
 "Added to cart"
 );
@@ -525,6 +639,8 @@ alert(
 };
 
 
+
+/* Buy */
 
 buyBtn.onclick=()=>{
 
@@ -537,6 +653,11 @@ window.location=
 loadProduct();
 
 </script>
+
+
+
+
+
 
 </body>
 
