@@ -1,46 +1,38 @@
-import {auth,db}
+import { auth, db }
 from "./firebase.js";
 
 import {
-
 collection,
 query,
 where,
 getDocs,
 deleteDoc,
 doc
-
 }
-
 from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
 
-const cartItems=
+const cartItems =
 document.getElementById(
 "cartItems"
 );
 
-const totalDiv=
+const totalDiv =
 document.getElementById(
 "total"
 );
 
-const checkoutBtn=
+const checkoutBtn =
 document.getElementById(
 "checkoutBtn"
 );
 
-let firstProductId="";
+let firstProductId = "";
 
 
-/* POPUP */
+/* Popup */
 
-window.showPopup=(
-
-title,
-message
-
-)=>{
+window.showPopup=(title,message)=>{
 
 document.getElementById(
 "popupTitle"
@@ -70,13 +62,13 @@ document.getElementById(
 };
 
 
-/* LOAD CART */
+/* Load Cart */
 
 async function loadCart(){
 
 try{
 
-const user=
+const user =
 auth.currentUser;
 
 
@@ -105,7 +97,7 @@ Loading Products...
 `;
 
 
-const q=
+const q =
 
 query(
 
@@ -131,7 +123,6 @@ q
 
 
 cartItems.innerHTML="";
-
 
 let total=0;
 
@@ -159,7 +150,6 @@ animation:fadeIn 1s;
 `;
 
 totalDiv.innerText=
-
 "Total : ₹0";
 
 return;
@@ -178,12 +168,11 @@ const item=
 itemDoc.data();
 
 
-if(
-!firstProductId
-){
+if(!firstProductId){
 
 firstProductId=
 item.productId;
+
 }
 
 
@@ -194,7 +183,7 @@ item.price||0
 );
 
 
-total+=price;
+total += price;
 
 
 const card=
@@ -207,19 +196,15 @@ document.createElement(
 card.className=
 "card";
 
-
 card.style.animationDelay=
-
-`${index*.25}s`;
+`${index*0.25}s`;
 
 
 card.innerHTML=`
 
 <img
 
-src="${
-item.image||'logo.png'
-}"
+src="${item.image||'logo.png'}"
 
 onerror="
 this.src='logo.png'
@@ -227,19 +212,13 @@ this.src='logo.png'
 
 >
 
-
 <div class="details">
-
 
 <h3>
 
-${
-item.name||
-"No Product"
-}
+${item.name||"No Product"}
 
 </h3>
-
 
 <div class="price">
 
@@ -247,27 +226,18 @@ item.name||
 
 </div>
 
-
 <p>
 
 Qty :
-
-${
-item.quantity||1
-}
+${item.quantity||1}
 
 </p>
-
 
 <button
 
 class="remove"
 
-onclick="removeItem(
-
-'${itemDoc.id}'
-
-)"
+onclick="removeItem('${itemDoc.id}')"
 
 >
 
@@ -284,7 +254,6 @@ cartItems.appendChild(
 card
 );
 
-
 index++;
 
 }
@@ -296,14 +265,11 @@ totalDiv.innerText=
 
 `Total : ₹${total}`;
 
-
 }
 
 catch(error){
 
-console.log(
-error
-);
+console.log(error);
 
 showPopup(
 
@@ -318,8 +284,7 @@ showPopup(
 }
 
 
-
-/* REMOVE ITEM */
+/* Remove Item */
 
 window.removeItem=
 
@@ -330,15 +295,12 @@ try{
 await deleteDoc(
 
 doc(
-
 db,
 "Cart",
 id
-
 )
 
 );
-
 
 showPopup(
 
@@ -348,16 +310,13 @@ showPopup(
 
 );
 
-
 loadCart();
 
 }
 
 catch(error){
 
-console.log(
-error
-);
+console.log(error);
 
 showPopup(
 
@@ -372,8 +331,7 @@ showPopup(
 };
 
 
-
-/* AUTH CHECK */
+/* Auth Check */
 
 auth.onAuthStateChanged(
 
@@ -384,27 +342,23 @@ if(user){
 loadCart();
 
 }
-
 else{
 
 window.location=
-
 "login.html";
 
 }
 
-});
+}
+
+);
 
 
-
-/* CHECKOUT */
+/* Checkout */
 
 checkoutBtn.onclick=()=>{
 
-
-if(
-!firstProductId
-){
+if(!firstProductId){
 
 showPopup(
 
@@ -417,7 +371,6 @@ showPopup(
 return;
 
 }
-
 
 window.location=
 
