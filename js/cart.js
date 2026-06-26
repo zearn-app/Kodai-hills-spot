@@ -454,10 +454,13 @@ item.name||
 </div>
 
 <p>
-
 Qty :
 ${item.quantity||1}
+</p>
 
+<p>
+Pack :
+${item.selectedSize || "-"}
 </p>
 
 <button
