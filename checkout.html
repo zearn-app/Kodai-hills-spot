@@ -1,7 +1,647 @@
 import { auth, db } from "./firebase.js";
 
 import {
-onAuthStateChanged
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport"
+content="width=device-width,initial-scale=1">
+
+<title>Kodai Hills Spot - Checkout</title>
+
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Arial,sans-serif;
+}
+
+body{
+background:#f5f5f5;
+padding-bottom:100px;
+animation:fadeBody .5s;
+}
+
+/* Animations */
+
+@keyframes fadeBody{
+
+from{
+opacity:0;
+transform:translateY(15px);
+}
+
+to{
+opacity:1;
+transform:translateY(0);
+}
+
+}
+
+@keyframes cardPop{
+
+from{
+opacity:0;
+transform:translateY(20px);
+}
+
+to{
+opacity:1;
+transform:translateY(0);
+}
+
+}
+
+@keyframes popupShow{
+
+from{
+opacity:0;
+transform:scale(.6);
+}
+
+to{
+opacity:1;
+transform:scale(1);
+}
+
+}
+
+/* Header */
+
+.header{
+
+background:white;
+
+padding:15px;
+
+display:flex;
+
+align-items:center;
+
+gap:10px;
+
+position:sticky;
+
+top:0;
+
+z-index:100;
+
+box-shadow:0 2px 15px rgba(0,0,0,.1);
+
+}
+
+.logo{
+
+width:50px;
+height:50px;
+
+border-radius:50%;
+
+border:2px solid #2e7d32;
+
+object-fit:cover;
+
+}
+
+.title{
+
+font-size:25px;
+
+font-weight:bold;
+
+color:#2e7d32;
+
+}
+
+/* Sections */
+
+.section{
+
+background:white;
+
+margin:15px;
+
+padding:20px;
+
+border-radius:25px;
+
+box-shadow:0 4px 15px rgba(0,0,0,.08);
+
+animation:cardPop .6s;
+
+}
+
+.heading{
+
+font-size:20px;
+
+font-weight:bold;
+
+margin-bottom:15px;
+
+}
+
+/* Product */
+
+.product{
+
+display:flex;
+
+gap:15px;
+
+align-items:center;
+
+}
+
+.product img{
+
+width:95px;
+height:95px;
+
+border-radius:15px;
+
+object-fit:cover;
+
+border:1px solid #eee;
+
+}
+
+.details{
+
+flex:1;
+
+}
+
+.price{
+
+color:#2e7d32;
+
+font-size:20px;
+
+font-weight:bold;
+
+margin-top:5px;
+
+}
+
+/* Inputs */
+
+input,
+select{
+
+width:100%;
+
+padding:14px;
+
+margin-top:10px;
+
+border:1px solid #ddd;
+
+border-radius:15px;
+
+outline:none;
+
+transition:.3s;
+
+}
+
+input:focus,
+select:focus{
+
+border-color:#2e7d32;
+
+transform:scale(1.02);
+
+box-shadow:0 0 10px rgba(46,125,50,.2);
+
+}
+
+/* Summary */
+
+.row{
+
+display:flex;
+
+justify-content:space-between;
+
+margin:12px 0;
+
+font-size:18px;
+
+}
+
+.total{
+
+font-size:25px;
+
+font-weight:bold;
+
+color:#2e7d32;
+
+}
+
+/* Delivery */
+
+.old-price{
+
+text-decoration:line-through;
+
+color:red;
+
+}
+
+.free{
+
+color:#2e7d32;
+
+font-weight:bold;
+
+}
+
+/* Bottom */
+
+.bottom{
+
+position:fixed;
+
+bottom:0;
+left:0;
+
+width:100%;
+
+background:white;
+
+padding:15px;
+
+box-shadow:0 -2px 15px rgba(0,0,0,.1);
+
+}
+
+.place-btn{
+
+width:100%;
+
+padding:16px;
+
+border:none;
+
+border-radius:15px;
+
+background:#2e7d32;
+
+color:white;
+
+font-size:20px;
+
+font-weight:bold;
+
+cursor:pointer;
+
+transition:.3s;
+
+}
+
+.place-btn:hover{
+
+transform:scale(.98);
+
+}
+
+.place-btn:active{
+
+transform:scale(.94);
+
+}
+
+/* Popup */
+
+.popup-container{
+
+position:fixed;
+
+top:0;
+left:0;
+
+width:100%;
+height:100%;
+
+display:none;
+
+justify-content:center;
+align-items:center;
+
+background:rgba(0,0,0,.5);
+
+z-index:9999;
+
+}
+
+.popup{
+
+background:white;
+
+width:300px;
+
+padding:25px;
+
+border-radius:25px;
+
+text-align:center;
+
+animation:popupShow .3s;
+
+}
+
+.popup-logo{
+
+width:80px;
+
+height:80px;
+
+border-radius:50%;
+
+margin-bottom:15px;
+
+border:2px solid #2e7d32;
+
+}
+
+.popup h2{
+
+margin-bottom:10px;
+
+color:#2e7d32;
+
+}
+
+.popup p{
+
+margin-bottom:20px;
+
+color:#666;
+
+}
+
+.popup button{
+
+padding:12px 30px;
+
+border:none;
+
+background:#2e7d32;
+
+color:white;
+
+border-radius:12px;
+
+cursor:pointer;
+
+transition:.3s;
+
+}
+
+.popup button:hover{
+
+transform:scale(.95);
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="header">
+
+<img src="logo.png"
+class="logo">
+
+<div class="title">
+
+Kodai Hills Spot
+
+</div>
+
+</div>
+
+
+<div class="section">
+
+<div class="heading">
+
+📦 Delivery Address
+
+</div>
+
+<div id="savedAddress"
+class="hidden">
+
+<div id="addressText"></div>
+
+</div>
+
+<div id="addressForm">
+
+<input id="name"
+placeholder="Full Name">
+
+<input id="phone"
+placeholder="Phone Number">
+
+<select id="state">
+
+<option value="">
+Select State
+</option>
+
+</select>
+
+<select id="district">
+
+<option value="">
+Select District
+</option>
+
+</select>
+
+<input id="area"
+placeholder="Area">
+
+<input id="street"
+placeholder="Street">
+
+<input id="pincode"
+placeholder="Pincode">
+
+</div>
+
+</div>
+
+
+<div class="section">
+
+<div class="heading">
+
+🛍 Order Item
+
+</div>
+
+<div class="product">
+
+<img id="productImage"
+src="logo.png">
+
+<div class="details">
+
+<h3 id="productName">
+
+Loading...
+
+</h3>
+
+<div class="price"
+id="productPrice">
+
+₹0
+
+</div>
+
+<p id="productQty">
+
+Qty : 1
+
+</p>
+
+</div>
+
+</div>
+
+</div>
+
+
+<div class="section">
+
+<div class="heading">
+
+🧾 Order Summary
+
+</div>
+
+<div class="row">
+
+<span>Subtotal</span>
+
+<span id="subtotal">
+
+₹0
+
+</span>
+
+</div>
+
+<div class="row">
+
+<span>Delivery</span>
+
+<span>
+
+<span class="old-price">
+
+₹50
+
+</span>
+
+<span class="free">
+
+FREE
+
+</span>
+
+</span>
+
+</div>
+
+<hr>
+
+<div class="row total">
+
+<span>Total</span>
+
+<span id="total">
+
+₹0
+
+</span>
+
+</div>
+
+</div>
+
+
+<div class="bottom">
+
+<button
+class="place-btn"
+id="placeOrder">
+
+Place Order →
+
+</button>
+
+</div>
+
+
+<div id="popupBox"
+class="popup-container">
+
+<div class="popup">
+
+<img src="logo.png"
+class="popup-logo">
+
+<h2 id="popupTitle"></h2>
+
+<p id="popupMessage"></p>
+
+<button onclick="closePopup()">
+
+OK
+
+</button>
+
+</div>
+
+</div>
+
+
+<script>
+
+window.closePopup=()=>{
+
+document
+.getElementById(
+"popupBox"
+)
+
+.style.display="none";
+
+};
+
+</script>
+
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+<script type="module"
+src="js/checkout.js"></script>
+
+</body>
+</html>
 }
 from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
 
