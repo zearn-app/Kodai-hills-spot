@@ -102,7 +102,10 @@ quantity:
 item.quantity || 1,
 
 selectedSize:
-item.selectedSize || ""
+item.selectedSize || "",
+
+unitPrice:
+item.unitPrice || item.price
 
 }
 
@@ -187,18 +190,26 @@ item.productId;
 
 }
 
-const price=
+
+
+
+
+const unitPrice =
 Number(
-item.price || 0
+item.unitPrice || item.price || 0
 );
 
-const qty=
+const qty =
 Number(
 item.quantity || 1
 );
 
-total +=
-price*qty;
+const itemTotal =
+unitPrice * qty;
+
+total += itemTotal; 
+
+
 
 
 const card=
@@ -226,9 +237,16 @@ ${item.name || "No Product"}
 
 <div class="price">
 
-₹${price}
+₹${unitPrice}
 
 </div>
+
+<p>
+
+Item Total :
+₹${itemTotal}
+
+</p>
 
 <p>
 
@@ -555,8 +573,16 @@ localStorage.getItem(
 "selectedSize"
 )||"";
 
+const totalAmount =
+totalDiv.innerText.replace(
+"Total : ₹",
+""
+);
+
 window.location=
 
-`checkout.html?id=${firstProductId}&qty=${encodeURIComponent(selectedQty)}`;
+`checkout.html?id=${firstProductId}
+&qty=${encodeURIComponent(selectedQty)}
+&total=${totalAmount}`;
 
 };
