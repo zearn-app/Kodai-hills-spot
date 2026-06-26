@@ -463,10 +463,7 @@ Pack :
 ${item.selectedSize || "-"}
 </p>
 
-<p>
-Pack :
-${item.selectedSize || "-"}
-</p>
+
 
 <button
 
