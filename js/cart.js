@@ -1,5 +1,4 @@
-import { auth, db }
-from "./firebase.js";
+import { auth, db } from "./firebase.js";
 
 import {
 collection,
@@ -12,43 +11,39 @@ addDoc
 }
 from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
+import {
+onAuthStateChanged
+}
+from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
+
 
 const cartItems =
-document.getElementById(
-"cartItems"
-);
+document.getElementById("cartItems");
 
 const totalDiv =
-document.getElementById(
-"total"
-);
+document.getElementById("total");
 
 const checkoutBtn =
-document.getElementById(
-"checkoutBtn"
-);
+document.getElementById("checkoutBtn");
 
-let firstProductId="";
+let firstProductId = "";
 
 
-/* Popup */
+/* POPUP */
 
 window.showPopup=(title,message)=>{
 
 document.getElementById(
 "popupTitle"
-).innerText=
-title;
+).innerText=title;
 
 document.getElementById(
 "popupMessage"
-).innerText=
-message;
+).innerText=message;
 
 document.getElementById(
 "popupBox"
-).style.display=
-"flex";
+).style.display="flex";
 
 };
 
@@ -56,14 +51,12 @@ window.closePopup=()=>{
 
 document.getElementById(
 "popupBox"
-).style.display=
-"none";
+).style.display="none";
 
 };
 
 
-
-/* Move guest cart to Firebase */
+/* Move Guest Cart */
 
 async function moveGuestCart(user){
 
@@ -73,15 +66,12 @@ JSON.parse(
 localStorage.getItem(
 "guestCart"
 )
-)||[];
+) || [];
 
 
 if(guestCart.length===0){
-
 return;
-
 }
-
 
 for(let item of guestCart){
 
@@ -109,24 +99,22 @@ image:
 item.image,
 
 quantity:
-item.quantity||1,
+item.quantity || 1,
 
 selectedSize:
-item.selectedSize||""
+item.selectedSize || ""
 
 }
 
 );
 
 }
-
 
 localStorage.removeItem(
 "guestCart"
 );
 
 }
-
 
 
 /* Load Cart */
@@ -138,20 +126,8 @@ try{
 const user=
 auth.currentUser;
 
-cartItems.innerHTML=`
-
-<div style="
-text-align:center;
-padding:30px;
-font-size:18px;
-">
-
-Loading Products...
-
-</div>
-
-`;
-
+cartItems.innerHTML=
+"Loading...";
 
 let total=0;
 
@@ -167,11 +143,9 @@ if(!user){
 let guestCart=
 
 JSON.parse(
-
 localStorage.getItem(
 "guestCart"
 )
-
 )||[];
 
 
@@ -181,22 +155,13 @@ cartItems.innerHTML=`
 
 <div style="
 text-align:center;
-padding:50px;
+padding:40px;
 ">
 
-<h2>
+<h2>🛒 Cart Empty</h2>
 
-<img src="logo.png">
-
-</h2>
-
-<p style="
-margin-top:10px;
-color:#666;
-">
-
+<p>
 Add products to continue
-
 </p>
 
 </div>
@@ -222,54 +187,40 @@ item.productId;
 
 }
 
-
 const price=
-
 Number(
-item.price||0
+item.price || 0
 );
 
+const qty=
+Number(
+item.quantity || 1
+);
 
-total+=price;
+total +=
+price*qty;
 
 
 const card=
-
 document.createElement(
 "div"
 );
 
-
 card.className=
 "card";
-
-card.style.animationDelay=
-`${index*.25}s`;
-
 
 card.innerHTML=`
 
 <img
-
-src="${
-item.image||
-"logo.png"
-}"
-
-onerror="
-this.src='logo.png'
-"
-
+src="${item.image || "logo.png"}"
+onerror="this.src='logo.png'"
 >
 
 <div class="details">
 
 <h3>
 
-${
-item.name||
-"No Product"
-}
+${item.name || "No Product"}
 
 </h3>
 
@@ -280,21 +231,21 @@ item.name||
 </div>
 
 <p>
-Qty :
-${item.quantity||1}
 
-${item.selectedSize ?
-` (${item.selectedSize})`
-: ""}
+Qty : ${qty}
+
+</p>
+
+<p>
+
+Pack :
+${item.selectedSize || "-"}
 
 </p>
 
 <button
-
 class="remove"
-
 onclick="removeGuestItem(${index})"
-
 >
 
 Remove
@@ -305,24 +256,18 @@ Remove
 
 `;
 
-
 cartItems.appendChild(
 card
 );
 
-}
-
-);
-
+});
 
 totalDiv.innerText=
-
 `Total : ₹${total}`;
 
 return;
 
 }
-
 
 
 /* Firebase Cart */
@@ -344,11 +289,14 @@ user.uid
 
 );
 
-
 const snapshot=
+await getDocs(q);
 
-await getDocs(
-q
+
+console.log(
+snapshot.docs.map(
+doc=>doc.data()
+)
 );
 
 
@@ -358,13 +306,11 @@ cartItems.innerHTML=`
 
 <div style="
 text-align:center;
-padding:50px;
+padding:40px;
 ">
 
 <h2>
-
 🛒 Cart Empty
-
 </h2>
 
 </div>
@@ -377,9 +323,6 @@ totalDiv.innerText=
 return;
 
 }
-
-
-let index=0;
 
 
 snapshot.forEach(
@@ -398,52 +341,40 @@ item.productId;
 }
 
 
-const price =
-Number(item.price || 0);
+const price=
+Number(
+item.price || 0
+);
 
-const qty =
-Number(item.quantity || 1);
+const qty=
+Number(
+item.quantity || 1
+);
 
-total += price * qty;
+total +=
+price*qty;
 
 
 const card=
-
 document.createElement(
 "div"
 );
 
-
 card.className=
 "card";
-
-card.style.animationDelay=
-`${index*.25}s`;
-
 
 card.innerHTML=`
 
 <img
-
-src="${
-item.image||
-"logo.png"
-}"
-
-onerror="
-this.src='logo.png'
-"
-
+src="${item.image || "logo.png"}"
+onerror="this.src='logo.png'"
 >
 
 <div class="details">
 
 <h3>
 
-${
-item.name||
-"No Product"
-}
+${item.name}
 
 </h3>
 
@@ -454,23 +385,21 @@ item.name||
 </div>
 
 <p>
-Qty :
-${item.quantity||1}
+
+Qty : ${qty}
+
 </p>
 
 <p>
+
 Pack :
 ${item.selectedSize || "-"}
+
 </p>
 
-
-
 <button
-
 class="remove"
-
 onclick="removeItem('${itemDoc.id}')"
-
 >
 
 Remove
@@ -481,36 +410,24 @@ Remove
 
 `;
 
-
 cartItems.appendChild(
 card
 );
 
-index++;
-
-}
-
-);
-
+});
 
 totalDiv.innerText=
-
 `Total : ₹${total}`;
 
 }
 
 catch(error){
 
-console.log(
-error
-);
+console.log(error);
 
 showPopup(
-
 "Error",
-
 "Unable to load cart"
-
 );
 
 }
@@ -518,14 +435,11 @@ showPopup(
 }
 
 
-
-/* Remove Firebase Item */
+/* Remove Firebase */
 
 window.removeItem=
 
 async(id)=>{
-
-try{
 
 await deleteDoc(
 
@@ -537,31 +451,17 @@ id
 
 );
 
-
-showPopup(
-
-"Removed",
-
-"Product removed"
-
-);
-
-
 loadCart();
 
-}
-
-catch(error){
-
-console.log(error);
-
-}
+showPopup(
+"Removed",
+"Product removed"
+);
 
 };
 
 
-
-/* Remove Guest Item */
+/* Remove Guest */
 
 window.removeGuestItem=
 
@@ -570,19 +470,15 @@ window.removeGuestItem=
 let guestCart=
 
 JSON.parse(
-
 localStorage.getItem(
 "guestCart"
 )
-
 )||[];
-
 
 guestCart.splice(
 index,
 1
 );
-
 
 localStorage.setItem(
 
@@ -594,31 +490,17 @@ guestCart
 
 );
 
+loadCart();
 
 showPopup(
-
 "Removed",
-
 "Product removed"
-
 );
-
-
-loadCart();
 
 };
 
 
-
 /* Auth */
-
-/* Auth */
-
-import {
-onAuthStateChanged
-}
-from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
-
 
 onAuthStateChanged(
 
@@ -628,11 +510,13 @@ async(user)=>{
 
 if(user){
 
-await moveGuestCart(user);
+await moveGuestCart(
+user
+);
 
 }
 
-await loadCart();
+loadCart();
 
 }
 
@@ -643,39 +527,36 @@ await loadCart();
 
 checkoutBtn.onclick=()=>{
 
-
 if(!auth.currentUser){
 
 showPopup(
-
 "Login Required",
-
-"Please login to continue checkout"
-
+"Please login first"
 );
 
 return;
 
 }
-
 
 if(!firstProductId){
 
 showPopup(
-
 "Cart Empty",
-
-"Please add products"
-
+"Add products first"
 );
 
 return;
 
 }
 
+const selectedQty=
 
-const selectedQty =
-localStorage.getItem("selectedSize") || "";
+localStorage.getItem(
+"selectedSize"
+)||"";
 
-window.location =
+window.location=
+
 `checkout.html?id=${firstProductId}&qty=${encodeURIComponent(selectedQty)}`;
+
+};
