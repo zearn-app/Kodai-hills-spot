@@ -1,558 +1,457 @@
-import { auth, db } from "./firebase.js";
-
-import {
-collection,
-query,
-where,
-getDocs,
-deleteDoc,
-doc,
-addDoc
-}
-from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
-
-import {
-onAuthStateChanged
-}
-from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
-
-
-const cartItems =
-document.getElementById("cartItems");
-
-const totalDiv =
-document.getElementById("total");
-
-const checkoutBtn =
-document.getElementById("checkoutBtn");
-
-let cartData=[];
-
-
-/* POPUP */
-
-window.showPopup=(title,message)=>{
-
-document.getElementById(
-"popupTitle"
-).innerText=title;
-
-document.getElementById(
-"popupMessage"
-).innerText=message;
-
-document.getElementById(
-"popupBox"
-).style.display="flex";
-
-};
-
-window.closePopup=()=>{
-
-document.getElementById(
-"popupBox"
-).style.display="none";
-
-};
-
-
-
-/* Move Guest Cart To Firebase */
-
-async function moveGuestCart(user){
-
-let guestCart=
-
-JSON.parse(
-localStorage.getItem(
-"guestCart"
-)
-)||[];
-
-
-if(guestCart.length===0){
-return;
-}
-
-
-for(let item of guestCart){
-
-await addDoc(
-
-collection(
-db,
-"Cart"
-),
-
-{
-
-uid:user.uid,
-
-productId:
-item.productId,
-
-name:
-item.name,
-
-image:
-item.image,
-
-quantity:
-item.quantity || 1,
-
-pack:
-item.pack || "",
-
-unitPrice:
-item.unitPrice || 0,
-
-totalPrice:
-item.totalPrice || 0
-
-}
-
-);
-
-}
-
-localStorage.removeItem(
-"guestCart"
-);
-
-}
-
-
-
-/* Create Card */
-
-function createCard(
-item,
-removeFunction
-){
-
-const qty=
-Number(
-item.quantity || 1
-);
-
-const unitPrice=
-Number(
-item.unitPrice || 0
-);
-
-const itemTotal=
-Number(
-item.totalPrice ||
-(unitPrice*qty)
-);
-
-const card=
-document.createElement(
-"div"
-);
-
-card.className=
-"card";
-
-card.innerHTML=`
-
-<img
-src="${item.image || "logo.png"}"
-onerror="this.src='logo.png'"
->
-
-<div class="details">
-
-<h3>
-
-${item.name || "No Product"}
-
-</h3>
-
-<div class="price">
-
-₹${itemTotal}
-
-</div>
-
-<p>
-
-Unit Price :
-₹${unitPrice}
-
-</p>
-
-<p>
-
-Qty :
-${qty}
-
-</p>
-
-<p>
-
-Pack :
-${item.pack || "-"}
-
-</p>
-
-<button
-class="remove"
-onclick="${removeFunction}"
->
-
-Remove
-
-</button>
-
-</div>
-
-`;
-
-return {
-card,
-itemTotal
-};
-
-}
-
-
-
-/* Load Cart */
-
-async function loadCart(){
-
-try{
-
-cartItems.innerHTML=
-"Loading...";
-
-cartData=[];
-
-let total=0;
-
-const user=
-auth.currentUser;
-
-cartItems.innerHTML="";
-
-
-/* Guest Cart */
-
-if(!user){
-
-let guestCart=
-
-JSON.parse(
-localStorage.getItem(
-"guestCart"
-)
-)||[];
-
-
-if(guestCart.length===0){
-
-cartItems.innerHTML=`
-
-<div style="
-text-align:center;
-padding:50px;
-">
-
-<h2>
-🛒 Cart Empty
-</h2>
-
-<p>
-
-Add products to continue
-
-</p>
-
-</div>
-
-`;
-
-totalDiv.innerText=
-"Total : ₹0";
-
-return;
-}
-
-
-guestCart.forEach(
-
-(item,index)=>{
-
-cartData.push(item);
-
-const result=
-
-createCard(
-
-item,
-
-`removeGuestItem(${index})`
-
-);
-
-total+=
-result.itemTotal;
-
-cartItems.appendChild(
-result.card
-);
-
-});
-
-totalDiv.innerText=
-`Total : ₹${total}`;
-
-return;
-
-}
-
-
-/* Firebase Cart */
-
-const q=
-
-query(
-
-collection(
-db,
-"Cart"
-),
-
-where(
-"uid",
-"==",
-user.uid
-)
-
-);
-
-const snapshot=
-
-await getDocs(q);
-
-
-if(snapshot.empty){
-
-cartItems.innerHTML=`
-
-<div style="
-text-align:center;
-padding:50px;
-">
-
-<h2>
-🛒 Cart Empty
-</h2>
-
-</div>
-
-`;
-
-totalDiv.innerText=
-"Total : ₹0";
-
-return;
-
-}
-
-
-snapshot.forEach(
-
-(itemDoc)=>{
-
-const item=
-itemDoc.data();
-
-item.docId=
-itemDoc.id;
-
-cartData.push(item);
-
-const result=
-
-createCard(
-
-item,
-
-`removeItem('${itemDoc.id}')`
-
-);
-
-total+=
-result.itemTotal;
-
-cartItems.appendChild(
-result.card
-);
-
-});
-
-
-totalDiv.innerText=
-`Total : ₹${total}`;
-
-}
-
-catch(error){
-
-console.log(error);
-
-showPopup(
-"Error",
-"Unable to load cart"
-);
-
-}
-
-}
-
-
-
-/* Remove Firebase */
-
-window.removeItem=
-
-async(id)=>{
-
-await deleteDoc(
-
-doc(
-db,
-"Cart",
-id
-)
-
-);
-
-showPopup(
-"Removed",
-"Product removed"
-);
-
-loadCart();
-
-};
-
-
-
-/* Remove Guest */
-
-window.removeGuestItem=
-
-(index)=>{
-
-let guestCart=
-
-JSON.parse(
-localStorage.getItem(
-"guestCart"
-)
-)||[];
-
-guestCart.splice(
-index,
-1
-);
-
-localStorage.setItem(
-
-"guestCart",
-
-JSON.stringify(
-guestCart
-)
-
-);
-
-showPopup(
-"Removed",
-"Product removed"
-);
-
-loadCart();
-
-};
-
-
-
-/* Login */
-
-onAuthStateChanged(
-
-auth,
-
-async(user)=>{
-
-if(user){
-
-await moveGuestCart(
-user
-);
-
-}
-
-loadCart();
-
-}
-
-);
-
-
-
-/* Checkout */
-
-checkoutBtn.onclick=()=>{
-
-if(!auth.currentUser){
-
-showPopup(
-
-"Login Required",
-
-"Please login first"
-
-);
-
-return;
-
-}
-
-
-if(cartData.length===0){
-
-showPopup(
-
-"Cart Empty",
-
-"Add products first"
-
-);
-
-return;
-
-}
-
-
-/* Save checkout data */
-
-localStorage.setItem(
-
-"checkoutItems",
-
-JSON.stringify(
-cartData
-)
-
-);
-
-
-window.location=
-"checkout.html";
-
-};
+<!DOCTYPE html>  <html lang="en">  <head>  <meta charset="UTF-8">  
+<meta name="viewport"  
+content="width=device-width,initial-scale=1">  <title>Kodai Hills Spot - Cart</title>  <style>  
+  
+*{  
+margin:0;  
+padding:0;  
+box-sizing:border-box;  
+font-family:Arial,sans-serif;  
+}  
+  
+body{  
+background:#f5f5f5;  
+padding-bottom:100px;  
+overflow-x:hidden;  
+}  
+  
+/* Animations */  
+  
+@keyframes fadeIn{  
+  
+from{  
+opacity:0;  
+transform:translateY(35px);  
+}  
+  
+to{  
+opacity:1;  
+transform:translateY(0);  
+}  
+  
+}  
+  
+@keyframes cardShow{  
+  
+from{  
+opacity:0;  
+transform:translateY(50px);  
+}  
+  
+to{  
+opacity:1;  
+transform:translateY(0);  
+}  
+  
+}  
+  
+@keyframes popupShow{  
+  
+from{  
+opacity:0;  
+transform:scale(.8);  
+}  
+  
+to{  
+opacity:1;  
+transform:scale(1);  
+}  
+  
+}  
+  
+/* Back Button */  
+  
+.back-container{  
+  
+padding:15px;  
+  
+animation:fadeIn .6s ease;  
+  
+}  
+  
+.back-btn{  
+  
+display:inline-flex;  
+align-items:center;  
+justify-content:center;  
+  
+width:45px;  
+height:45px;  
+  
+border-radius:50%;  
+  
+background:white;  
+  
+font-size:25px;  
+  
+cursor:pointer;  
+  
+text-decoration:none;  
+color:black;  
+  
+box-shadow:0 2px 10px rgba(0,0,0,.1);  
+  
+transition:.3s;  
+  
+}  
+  
+.back-btn:active{  
+  
+transform:scale(.92);  
+  
+}  
+  
+/* Content */  
+  
+.cart-header,  
+#cartItems,  
+.summary{  
+  
+animation:fadeIn .5s ease;  
+  
+}  
+  
+.cart-header{  
+  
+padding:0 15px;  
+font-size:25px;  
+font-weight:bold;  
+margin-bottom:15px;  
+  
+}  
+  
+#cartItems{  
+  
+padding:15px;  
+  
+}  
+  
+.card{  
+  
+background:white;  
+padding:15px;  
+margin-bottom:15px;  
+  
+border-radius:20px;  
+  
+display:flex;  
+gap:15px;  
+  
+box-shadow:0 3px 15px rgba(0,0,0,.08);  
+  
+opacity:0;  
+  
+animation:cardShow .9s forwards;  
+  
+transition:.4s;  
+  
+}  
+  
+.card:hover{  
+  
+transform:translateY(-5px);  
+  
+}  
+  
+.card img{  
+  
+width:100px;  
+height:100px;  
+  
+border-radius:12px;  
+  
+object-fit:cover;  
+  
+}  
+  
+.details{  
+  
+flex:1;  
+  
+}  
+  
+.price{  
+  
+margin:10px 0;  
+  
+font-size:20px;  
+font-weight:bold;  
+  
+color:#2e7d32;  
+  
+}  
+  
+.remove{  
+  
+padding:10px 15px;  
+  
+border:none;  
+border-radius:10px;  
+  
+background:#e53935;  
+  
+color:white;  
+  
+cursor:pointer;  
+  
+transition:.3s;  
+  
+}  
+  
+.remove:active{  
+  
+transform:scale(.95);  
+  
+}  
+  
+/* Summary */  
+  
+.summary{  
+  
+position:fixed;  
+  
+bottom:75px;  
+left:0;  
+  
+width:100%;  
+  
+background:white;  
+  
+padding:15px;  
+  
+box-shadow:0 -2px 10px rgba(0,0,0,.1);  
+  
+}  
+  
+.total{  
+  
+font-size:22px;  
+font-weight:bold;  
+  
+color:#2e7d32;  
+  
+margin-bottom:10px;  
+  
+}  
+  
+.checkout{  
+  
+width:100%;  
+  
+padding:14px;  
+  
+border:none;  
+border-radius:15px;  
+  
+background:#2e7d32;  
+  
+color:white;  
+  
+font-size:18px;  
+  
+cursor:pointer;  
+  
+transition:.3s;  
+  
+}  
+  
+.checkout:hover{  
+  
+opacity:.9;  
+  
+}  
+  
+.checkout:active{  
+  
+transform:scale(.97);  
+  
+}  
+  
+/* Bottom Navbar */  
+  
+.bottom-nav{  
+  
+position:fixed;  
+  
+bottom:0;  
+left:0;  
+  
+width:100%;  
+  
+background:white;  
+  
+display:flex;  
+justify-content:space-around;  
+  
+padding:15px;  
+  
+box-shadow:0 -2px 10px rgba(0,0,0,.1);  
+  
+z-index:999;  
+  
+}  
+  
+.bottom-nav a{  
+  
+text-decoration:none;  
+  
+color:black;  
+  
+font-size:14px;  
+  
+text-align:center;  
+  
+transition:.3s;  
+  
+}  
+  
+.bottom-nav a:active{  
+  
+transform:scale(.9);  
+  
+}  
+  
+.active{  
+  
+color:#2e7d32;  
+font-weight:bold;  
+  
+}  
+  
+/* Popup */  
+  
+.popup-container{  
+  
+position:fixed;  
+  
+top:0;  
+left:0;  
+  
+width:100%;  
+height:100%;  
+  
+display:none;  
+  
+justify-content:center;  
+align-items:center;  
+  
+background:rgba(0,0,0,.5);  
+  
+z-index:9999;  
+  
+}  
+  
+.popup{  
+  
+background:white;  
+  
+width:300px;  
+  
+padding:25px;  
+  
+border-radius:25px;  
+  
+text-align:center;  
+  
+animation:popupShow .3s;  
+  
+}  
+  
+.popup-logo{  
+  
+width:80px;  
+height:80px;  
+  
+border-radius:50%;  
+  
+border:2px solid #2e7d32;  
+  
+margin-bottom:15px;  
+  
+}  
+  
+.popup h2{  
+  
+margin-bottom:10px;  
+color:#2e7d32;  
+  
+}  
+  
+.popup p{  
+  
+margin-bottom:20px;  
+  
+}  
+  
+.popup button{  
+  
+padding:12px 30px;  
+  
+border:none;  
+border-radius:10px;  
+  
+background:#2e7d32;  
+  
+color:white;  
+  
+cursor:pointer;  
+  
+}  
+  
+</style>  </head>  <body>  <div class="back-container">  <a href="javascript:history.back()"  
+class="back-btn">
+
+←
+
+</a>  </div>  <div class="cart-header">  🛒 My Cart
+
+</div>  <div id="cartItems">  Loading...
+
+</div>  <div class="summary">  <div  
+class="total"  
+id="total">  Total : ₹0
+
+</div>  <button  
+class="checkout"  
+id="checkoutBtn">
+
+Proceed To Checkout
+
+</button>  </div>  <div  
+id="popupBox"  
+class="popup-container">  <div class="popup">  <img src="logo.png"  
+class="popup-logo">
+
+<h2 id="popupTitle"></h2>  <p id="popupMessage"></p>  <button onclick="closePopup()">  OK
+
+</button>  </div>  </div>  <script>  
+  
+function showPopup(  
+title,  
+message  
+){  
+  
+popupTitle.innerText=  
+title;  
+  
+popupMessage.innerText=  
+message;  
+  
+popupBox.style.display=  
+"flex";  
+  
+}  
+  
+function closePopup(){  
+  
+popupBox.style.display=  
+"none";  
+  
+}  
+  
+</script>  <script  
+type="module"  
+src="js/cart.js">  
+  
+</script>  </body>  
+</html> 
