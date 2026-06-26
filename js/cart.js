@@ -656,8 +656,6 @@ return;
 }
 
 
-window.location=
-
-`checkout.html?id=${firstProductId}`;
-
+window.location =
+"checkout.html";
 };
