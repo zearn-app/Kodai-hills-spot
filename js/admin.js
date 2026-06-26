@@ -27,6 +27,90 @@ document.getElementById("allOrders");
 let selectedOrderId=null;
 
 
+
+
+const enableVariants =
+document.getElementById(
+"enableVariants"
+);
+
+const variantSection =
+document.getElementById(
+"variantSection"
+);
+
+const variantFields =
+document.getElementById(
+"variantFields"
+);
+
+const addVariantBtn =
+document.getElementById(
+"addVariantBtn"
+);
+
+
+/* Toggle variants */
+
+enableVariants.onchange=()=>{
+
+if(enableVariants.checked){
+
+variantSection.style.display=
+"block";
+
+document.getElementById(
+"packQty"
+).style.display=
+"none";
+
+}
+
+else{
+
+variantSection.style.display=
+"none";
+
+document.getElementById(
+"packQty"
+).style.display=
+"block";
+
+variantFields.innerHTML="";
+
+}
+
+};
+
+
+
+/* Add quantity fields */
+
+addVariantBtn.onclick=()=>{
+
+const div=
+document.createElement(
+"div"
+);
+
+div.style.marginTop=
+"10px";
+
+div.innerHTML=`
+
+<input
+class="variantInput"
+placeholder="Example: 1kg / 500g / 2L">
+
+`;
+
+variantFields.appendChild(
+div
+);
+
+};
+
+
 /* ADMIN CHECK */
 
 onAuthStateChanged(auth,(user)=>{
