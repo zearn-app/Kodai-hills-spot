@@ -657,5 +657,4 @@ return;
 
 
 window.location =
-"checkout.html";
-};
+`checkout.html?id=${firstProductId}`;
