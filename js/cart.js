@@ -26,7 +26,7 @@ document.getElementById("total");
 const checkoutBtn =
 document.getElementById("checkoutBtn");
 
-let firstProductId = "";
+let cartData=[];
 
 
 /* POPUP */
@@ -56,7 +56,8 @@ document.getElementById(
 };
 
 
-/* Move Guest Cart */
+
+/* Move Guest Cart To Firebase */
 
 async function moveGuestCart(user){
 
@@ -66,12 +67,13 @@ JSON.parse(
 localStorage.getItem(
 "guestCart"
 )
-) || [];
+)||[];
 
 
 if(guestCart.length===0){
 return;
 }
+
 
 for(let item of guestCart){
 
@@ -92,20 +94,20 @@ item.productId,
 name:
 item.name,
 
-price:
-item.price,
-
 image:
 item.image,
 
 quantity:
 item.quantity || 1,
 
-selectedSize:
-item.selectedSize || "",
+pack:
+item.pack || "",
 
 unitPrice:
-item.unitPrice || item.price
+item.unitPrice || 0,
+
+totalPrice:
+item.totalPrice || 0
 
 }
 
@@ -120,97 +122,29 @@ localStorage.removeItem(
 }
 
 
-/* Load Cart */
 
-async function loadCart(){
+/* Create Card */
 
-try{
+function createCard(
+item,
+removeFunction
+){
 
-const user=
-auth.currentUser;
-
-cartItems.innerHTML=
-"Loading...";
-
-let total=0;
-
-firstProductId="";
-
-cartItems.innerHTML="";
-
-
-/* Guest Cart */
-
-if(!user){
-
-let guestCart=
-
-JSON.parse(
-localStorage.getItem(
-"guestCart"
-)
-)||[];
-
-
-if(guestCart.length===0){
-
-cartItems.innerHTML=`
-
-<div style="
-text-align:center;
-padding:40px;
-">
-
-<h2>🛒 Cart Empty</h2>
-
-<p>
-Add products to continue
-</p>
-
-</div>
-
-`;
-
-totalDiv.innerText=
-"Total : ₹0";
-
-return;
-
-}
-
-
-guestCart.forEach(
-
-(item,index)=>{
-
-if(!firstProductId){
-
-firstProductId=
-item.productId;
-
-}
-
-
-
-
-
-const unitPrice =
-Number(
-item.unitPrice || item.price || 0
-);
-
-const qty =
+const qty=
 Number(
 item.quantity || 1
 );
 
-const itemTotal =
-unitPrice * qty;
+const unitPrice=
+Number(
+item.unitPrice || 0
+);
 
-total += itemTotal; 
-
-
-
+const itemTotal=
+Number(
+item.totalPrice ||
+(unitPrice*qty)
+);
 
 const card=
 document.createElement(
@@ -237,33 +171,34 @@ ${item.name || "No Product"}
 
 <div class="price">
 
-₹${unitPrice}
+₹${itemTotal}
 
 </div>
 
 <p>
 
-Item Total :
-₹${itemTotal}
+Unit Price :
+₹${unitPrice}
 
 </p>
 
 <p>
 
-Qty : ${qty}
+Qty :
+${qty}
 
 </p>
 
 <p>
 
 Pack :
-${item.selectedSize || "-"}
+${item.pack || "-"}
 
 </p>
 
 <button
 class="remove"
-onclick="removeGuestItem(${index})"
+onclick="${removeFunction}"
 >
 
 Remove
@@ -274,8 +209,98 @@ Remove
 
 `;
 
+return {
+card,
+itemTotal
+};
+
+}
+
+
+
+/* Load Cart */
+
+async function loadCart(){
+
+try{
+
+cartItems.innerHTML=
+"Loading...";
+
+cartData=[];
+
+let total=0;
+
+const user=
+auth.currentUser;
+
+cartItems.innerHTML="";
+
+
+/* Guest Cart */
+
+if(!user){
+
+let guestCart=
+
+JSON.parse(
+localStorage.getItem(
+"guestCart"
+)
+)||[];
+
+
+if(guestCart.length===0){
+
+cartItems.innerHTML=`
+
+<div style="
+text-align:center;
+padding:50px;
+">
+
+<h2>
+🛒 Cart Empty
+</h2>
+
+<p>
+
+Add products to continue
+
+</p>
+
+</div>
+
+`;
+
+totalDiv.innerText=
+"Total : ₹0";
+
+return;
+}
+
+
+guestCart.forEach(
+
+(item,index)=>{
+
+cartData.push(item);
+
+const result=
+
+createCard(
+
+item,
+
+`removeGuestItem(${index})`
+
+);
+
+total+=
+result.itemTotal;
+
 cartItems.appendChild(
-card
+result.card
 );
 
 });
@@ -308,14 +333,8 @@ user.uid
 );
 
 const snapshot=
+
 await getDocs(q);
-
-
-console.log(
-snapshot.docs.map(
-doc=>doc.data()
-)
-);
 
 
 if(snapshot.empty){
@@ -324,7 +343,7 @@ cartItems.innerHTML=`
 
 <div style="
 text-align:center;
-padding:40px;
+padding:50px;
 ">
 
 <h2>
@@ -350,89 +369,30 @@ snapshot.forEach(
 const item=
 itemDoc.data();
 
+item.docId=
+itemDoc.id;
 
-if(!firstProductId){
+cartData.push(item);
 
-firstProductId=
-item.productId;
+const result=
 
-}
+createCard(
 
+item,
 
-const price=
-Number(
-item.price || 0
+`removeItem('${itemDoc.id}')`
+
 );
 
-const qty=
-Number(
-item.quantity || 1
-);
-
-total +=
-price*qty;
-
-
-const card=
-document.createElement(
-"div"
-);
-
-card.className=
-"card";
-
-card.innerHTML=`
-
-<img
-src="${item.image || "logo.png"}"
-onerror="this.src='logo.png'"
->
-
-<div class="details">
-
-<h3>
-
-${item.name}
-
-</h3>
-
-<div class="price">
-
-₹${price}
-
-</div>
-
-<p>
-
-Qty : ${qty}
-
-</p>
-
-<p>
-
-Pack :
-${item.selectedSize || "-"}
-
-</p>
-
-<button
-class="remove"
-onclick="removeItem('${itemDoc.id}')"
->
-
-Remove
-
-</button>
-
-</div>
-
-`;
+total+=
+result.itemTotal;
 
 cartItems.appendChild(
-card
+result.card
 );
 
 });
+
 
 totalDiv.innerText=
 `Total : ₹${total}`;
@@ -453,6 +413,7 @@ showPopup(
 }
 
 
+
 /* Remove Firebase */
 
 window.removeItem=
@@ -469,14 +430,15 @@ id
 
 );
 
-loadCart();
-
 showPopup(
 "Removed",
 "Product removed"
 );
 
+loadCart();
+
 };
+
 
 
 /* Remove Guest */
@@ -508,17 +470,18 @@ guestCart
 
 );
 
-loadCart();
-
 showPopup(
 "Removed",
 "Product removed"
 );
 
+loadCart();
+
 };
 
 
-/* Auth */
+
+/* Login */
 
 onAuthStateChanged(
 
@@ -541,6 +504,7 @@ loadCart();
 );
 
 
+
 /* Checkout */
 
 checkoutBtn.onclick=()=>{
@@ -548,41 +512,47 @@ checkoutBtn.onclick=()=>{
 if(!auth.currentUser){
 
 showPopup(
+
 "Login Required",
+
 "Please login first"
+
 );
 
 return;
 
 }
 
-if(!firstProductId){
+
+if(cartData.length===0){
 
 showPopup(
+
 "Cart Empty",
+
 "Add products first"
+
 );
 
 return;
 
 }
 
-const selectedQty=
 
-localStorage.getItem(
-"selectedSize"
-)||"";
+/* Save checkout data */
 
-const totalAmount =
-totalDiv.innerText.replace(
-"Total : ₹",
-""
+localStorage.setItem(
+
+"checkoutItems",
+
+JSON.stringify(
+cartData
+)
+
 );
 
-window.location=
 
-`checkout.html?id=${firstProductId}
-&qty=${encodeURIComponent(selectedQty)}
-&total=${totalAmount}`;
+window.location=
+"checkout.html";
 
 };
