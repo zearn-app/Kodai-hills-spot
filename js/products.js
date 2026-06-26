@@ -15,7 +15,7 @@ from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
 
 const productsDiv=document.getElementById("products");
 const searchInput=document.getElementById("searchInput");
-const priceFilter=document.getElementById("priceFilter");
+let priceFilter="";
 const categoryCards=document.querySelectorAll(".category-card");
 const profileNav=document.getElementById("profileNav");
 
