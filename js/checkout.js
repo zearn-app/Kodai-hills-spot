@@ -1,5 +1,4 @@
-import { auth, db }
-from "./firebase.js";
+import { auth, db } from "./firebase.js";
 
 import {
 onAuthStateChanged
@@ -7,8 +6,11 @@ onAuthStateChanged
 from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
 
 import {
-doc,
-getDoc
+collection,
+query,
+where,
+getDocs,
+addDoc
 }
 from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
@@ -18,12 +20,9 @@ let totalAmount=0;
 let currentProduct=null;
 
 
-/* POPUP */
+/* Popup */
 
-function showPopup(
-title,
-message
-){
+function showPopup(title,message){
 
 document.getElementById(
 "popupTitle"
@@ -49,23 +48,24 @@ document.getElementById(
 
 
 
-/* AUTH */
+/* Auth */
 
 onAuthStateChanged(
 
 auth,
 
-(user)=>{
-
-currentUser=user;
+async(user)=>{
 
 if(!user){
 
-window.location="login.html";
+window.location=
+"login.html";
 
 return;
 
 }
+
+currentUser=user;
 
 loadProduct();
 
@@ -75,90 +75,76 @@ loadProduct();
 
 
 
+/* Load product from Cart */
+
 async function loadProduct(){
 
 try{
 
-const params=
-new URLSearchParams(
-window.location.search
+const q=query(
+
+collection(db,"Cart"),
+
+where(
+"uid",
+"==",
+currentUser.uid
+)
+
 );
 
-const productId=
-params.get("id");
+const snapshot=
+await getDocs(q);
 
-if(!productId){
+if(snapshot.empty){
 
 document.getElementById(
 "productName"
 ).innerText=
-"No Product Selected";
+"Cart Empty";
 
 return;
 
 }
 
-const productRef=
-doc(
-db,
-"Products",
-productId
+const item=
+snapshot.docs[0].data();
+
+currentProduct=item;
+
+const qty=
+Number(
+item.quantity||1
 );
 
-const productSnap=
-await getDoc(
-productRef
+const price=
+Number(
+item.price||0
 );
-
-if(!productSnap.exists()){
-
-document.getElementById(
-"productName"
-).innerText=
-"Product Not Found";
-
-return;
-
-}
-
-const product=
-productSnap.data();
-
-currentProduct=
-product;
 
 totalAmount=
-Number(product.price||0);
+price*qty;
 
-const params =
-new URLSearchParams(
-window.location.search
-);
-
-let selectedQty =
-params.get("qty") ||
-product.packQty ||
-"";
 
 document.getElementById(
 "productName"
 ).innerText=
-product.name;
+item.name || "No Product";
 
 document.getElementById(
 "productPrice"
 ).innerText=
-`₹${totalAmount}`;
+`₹${price}`;
 
 document.getElementById(
 "productImage"
 ).src=
-product.Image || "logo.png";
+item.image || "logo.png";
 
 document.getElementById(
 "productQty"
 ).innerText=
-`Qty : ${selectedQty}`;
+`Qty : ${qty} ${item.selectedSize ? "(" + item.selectedSize + ")" : ""}`;
 
 document.getElementById(
 "subtotal"
@@ -176,23 +162,24 @@ catch(error){
 
 console.log(error);
 
-}
+showPopup(
+"Error",
+"Unable to load product"
+);
 
 }
 
+}
 
-/* PLACE ORDER */
 
-document
-.getElementById(
+
+/* Place Order */
+
+document.getElementById(
 "placeOrder"
 )
 
-.addEventListener(
-
-"click",
-
-()=>{
+.onclick=()=>{
 
 const name=
 document.getElementById(
@@ -242,7 +229,7 @@ if(
 
 showPopup(
 "Missing Information",
-"Please enter all required details"
+"Please fill all fields"
 );
 
 return;
@@ -252,34 +239,71 @@ return;
 
 const options={
 
-key:
-"rzp_test_T5tWAjBQVPNBI4",
+key:"rzp_test_T5tWAjBQVPNBI4",
 
 amount:
 totalAmount*100,
 
-currency:
-"INR",
+currency:"INR",
 
-name:
-"Kodai Hills Spot",
+name:"Kodai Hills Spot",
 
 description:
 currentProduct.name,
 
-image:
-"logo.png",
+image:"logo.png",
 
-handler:function(response){
+handler:async function(response){
+
+await addDoc(
+
+collection(
+db,
+"Orders"
+),
+
+{
+
+uid:
+currentUser.uid,
+
+name:
+currentProduct.name,
+
+price:
+totalAmount,
+
+quantity:
+currentProduct.quantity,
+
+pack:
+currentProduct.selectedSize,
+
+customerName:
+name,
+
+phone:
+phone,
+
+address:
+`${area}, ${street}, ${district}, ${state}-${pincode}`,
+
+paymentId:
+response.razorpay_payment_id,
+
+status:
+"Pending",
+
+createdAt:
+Date.now()
+
+}
+
+);
 
 showPopup(
-
-"Payment Success",
-
-"Payment ID:\n"+
-
-response.razorpay_payment_id
-
+"Success",
+"Order placed successfully"
 );
 
 },
@@ -291,60 +315,15 @@ name:name,
 contact:phone,
 
 email:
-currentUser?.email||""
-
-},
-
-theme:{
-color:"#2e7d32"
-},
-
-modal:{
-
-ondismiss:function(){
-
-showPopup(
-
-"Payment Cancelled",
-
-"Please try again"
-
-);
-
-}
+currentUser.email
 
 }
 
 };
 
 
-const razorpay=
 new Razorpay(
 options
-);
+).open();
 
-
-razorpay.on(
-
-"payment.failed",
-
-function(){
-
-showPopup(
-
-"Payment Failed",
-
-"Please try again"
-
-);
-
-}
-
-);
-
-
-razorpay.open();
-
-}
-
-);
+};
