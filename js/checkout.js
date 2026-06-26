@@ -130,10 +130,15 @@ product;
 totalAmount=
 Number(product.price||0);
 
-let selectedQty=
-localStorage.getItem(
-"selectedSize"
-) || product.packQty || "";
+const params =
+new URLSearchParams(
+window.location.search
+);
+
+let selectedQty =
+params.get("qty") ||
+product.packQty ||
+"";
 
 document.getElementById(
 "productName"
