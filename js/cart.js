@@ -109,7 +109,10 @@ image:
 item.image,
 
 quantity:
-item.quantity||1
+item.quantity||1,
+
+selectedSize:
+item.selectedSize||""
 
 }
 
