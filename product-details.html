@@ -589,6 +589,8 @@ quantity;
 
 /* Load Product */
 
+let selectedVariant="";
+
 async function loadProduct(){
 
 const snapshot=
@@ -602,7 +604,6 @@ id
 )
 
 );
-
 
 currentProduct=
 snapshot.data();
@@ -625,13 +626,112 @@ descriptionEl.innerText=
 currentProduct.description;
 
 
+/* Load quantity variants */
+
+const variantBox=
+document.getElementById(
+"variantBox"
+);
+
+const variantList=
+document.getElementById(
+"variantList"
+);
+
+
+if(
+
+currentProduct.quantityVariants
+&&
+currentProduct.quantityVariants.length>0
+
+){
+
+variantBox.style.display=
+"block";
+
+variantList.innerHTML="";
+
+
+currentProduct.quantityVariants
+.forEach(
+
+(item,index)=>{
+
+const btn=
+document.createElement(
+"div"
+);
+
+btn.className=
+"variantBtn";
+
+btn.innerText=
+item;
+
+
+if(index===0){
+
+btn.classList.add(
+"variantActive"
+);
+
+selectedVariant=
+item;
+
+}
+
+
+btn.onclick=()=>{
+
+
+document
+.querySelectorAll(
+".variantBtn"
+)
+
+.forEach((x)=>{
+
+x.classList.remove(
+"variantActive"
+);
+
+});
+
+
+btn.classList.add(
+"variantActive"
+);
+
+selectedVariant=
+item;
+
+};
+
+
+variantList.appendChild(
+btn
+);
+
+}
+
+);
+
+}
+
+else{
+
+variantBox.style.display=
+"none";
+
+}
+
+
 loadReviews();
 
 loadRelated();
 
 }
-
-
 
 /* Reviews */
 
