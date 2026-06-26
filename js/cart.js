@@ -615,24 +615,31 @@ loadCart();
 
 /* Auth */
 
-auth.onAuthStateChanged(
+/* Auth */
+
+import {
+onAuthStateChanged
+}
+from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
+
+
+onAuthStateChanged(
+
+auth,
 
 async(user)=>{
 
 if(user){
 
-await moveGuestCart(
-user
-);
+await moveGuestCart(user);
 
 }
 
-loadCart();
+await loadCart();
 
 }
 
 );
-
 
 
 /* Checkout */
