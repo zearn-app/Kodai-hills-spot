@@ -33,7 +33,7 @@ try{
 const userRef =
 doc(
 db,
-"users",
+"Users",
 user.uid
 );
 
