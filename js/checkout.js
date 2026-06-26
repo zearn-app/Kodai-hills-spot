@@ -128,10 +128,12 @@ currentProduct=
 product;
 
 totalAmount=
-Number(
-product.price||0
-);
+Number(product.price||0);
 
+let selectedQty=
+localStorage.getItem(
+"selectedSize"
+) || product.packQty || "";
 
 document.getElementById(
 "productName"
@@ -146,7 +148,12 @@ document.getElementById(
 document.getElementById(
 "productImage"
 ).src=
-product.Image||"logo.png";
+product.Image || "logo.png";
+
+document.getElementById(
+"productQty"
+).innerText=
+`Qty : ${selectedQty}`;
 
 document.getElementById(
 "subtotal"
