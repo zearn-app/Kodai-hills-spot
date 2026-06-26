@@ -639,22 +639,43 @@ document.getElementById(
 );
 
 
+variantList.innerHTML="";
+
+let variants=[];
+
+
+/* Multiple quantities */
+
 if(
-
-currentProduct.quantityVariants
-&&
+currentProduct.quantityVariants &&
 currentProduct.quantityVariants.length>0
-
 ){
+
+variants=
+currentProduct.quantityVariants;
+
+}
+
+/* Single quantity */
+
+else if(
+currentProduct.packQty
+){
+
+variants=[
+currentProduct.packQty
+];
+
+}
+
+
+if(variants.length>0){
 
 variantBox.style.display=
 "block";
 
-variantList.innerHTML="";
 
-
-currentProduct.quantityVariants
-.forEach(
+variants.forEach(
 
 (item,index)=>{
 
@@ -670,6 +691,8 @@ btn.innerText=
 item;
 
 
+/* First selected */
+
 if(index===0){
 
 btn.classList.add(
@@ -684,20 +707,16 @@ item;
 
 btn.onclick=()=>{
 
-
 document
 .querySelectorAll(
-".variantBtn"
-)
-
-.forEach((x)=>{
+".variantBtn")
+.forEach(x=>{
 
 x.classList.remove(
 "variantActive"
 );
 
 });
-
 
 btn.classList.add(
 "variantActive"
