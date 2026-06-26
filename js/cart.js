@@ -183,7 +183,7 @@ padding:50px;
 
 <h2>
 
-🛒 Cart Empty
+<img src="logo.png">
 
 </h2>
 
