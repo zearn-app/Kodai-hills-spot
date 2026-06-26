@@ -949,7 +949,13 @@ name:
 currentProduct.name,
 
 price:
+selectedVariant?.price ||
 currentProduct.price,
+
+unitPrice:
+selectedVariant?.price ||
+currentProduct.price,
+
 
 image:
 currentProduct.Image,
