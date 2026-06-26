@@ -7,17 +7,14 @@ from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
 
 import {
 collection,
-query,
-where,
-getDocs,
 addDoc
 }
 from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
 
 let currentUser=null;
+let checkoutItems=[];
 let totalAmount=0;
-let currentProduct=null;
 
 
 /* Popup */
@@ -48,13 +45,13 @@ document.getElementById(
 
 
 
-/* Auth */
+/* Login */
 
 onAuthStateChanged(
 
 auth,
 
-async(user)=>{
+(user)=>{
 
 if(!user){
 
@@ -67,7 +64,7 @@ return;
 
 currentUser=user;
 
-loadProduct();
+loadCheckout();
 
 }
 
@@ -75,28 +72,22 @@ loadProduct();
 
 
 
-/* Load product from Cart */
+/* Load Cart Data */
 
-async function loadProduct(){
+function loadCheckout(){
 
-try{
+checkoutItems=
 
-const q=query(
+JSON.parse(
 
-collection(db,"Cart"),
-
-where(
-"uid",
-"==",
-currentUser.uid
+localStorage.getItem(
+"checkoutItems"
 )
 
-);
+)||[];
 
-const snapshot=
-await getDocs(q);
 
-if(snapshot.empty){
+if(checkoutItems.length===0){
 
 document.getElementById(
 "productName"
@@ -107,44 +98,82 @@ return;
 
 }
 
-const item=
-snapshot.docs[0].data();
 
-currentProduct=item;
+const firstItem=
+checkoutItems[0];
+
+const qty=
+Number(
+firstItem.quantity||1
+);
+
+const unitPrice=
+Number(
+firstItem.unitPrice||0
+);
+
+const itemTotal=
+Number(
+firstItem.totalPrice||
+(unitPrice*qty)
+);
+
+
+/* Product Display */
+
+document.getElementById(
+"productName"
+).innerText=
+firstItem.name;
+
+document.getElementById(
+"productPrice"
+).innerText=
+`₹${itemTotal}`;
+
+document.getElementById(
+"productImage"
+).src=
+firstItem.image || "logo.png";
+
+document.getElementById(
+"productQty"
+).innerText=
+`Qty : ${qty}
+(${firstItem.pack || "-"})`;
+
+
+
+/* Total Amount */
+
+totalAmount=0;
+
+checkoutItems.forEach(
+
+item=>{
 
 const qty=
 Number(
 item.quantity||1
 );
 
-const price=
+const unitPrice=
 Number(
-item.price||0
+item.unitPrice||0
 );
 
-totalAmount=
-price*qty;
+const total=
+Number(
+item.totalPrice||
+(unitPrice*qty)
+);
 
+totalAmount+=total;
 
-document.getElementById(
-"productName"
-).innerText=
-item.name || "No Product";
+}
 
-document.getElementById(
-"productPrice"
-).innerText=
-`₹${price}`;
+);
 
-document.getElementById(
-"productImage"
-).src=
-item.image || "logo.png";
-
-document.getElementById(
-"productQty"
-).innerText=
-`Qty : ${qty} ${item.selectedSize ? "(" + item.selectedSize + ")" : ""}`;
 
 document.getElementById(
 "subtotal"
@@ -158,19 +187,6 @@ document.getElementById(
 
 }
 
-catch(error){
-
-console.log(error);
-
-showPopup(
-"Error",
-"Unable to load product"
-);
-
-}
-
-}
-
 
 
 /* Place Order */
@@ -180,6 +196,7 @@ document.getElementById(
 )
 
 .onclick=()=>{
+
 
 const name=
 document.getElementById(
@@ -218,6 +235,7 @@ document.getElementById(
 
 
 if(
+
 !name||
 !phone||
 !state||
@@ -225,11 +243,15 @@ if(
 !area||
 !street||
 !pincode
+
 ){
 
 showPopup(
+
 "Missing Information",
+
 "Please fill all fields"
+
 );
 
 return;
@@ -237,23 +259,35 @@ return;
 }
 
 
+/* Razorpay */
+
 const options={
 
-key:"rzp_test_T5tWAjBQVPNBI4",
+key:
+"rzp_test_T5tWAjBQVPNBI4",
 
 amount:
 totalAmount*100,
 
-currency:"INR",
+currency:
+"INR",
 
-name:"Kodai Hills Spot",
+name:
+"Kodai Hills Spot",
 
 description:
-currentProduct.name,
+"Order Payment",
 
-image:"logo.png",
+image:
+"logo.png",
 
-handler:async function(response){
+
+handler:
+
+async function(response){
+
+
+for(let item of checkoutItems){
 
 await addDoc(
 
@@ -267,17 +301,29 @@ db,
 uid:
 currentUser.uid,
 
-name:
-currentProduct.name,
+productId:
+item.productId,
 
-price:
-totalAmount,
+name:
+item.name,
+
+image:
+item.image,
 
 quantity:
-currentProduct.quantity,
+item.quantity,
 
 pack:
-currentProduct.selectedSize,
+item.pack,
+
+unitPrice:
+item.unitPrice,
+
+totalPrice:
+item.totalPrice || (
+item.unitPrice*
+item.quantity
+),
 
 customerName:
 name,
@@ -286,7 +332,12 @@ phone:
 phone,
 
 address:
-`${area}, ${street}, ${district}, ${state}-${pincode}`,
+`${area},
+${street},
+${district},
+${state}
+-
+${pincode}`,
 
 paymentId:
 response.razorpay_payment_id,
@@ -301,12 +352,31 @@ Date.now()
 
 );
 
+}
+
+
 showPopup(
+
 "Success",
+
 "Order placed successfully"
+
 );
 
+
+localStorage.removeItem(
+"checkoutItems"
+);
+
+setTimeout(()=>{
+
+window.location=
+"orders.html";
+
+},1500);
+
 },
+
 
 prefill:{
 
@@ -322,8 +392,32 @@ currentUser.email
 };
 
 
+const razorpay=
+
 new Razorpay(
 options
-).open();
+);
+
+
+razorpay.on(
+
+"payment.failed",
+
+()=>{
+
+showPopup(
+
+"Payment Failed",
+
+"Please try again"
+
+);
+
+}
+
+);
+
+
+razorpay.open();
 
 };
