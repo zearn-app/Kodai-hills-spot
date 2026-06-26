@@ -392,14 +392,13 @@ item.productId;
 }
 
 
-const price=
+const price =
+Number(item.price || 0);
 
-Number(
-item.price||0
-);
+const qty =
+Number(item.quantity || 1);
 
-
-total+=price;
+total += price * qty;
 
 
 const card=
