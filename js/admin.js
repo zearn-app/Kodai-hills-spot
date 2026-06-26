@@ -215,19 +215,60 @@ return;
 }
 
 
+let quantityVariants=[];
+
+document
+.querySelectorAll(
+".variantInput"
+)
+
+.forEach((item)=>{
+
+if(item.value.trim()){
+
+quantityVariants.push(
+item.value.trim()
+);
+
+}
+
+});
+
+
 await addDoc(
 
-collection(db,"Products"),
+collection(
+db,
+"Products"
+),
 
 {
 
 name,
 price,
+
 oldPrice,
+
+packQty:
+
+enableVariants.checked
+
+?
+
+""
+
+:
+
 packQty,
+
+quantityVariants,
+
 category,
+
 Image:image,
+
 description,
+
 fewStock
 
 }
