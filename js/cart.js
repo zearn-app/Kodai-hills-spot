@@ -62,6 +62,7 @@ document.getElementById(
 };
 
 
+
 /* Load Cart */
 
 async function loadCart(){
@@ -72,15 +73,63 @@ const user =
 auth.currentUser;
 
 
+/* User not logged in */
+
 if(!user){
 
-window.location=
-"login.html";
+cartItems.innerHTML=`
+
+<div style="
+text-align:center;
+padding:50px;
+">
+
+<h2>
+
+🛒 Your Cart
+
+</h2>
+
+<p style="
+margin-top:10px;
+color:#666;
+">
+
+Login to view your cart items
+
+</p>
+
+<a
+href="login.html"
+style="
+display:inline-block;
+margin-top:20px;
+padding:12px 25px;
+background:#2e7d32;
+color:white;
+text-decoration:none;
+border-radius:10px;
+">
+
+🔐 Login
+
+</a>
+
+</div>
+
+`;
+
+totalDiv.innerText=
+"Total : ₹0";
+
+firstProductId="";
 
 return;
 
 }
 
+
+/* Loading */
 
 cartItems.innerHTML=`
 
@@ -96,6 +145,8 @@ Loading Products...
 
 `;
 
+
+/* Get cart items */
 
 const q =
 
@@ -129,6 +180,8 @@ let total=0;
 firstProductId="";
 
 
+/* Empty cart */
+
 if(snapshot.empty){
 
 cartItems.innerHTML=`
@@ -156,6 +209,8 @@ return;
 
 }
 
+
+/* Show cart */
 
 let index=0;
 
@@ -204,7 +259,9 @@ card.innerHTML=`
 
 <img
 
-src="${item.image||'logo.png'}"
+src="${
+item.image||"logo.png"
+}"
 
 onerror="
 this.src='logo.png'
@@ -216,7 +273,10 @@ this.src='logo.png'
 
 <h3>
 
-${item.name||"No Product"}
+${
+item.name||
+"No Product"
+}
 
 </h3>
 
@@ -284,6 +344,7 @@ showPopup(
 }
 
 
+
 /* Remove Item */
 
 window.removeItem=
@@ -302,6 +363,7 @@ id
 
 );
 
+
 showPopup(
 
 "Removed",
@@ -309,6 +371,7 @@ showPopup(
 "Product removed successfully"
 
 );
+
 
 loadCart();
 
@@ -331,32 +394,40 @@ showPopup(
 };
 
 
+
 /* Auth Check */
 
 auth.onAuthStateChanged(
 
 (user)=>{
 
-if(user){
-
 loadCart();
-
-}
-else{
-
-window.location=
-"login.html";
-
-}
 
 }
 
 );
 
 
+
 /* Checkout */
 
 checkoutBtn.onclick=()=>{
+
+
+if(!auth.currentUser){
+
+showPopup(
+
+"Login Required",
+
+"Please login to continue"
+
+);
+
+return;
+
+}
+
 
 if(!firstProductId){
 
@@ -371,6 +442,7 @@ showPopup(
 return;
 
 }
+
 
 window.location=
 
