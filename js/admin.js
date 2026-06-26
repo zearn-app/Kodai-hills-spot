@@ -195,11 +195,23 @@ document.getElementById(
 "description"
 ).value.trim();
 
-const fewStock=
 document.getElementById(
 "fewStock"
-).checked;
+).checked=false;
 
+document.getElementById(
+"enableVariants"
+).checked=false;
+
+variantFields.innerHTML="";
+
+variantSection.style.display=
+"none";
+
+document.getElementById(
+"packQty"
+).style.display=
+"block";
 
 if(
 !name||
