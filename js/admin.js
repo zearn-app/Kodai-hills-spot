@@ -259,7 +259,6 @@ item.value.trim()
 
 });
 
-
 await addDoc(
 
 collection(
@@ -270,8 +269,20 @@ db,
 {
 
 name:name,
-price:price,
-oldPrice:oldPrice,
+
+price:Number(price),
+
+oldPrice:
+
+oldPrice.trim() !== ""
+
+?
+
+Number(oldPrice)
+
+:
+
+null,
 
 packQty:
 
