@@ -152,6 +152,8 @@ window.location=
 
 /* ADD PRODUCT */
 
+/* ADD PRODUCT */
+
 document.getElementById(
 "addBtn"
 ).onclick=
@@ -195,6 +197,128 @@ document.getElementById(
 "description"
 ).value.trim();
 
+/* FIX */
+const fewStock=
+document.getElementById(
+"fewStock"
+).checked;
+
+const variantsEnabled=
+document.getElementById(
+"enableVariants"
+).checked;
+
+
+if(
+!name||
+!price||
+!image||
+!description
+){
+
+alert(
+"Fill all fields"
+);
+
+return;
+
+}
+
+
+/* Quantity variants */
+
+let quantityVariants=[];
+
+document
+.querySelectorAll(
+".variantInput"
+)
+.forEach((item)=>{
+
+if(
+item.value.trim()
+){
+
+quantityVariants.push(
+item.value.trim()
+);
+
+}
+
+});
+
+
+await addDoc(
+
+collection(
+db,
+"Products"
+),
+
+{
+
+name,
+price,
+oldPrice,
+
+packQty:
+
+variantsEnabled
+
+?
+
+""
+
+:
+
+packQty,
+
+quantityVariants,
+
+category,
+
+Image:image,
+
+description,
+
+fewStock
+
+}
+
+);
+
+
+alert(
+"Product Added"
+);
+
+
+/* Clear fields */
+
+document.getElementById(
+"name"
+).value="";
+
+document.getElementById(
+"price"
+).value="";
+
+document.getElementById(
+"oldPrice"
+).value="";
+
+document.getElementById(
+"packQty"
+).value="";
+
+document.getElementById(
+"image"
+).value="";
+
+document.getElementById(
+"description"
+).value="";
+
 document.getElementById(
 "fewStock"
 ).checked=false;
@@ -213,38 +337,24 @@ document.getElementById(
 ).style.display=
 "block";
 
-if(
-!name||
-!price||
-!image||
-!description
-){
 
-alert("Fill all fields");
+loadProducts();
 
-return;
+loadStats();
 
 }
 
+catch(error){
 
-let quantityVariants=[];
-
-document
-.querySelectorAll(
-".variantInput"
-)
-
-.forEach((item)=>{
-
-if(item.value.trim()){
-
-quantityVariants.push(
-item.value.trim()
+alert(
+error.message
 );
 
 }
 
-});
+};
+
+
 
 
 await addDoc(
