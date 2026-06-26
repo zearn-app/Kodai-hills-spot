@@ -483,19 +483,17 @@ const cartBtn=document.getElementById("cartBtn");
 const buyBtn=document.getElementById("buyBtn");
 const relatedDiv=document.getElementById("related");
 
-
 const params=
 new URLSearchParams(
 window.location.search
 );
 
-const id=
-params.get("id");
-
+const id=params.get("id");
 
 let quantity=1;
 let currentUser=null;
 let currentProduct=null;
+let selectedVariant=null;
 
 
 /* Login */
@@ -508,21 +506,17 @@ async(user)=>{
 
 currentUser=user;
 
-
-/* Move guest cart → Firebase */
+/* Move Guest Cart */
 
 if(user){
 
 let guestCart=
 
 JSON.parse(
-
 localStorage.getItem(
 "guestCart"
 )
-
 )||[];
-
 
 if(guestCart.length>0){
 
@@ -538,7 +532,6 @@ db,
 {
 
 uid:user.uid,
-
 ...item
 
 }
@@ -546,7 +539,6 @@ uid:user.uid,
 );
 
 }
-
 
 localStorage.removeItem(
 "guestCart"
@@ -556,8 +548,9 @@ localStorage.removeItem(
 
 }
 
-});
+}
 
+);
 
 
 /* Quantity */
@@ -569,8 +562,9 @@ quantity++;
 countEl.innerText=
 quantity;
 
-};
+updatePrice();
 
+};
 
 minusBtn.onclick=()=>{
 
@@ -581,15 +575,34 @@ quantity--;
 countEl.innerText=
 quantity;
 
+updatePrice();
+
 }
 
 };
 
 
+/* Update Total Price */
+
+function updatePrice(){
+
+const unitPrice=
+
+selectedVariant?.price ||
+currentProduct.price ||
+0;
+
+const total=
+
+unitPrice*quantity;
+
+priceEl.innerText=
+`₹${total}`;
+
+}
+
 
 /* Load Product */
-
-let selectedVariant="";
 
 async function loadProduct(){
 
@@ -600,23 +613,18 @@ await getDoc(
 doc(
 db,
 "Products",
-id
-)
+id)
 
 );
 
 currentProduct=
 snapshot.data();
 
-
 imageEl.src=
 currentProduct.Image;
 
 nameEl.innerText=
 currentProduct.name;
-
-priceEl.innerText=
-"₹"+currentProduct.price;
 
 categoryEl.innerText=
 "Category : "+
@@ -625,8 +633,6 @@ currentProduct.category;
 descriptionEl.innerText=
 currentProduct.description;
 
-
-/* Load quantity variants */
 
 const variantBox=
 document.getElementById(
@@ -638,17 +644,19 @@ document.getElementById(
 "variantList"
 );
 
-
 variantList.innerHTML="";
 
 let variants=[];
 
 
-/* Multiple quantities */
+/* Multiple quantity variants */
 
 if(
+
 currentProduct.quantityVariants &&
+
 currentProduct.quantityVariants.length>0
+
 ){
 
 variants=
@@ -659,12 +667,20 @@ currentProduct.quantityVariants;
 /* Single quantity */
 
 else if(
+
 currentProduct.packQty
+
 ){
 
-variants=[
-currentProduct.packQty
-];
+variants=[{
+
+qty:
+currentProduct.packQty,
+
+price:
+currentProduct.price
+
+}];
 
 }
 
@@ -673,7 +689,6 @@ if(variants.length>0){
 
 variantBox.style.display=
 "block";
-
 
 variants.forEach(
 
@@ -689,7 +704,11 @@ btn.className=
 
 btn.innerHTML=`
 
-<div>${item.qty}</div>
+<div>
+
+${item.qty}
+
+</div>
 
 <b>
 
@@ -701,14 +720,12 @@ btn.innerHTML=`
 
 if(index===0){
 
-selectedVariant=item;
+selectedVariant=
+item;
 
 btn.classList.add(
 "variantActive"
 );
-
-priceEl.innerText=
-"₹"+item.price;
 
 }
 
@@ -719,48 +736,9 @@ document
 ".variantBtn"
 )
 
-.forEach(x=>{
+.forEach(btn=>{
 
-x.classList.remove(
-"variantActive"
-);
-
-});
-
-btn.classList.add(
-"variantActive"
-);
-
-selectedVariant=item;
-
-priceEl.innerText=
-"₹"+item.price;
-
-};
-
-
-/* First selected */
-
-if(index===0){
-
-btn.classList.add(
-"variantActive"
-);
-
-selectedVariant=
-item;
-
-}
-
-
-btn.onclick=()=>{
-
-document
-.querySelectorAll(
-".variantBtn")
-.forEach(x=>{
-
-x.classList.remove(
+btn.classList.remove(
 "variantActive"
 );
 
@@ -773,12 +751,12 @@ btn.classList.add(
 selectedVariant=
 item;
 
-};
+updatePrice();
 
+};
 
 variantList.appendChild(
-btn
-);
+btn);
 
 }
 
@@ -786,13 +764,7 @@ btn
 
 }
 
-else{
-
-variantBox.style.display=
-"none";
-
-}
-
+updatePrice();
 
 loadReviews();
 
@@ -800,12 +772,12 @@ loadRelated();
 
 }
 
+
 /* Reviews */
 
 async function loadReviews(){
 
 reviewsDiv.innerHTML="";
-
 
 const q=
 
@@ -824,11 +796,8 @@ id
 
 );
 
-
 const snapshot=
-
 await getDocs(q);
-
 
 if(snapshot.empty){
 
@@ -839,12 +808,12 @@ return;
 
 }
 
+snapshot.forEach(
 
-snapshot.forEach((item)=>{
+item=>{
 
 const data=
 item.data();
-
 
 reviewsDiv.innerHTML+=`
 
@@ -866,18 +835,18 @@ ${data.comment}
 
 `;
 
-});
+}
+
+);
 
 }
 
 
-
-/* Related Products */
+/* Related */
 
 async function loadRelated(){
 
 relatedDiv.innerHTML="";
-
 
 const snapshot=
 
@@ -890,12 +859,12 @@ db,
 
 );
 
+snapshot.forEach(
 
-snapshot.forEach((item)=>{
+item=>{
 
 const data=
 item.data();
-
 
 if(item.id!==id){
 
@@ -904,9 +873,7 @@ relatedDiv.innerHTML+=`
 <div
 class="related-card"
 
-onclick="window.location='product-details.html?id=${item.id}'"
-
->
+onclick="window.location='product-details.html?id=${item.id}'">
 
 <img src="${data.Image}">
 
@@ -928,18 +895,27 @@ ${data.name}
 
 }
 
-});
+}
+
+);
 
 }
 
 
-
-/* Add To Cart */
+/* Add Cart */
 
 cartBtn.onclick=
 
 async()=>{
 
+const unitPrice=
+
+selectedVariant?.price ||
+currentProduct.price;
+
+const itemTotal=
+
+unitPrice*quantity;
 
 const item={
 
@@ -948,35 +924,27 @@ productId:id,
 name:
 currentProduct.name,
 
-price:
-selectedVariant?.price ||
-currentProduct.price,
-
-unitPrice:
-selectedVariant?.price ||
-currentProduct.price,
-
-
 image:
 currentProduct.Image,
 
 quantity:
 quantity,
 
+unitPrice:
+unitPrice,
+
+price:
+itemTotal,
+
 selectedSize:
-selectedVariant ||
+selectedVariant?.qty ||
 currentProduct.packQty ||
 ""
 
 };
 
-localStorage.setItem(
-"selectedSize",
-selectedVariant ||
-currentProduct.packQty
-);
 
-/* Logged in */
+/* Firebase */
 
 if(currentUser){
 
@@ -1007,49 +975,48 @@ return;
 }
 
 
-/* Guest cart */
+/* Guest */
 
-let localCart=
+let guestCart=
 
 JSON.parse(
-
 localStorage.getItem(
 "guestCart"
 )
+)||[];
 
-)
-
-||[];
-
-
-localCart.push(item);
-
+guestCart.push(
+item
+);
 
 localStorage.setItem(
 
 "guestCart",
 
 JSON.stringify(
-localCart
-)
+guestCart)
 
 );
 
-
 alert(
-"Added to cart"
+"Added to Cart"
 );
 
 };
-
 
 
 /* Buy */
 
 buyBtn.onclick=()=>{
 
+cartBtn.click();
+
+setTimeout(()=>{
+
 window.location=
 "cart.html";
+
+},500);
 
 };
 
