@@ -1,9 +1,8 @@
-import { initializeApp }
-from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
+import { auth, db }
+from "./firebase.js";
 
 import {
 
-getAuth,
 createUserWithEmailAndPassword,
 signInWithEmailAndPassword
 
@@ -14,7 +13,6 @@ from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
 
 import {
 
-getFirestore,
 doc,
 setDoc
 
@@ -23,90 +21,81 @@ setDoc
 from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
 
-
-const firebaseConfig={
-
-apiKey:"AIzaSyAXtM0DnYPTYbdQmvv93KAQwcqxty2C1vQ",
-
-authDomain:
-"kodaihillsspot-4a1b8.firebaseapp.com",
-
-projectId:
-"kodaihillsspot-4a1b8",
-
-storageBucket:
-"kodaihillsspot-4a1b8.firebasestorage.app",
-
-messagingSenderId:
-"396566428046",
-
-appId:
-"1:396566428046:web:c9bafa2143b34e7d64ccdf"
-
-};
-
-
-const app=
-initializeApp(
-firebaseConfig
+const signupBtn=
+document.getElementById(
+"signupBtn"
 );
 
-const auth=
-getAuth(app);
-
-const db=
-getFirestore(app);
-
+const loginBtn=
+document.getElementById(
+"loginBtn"
+);
 
 
-/* SIGNUP */
+/* Signup */
 
-document
-.getElementById(
-"signupBtn"
-)
-
-.onclick=
+signupBtn.onclick=
 
 async()=>{
 
 try{
 
 const name=
-document
-.getElementById(
+
+document.getElementById(
 "name"
 )
+
 .value.trim();
+
 
 const email=
-document
-.getElementById(
+
+document.getElementById(
 "email"
 )
+
 .value.trim();
 
+
 const password=
-document
-.getElementById(
+
+document.getElementById(
 "password"
 )
+
 .value.trim();
+
 
 
 if(
+
 !name||
 !email||
 !password
+
 ){
 
-alert(
-"Fill all fields"
+showPopup(
+
+"Fields Empty",
+
+"Please fill all fields"
+
 );
 
 return;
 
 }
+
+
+
+signupBtn.innerText=
+"Creating...";
+
+signupBtn.disabled=
+true;
+
 
 
 const userCredential=
@@ -120,8 +109,11 @@ password
 );
 
 
+
 const user=
+
 userCredential.user;
+
 
 
 await setDoc(
@@ -134,29 +126,61 @@ user.uid
 
 {
 
-uid:user.uid,
-name:name,
-email:email
+uid:
+user.uid,
+
+name:
+name,
+
+email:
+email
 
 }
 
 );
 
 
-alert(
+
+showPopup(
+
+"Success",
+
 "Signup successful"
+
 );
+
+
+
+setTimeout(()=>{
 
 window.location=
 "index.html";
+
+},1500);
+
+
 
 }
 
 catch(error){
 
-alert(
+showPopup(
+
+"Signup Failed",
+
 error.message
+
 );
+
+}
+
+finally{
+
+signupBtn.innerText=
+"Sign Up";
+
+signupBtn.disabled=
+false;
 
 }
 
@@ -164,36 +188,63 @@ error.message
 
 
 
-/* LOGIN */
-/* LOGIN */
 
-document
-.getElementById(
-"loginBtn"
-)
+/* Login */
 
-.onclick=
+loginBtn.onclick=
 
 async()=>{
 
 try{
 
 const email=
-document
-.getElementById(
+
+document.getElementById(
 "loginEmail"
 )
+
 .value.trim();
+
+
 
 const password=
-document
-.getElementById(
+
+document.getElementById(
 "loginPassword"
 )
+
 .value.trim();
 
 
-const userCredential=
+
+if(
+
+!email||
+!password
+
+){
+
+showPopup(
+
+"Fields Empty",
+
+"Please enter email and password"
+
+);
+
+return;
+
+}
+
+
+
+loginBtn.innerText=
+"Logging...";
+
+loginBtn.disabled=
+true;
+
+
 
 await signInWithEmailAndPassword(
 
@@ -204,43 +255,81 @@ password
 );
 
 
-/* ADMIN CHECK */
 
 const adminEmail=
+
 "kodaihillsspot@gmail.com";
 
 
+
 if(
+
 email===adminEmail
+
 ){
 
-alert(
-"Admin Login Successful"
+showPopup(
+
+"Admin Login",
+
+"Admin login successful"
+
 );
+
+
+
+setTimeout(()=>{
 
 window.location=
 "admin.html";
 
-}
+},1500);
 
+}
 else{
 
-alert(
-"Login Successful"
+showPopup(
+
+"Login Success",
+
+"Welcome back"
+
 );
+
+
+
+setTimeout(()=>{
 
 window.location=
 "index.html";
 
+},1500);
+
 }
+
+
 
 }
 
 catch(error){
 
-alert(
+showPopup(
+
+"Login Failed",
+
 error.message
+
 );
+
+}
+
+finally{
+
+loginBtn.innerText=
+"Login";
+
+loginBtn.disabled=
+false;
 
 }
 
