@@ -173,15 +173,19 @@ transform:scale(.97);
 
 .toggle{
 
+display:block;
+
 text-align:center;
 
-margin-top:15px;
+margin-top:20px;
 
 cursor:pointer;
 
 color:#2e7d32;
 
 font-weight:bold;
+
+font-size:15px;
 
 transition:.3s;
 
@@ -199,8 +203,6 @@ display:none;
 
 }
 
-/* Form animation */
-
 #signupBox,
 #loginBox{
 
@@ -208,6 +210,21 @@ animation:fadeIn .5s ease;
 
 }
 
+/* Forgot Password */
+
+#forgotPassword{
+
+margin-top:12px;
+
+text-align:center;
+
+color:#2e7d32;
+
+font-weight:bold;
+
+cursor:pointer;
+
+}
 
 /* Popup */
 
@@ -322,7 +339,6 @@ Sign Up
 
 
 
-
 <!-- Login -->
 
 <div
@@ -345,21 +361,27 @@ Login
 
 </button>
 
-<p
-id="forgotPassword"
-style="
-margin-top:12px;
-text-align:center;
-color:#2e7d32;
-font-weight:bold;
-cursor:pointer;
-">
+<p id="forgotPassword">
 
 Forgot Password?
 
 </p>
 
 </div>
+
+
+
+<!-- Toggle -->
+
+<p
+class="toggle"
+onclick="toggleForm()"
+id="toggleText">
+
+Already have account? Login
+
+</p>
+
 
 
 <!-- Popup -->
@@ -402,19 +424,16 @@ OK
 function toggleForm(){
 
 let signup=
-
 document.getElementById(
 "signupBox"
 );
 
 let login=
-
 document.getElementById(
 "loginBox"
 );
 
 let text=
-
 document.getElementById(
 "toggleText"
 );
@@ -424,6 +443,7 @@ if(
 
 login.classList.contains(
 "hidden"
+
 )
 
 ){
@@ -440,7 +460,6 @@ login.style.animation=
 "fadeIn .5s ease";
 
 text.innerText=
-
 "Don't have account? Sign Up";
 
 }
@@ -459,7 +478,6 @@ signup.style.animation=
 "fadeIn .5s ease";
 
 text.innerText=
-
 "Already have account? Login";
 
 }
