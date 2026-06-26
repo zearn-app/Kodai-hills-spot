@@ -13,16 +13,6 @@ from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
 
 import {
 
-createUserWithEmailAndPassword,
-signInWithEmailAndPassword
-
-}
-
-from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
-
-
-import {
-
 doc,
 setDoc
 
@@ -31,67 +21,53 @@ setDoc
 from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
 
-const signupBtn=
+const signupBtn =
 document.getElementById(
 "signupBtn"
 );
 
-const loginBtn=
+const loginBtn =
 document.getElementById(
 "loginBtn"
+);
+
+const forgotBtn =
+document.getElementById(
+"forgotPassword"
 );
 
 
 /* Signup */
 
-signupBtn.onclick=
-
-async()=>{
+signupBtn.onclick = async()=>{
 
 try{
 
-const name=
-
+const name =
 document.getElementById(
 "name"
-)
+).value.trim();
 
-.value.trim();
-
-
-const email=
-
+const email =
 document.getElementById(
 "email"
-)
+).value.trim();
 
-.value.trim();
-
-
-const password=
-
+const password =
 document.getElementById(
 "password"
-)
-
-.value.trim();
-
+).value.trim();
 
 
 if(
-
-!name||
-!email||
+!name ||
+!email ||
 !password
-
 ){
 
 showPopup(
-
 "Fields Empty",
-
 "Please fill all fields"
-
 );
 
 return;
@@ -99,13 +75,10 @@ return;
 }
 
 
-
-signupBtn.innerText=
+signupBtn.innerText =
 "Creating...";
 
-signupBtn.disabled=
-true;
-
+signupBtn.disabled=true;
 
 
 const userCredential=
@@ -119,11 +92,8 @@ password
 );
 
 
-
 const user=
-
 userCredential.user;
-
 
 
 await setDoc(
@@ -136,29 +106,21 @@ user.uid
 
 {
 
-uid:
-user.uid,
-
-name:
-name,
-
-email:
-email
+uid:user.uid,
+name:name,
+email:email
 
 }
 
 );
 
 
-
 showPopup(
 
 "Success",
-
 "Signup successful"
 
 );
-
 
 
 setTimeout(()=>{
@@ -168,8 +130,6 @@ window.location=
 
 },1500);
 
-
-
 }
 
 catch(error){
@@ -177,7 +137,6 @@ catch(error){
 showPopup(
 
 "Signup Failed",
-
 error.message
 
 );
@@ -198,7 +157,6 @@ false;
 
 
 
-
 /* Login */
 
 loginBtn.onclick=
@@ -211,33 +169,23 @@ const email=
 
 document.getElementById(
 "loginEmail"
-)
-
-.value.trim();
-
-
+).value.trim();
 
 const password=
 
 document.getElementById(
 "loginPassword"
-)
-
-.value.trim();
-
+).value.trim();
 
 
 if(
-
 !email||
 !password
-
 ){
 
 showPopup(
 
 "Fields Empty",
-
 "Please enter email and password"
 
 );
@@ -247,13 +195,11 @@ return;
 }
 
 
-
 loginBtn.innerText=
 "Logging...";
 
 loginBtn.disabled=
 true;
-
 
 
 await signInWithEmailAndPassword(
@@ -265,28 +211,20 @@ password
 );
 
 
-
 const adminEmail=
-
 "kodaihillsspot@gmail.com";
 
 
-
 if(
-
 email===adminEmail
-
 ){
 
 showPopup(
 
 "Admin Login",
-
 "Admin login successful"
 
 );
-
-
 
 setTimeout(()=>{
 
@@ -296,17 +234,15 @@ window.location=
 },1500);
 
 }
+
 else{
 
 showPopup(
 
 "Login Success",
-
 "Welcome back"
 
 );
-
-
 
 setTimeout(()=>{
 
@@ -317,8 +253,6 @@ window.location=
 
 }
 
-
-
 }
 
 catch(error){
@@ -326,7 +260,6 @@ catch(error){
 showPopup(
 
 "Login Failed",
-
 error.message
 
 );
@@ -347,16 +280,9 @@ false;
 
 
 
-
 /* Forgot Password */
 
-document
-
-.getElementById(
-"forgotPassword"
-)
-
-.onclick=
+forgotBtn.onclick=
 
 async()=>{
 
@@ -364,13 +290,9 @@ try{
 
 const email=
 
-document
-
-.getElementById(
+document.getElementById(
 "loginEmail"
-)
-
-.value.trim();
+).value.trim();
 
 
 if(!email){
@@ -378,8 +300,7 @@ if(!email){
 showPopup(
 
 "Email Required",
-
-"Please enter your email first"
+"Please enter your email"
 
 );
 
@@ -399,8 +320,7 @@ email
 showPopup(
 
 "Reset Link Sent",
-
-"Password reset link sent to your email"
+"Check your Gmail inbox"
 
 );
 
@@ -408,10 +328,11 @@ showPopup(
 
 catch(error){
 
+console.log(error);
+
 showPopup(
 
-"Error",
-
+"Reset Failed",
 error.message
 
 );
