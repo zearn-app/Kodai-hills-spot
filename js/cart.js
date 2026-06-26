@@ -662,5 +662,8 @@ return;
 }
 
 
+const selectedQty =
+localStorage.getItem("selectedSize") || "";
+
 window.location =
-`checkout.html?id=${firstProductId}`;
+`checkout.html?id=${firstProductId}&qty=${encodeURIComponent(selectedQty)}`;
