@@ -280,9 +280,12 @@ item.name||
 </div>
 
 <p>
-
 Qty :
 ${item.quantity||1}
+
+${item.selectedSize ?
+` (${item.selectedSize})`
+: ""}
 
 </p>
 
