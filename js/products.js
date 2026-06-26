@@ -1,129 +1,61 @@
-import { db, auth }
+import {db,auth}
 from "./firebase.js";
 
-import {
+import{
 collection,
 getDocs,
 addDoc
 }
 from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
-import {
+import{
 onAuthStateChanged
 }
 from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
 
+const productsDiv=document.getElementById("products");
+const searchInput=document.getElementById("searchInput");
+const priceFilter=document.getElementById("priceFilter");
+const categoryCards=document.querySelectorAll(".category-card");
+const profileNav=document.getElementById("profileNav");
 
-const productsDiv =
-document.getElementById(
-"products"
-);
+let allProducts=[];
+let currentUser=null;
+let selectedCategory="";
 
-const searchInput =
-document.getElementById(
-"searchInput"
-);
+onAuthStateChanged(auth,(user)=>{
 
-const priceFilter =
-document.getElementById(
-"priceFilter"
-);
-
-const categoryCards =
-document.querySelectorAll(
-".category-card"
-);
-
-const profileNav =
-document.getElementById(
-"profileNav"
-);
-
-
-let allProducts = [];
-let selectedCategory = "";
-let currentUser = null;
-
-
-/* Auth */
-
-onAuthStateChanged(
-
-auth,
-
-(user)=>{
-
-currentUser = user;
-
-
-/* Bottom Nav */
+currentUser=user;
 
 if(user){
 
-profileNav.href =
-"profile.html";
+profileNav.href="profile.html";
 
-profileNav.innerHTML = `
-
-👤<br>
-Yours
-
+profileNav.innerHTML=`
+👤<br>Yours
 `;
 
-}
-else{
+}else{
 
-profileNav.href =
-"login.html";
+profileNav.href="login.html";
 
-profileNav.innerHTML = `
-
-🔐<br>
-Login
-
+profileNav.innerHTML=`
+🔐<br>Login
 `;
 
 }
 
-}
-
-);
-
-
-/* Product Loading */
+});
 
 async function loadProducts(){
 
-try{
-
-productsDiv.innerHTML = `
-
-<div style="
-text-align:center;
-padding:20px;
-">
-
-Loading Products...
-
-</div>
-
-`;
-
-const snapshot =
-
-await getDocs(
-
-collection(
-db,
-"Products"
-)
-
+const snapshot=await getDocs(
+collection(db,"Products")
 );
 
-allProducts = [];
+allProducts=[];
 
-
-snapshot.forEach((doc)=>{
+snapshot.forEach(doc=>{
 
 allProducts.push({
 
@@ -134,316 +66,165 @@ id:doc.id,
 
 });
 
-
-showProducts(
-allProducts
-);
+showProducts(allProducts);
 
 }
-
-catch(error){
-
-console.log(error);
-
-productsDiv.innerHTML = `
-
-<h3 style="
-text-align:center;
-color:red;
-padding:20px;
-">
-
-Error Loading Products
-
-</h3>
-
-`;
-
-}
-
-}
-
-
-/* Show Products */
 
 function showProducts(products){
 
-productsDiv.innerHTML = "";
-
+productsDiv.innerHTML="";
 
 if(products.length===0){
 
-productsDiv.innerHTML = `
-
-<h3 style="
-text-align:center;
-padding:20px;
-">
-
-No Products Found
-
-</h3>
-
+productsDiv.innerHTML=`
+<h3>No Products</h3>
 `;
 
 return;
 
 }
 
+products.forEach(product=>{
 
-products.forEach((product)=>{
+const div=document.createElement("div");
 
-const oldPrice =
+div.className="card";
 
-product.oldPrice ||
+div.innerHTML=`
 
-(Number(product.price||0)+50);
+<img src="${product.Image||'logo.png'}">
 
+<h3>${product.name}</h3>
 
-productsDiv.innerHTML += `
-
-<div class="card">
-
-${
-product.fewStock
-
-?
-
-`
-
-<div class="stock-badge">
-
-Few Stock
-
-</div>
-
-`
-
-:
-
-""
-}
-
-<img
-
-src="${product.Image||'logo.png'}"
-
-onclick="openProduct('${product.id}')"
-
-onerror="this.src='logo.png'"
-
->
-
-<h3>
-
-${product.name||"No Name"}
-
-</h3>
-
-${
-product.packQty
-
-?
-
-`
-
-<div class="pack">
-
-📦 ${product.packQty}
-
-</div>
-
-`
-
-:
-
-""
-}
-
-<div style="
-margin-top:10px;
-">
+<div>
 
 <span class="old-price">
-
-₹${oldPrice}
-
+₹${product.oldPrice||Number(product.price)+50}
 </span>
 
 <span class="price">
-
-₹${product.price||0}
-
+₹${product.price}
 </span>
 
 </div>
 
-<button
-
-class="btn"
-
-onclick="addToCart('${product.id}')"
-
->
-
+<button class="btn">
 🛒 Add Cart
-
 </button>
 
-</div>
-
 `;
+
+div.onclick=()=>{
+
+window.location=
+`product-details.html?id=${product.id}`;
+
+};
+
+const button=
+div.querySelector(".btn");
+
+button.onclick=(e)=>{
+
+e.stopPropagation();
+
+addToCart(product);
+
+};
+
+productsDiv.appendChild(div);
 
 });
 
 }
 
+async function addToCart(product){
 
-/* Open Product */
+let cart=
+JSON.parse(
+localStorage.getItem("cart")
+)||[];
 
-window.openProduct = (id)=>{
+const existing=
+cart.find(
+item=>item.id===product.id
+);
 
-window.location =
+if(existing){
 
-`product-details.html?id=${id}`;
+existing.quantity++;
 
-};
+}else{
 
+cart.push({
 
-/* Add Cart */
+id:product.id,
+name:product.name,
+price:product.price,
+image:product.Image,
+quantity:1
 
-window.addToCart = async(id)=>{
-
-try{
-
-if(!currentUser){
-
-window.location =
-"login.html";
-
-return;
+});
 
 }
 
-const product =
-
-allProducts.find(
-
-item=>item.id===id
-
+localStorage.setItem(
+"cart",
+JSON.stringify(cart)
 );
 
-if(!product){
-
-alert(
-"Product not found"
-);
-
-return;
-
-}
-
+if(currentUser){
 
 await addDoc(
-
-collection(
-db,
-"Cart"
-),
-
+collection(db,"Cart"),
 {
 
-uid:
-currentUser.uid,
-
-productId:
-id,
-
-name:
-product.name,
-
-price:
-Number(product.price),
-
-image:
-product.Image,
-
+uid:currentUser.uid,
+productId:product.id,
+name:product.name,
+price:Number(product.price),
+image:product.Image,
 quantity:1,
-
-oldPrice:
-product.oldPrice ||
-(Number(product.price)+50),
-
-fewStock:
-product.fewStock || false,
-
-packQty:
-product.packQty || "",
-
-createdAt:
-Date.now()
+createdAt:Date.now()
 
 }
-
-);
-
-alert(
-"Added to cart"
 );
 
 }
 
-catch(error){
+const btn=document.querySelector(".cart-btn");
 
-console.log(error);
+btn.style.transform="scale(1.3)";
 
-alert(
-error.message
-);
+setTimeout(()=>{
+
+btn.style.transform="scale(1)";
+
+},300);
 
 }
-
-};
-
-
-/* Filter */
 
 function filterProducts(){
 
-let filtered = [...allProducts];
+let filtered=[...allProducts];
 
-
-/* Search */
-
-const search =
-
+const search=
 searchInput.value
 .toLowerCase();
 
-filtered =
-
-filtered.filter(
-
-item=>
+filtered=
+filtered.filter(item=>
 
 (item.name||"")
-
 .toLowerCase()
-
 .includes(search)
 
 );
 
-
-/* Category */
-
 if(selectedCategory!=""){
 
-filtered =
-
-filtered.filter(
-
-item=>
+filtered=
+filtered.filter(item=>
 
 item.category
 ?.toLowerCase()
@@ -457,125 +238,33 @@ selectedCategory
 
 }
 
-
-/* Sort */
-
-if(priceFilter.value==="low"){
-
-filtered.sort(
-
-(a,b)=>
-
-Number(a.price)
-
--
-
-Number(b.price)
-
-);
+showProducts(filtered);
 
 }
-
-else if(priceFilter.value==="high"){
-
-filtered.sort(
-
-(a,b)=>
-
-Number(b.price)
-
--
-
-Number(a.price)
-
-);
-
-}
-
-else if(priceFilter.value==="buy"){
-
-filtered.sort(
-
-(a,b)=>
-
-(b.buyCount||0)
-
--
-
-(a.buyCount||0)
-
-);
-
-}
-
-showProducts(
-filtered
-);
-
-}
-
-
-/* Events */
 
 searchInput.addEventListener(
-
 "input",
-
 filterProducts
-
 );
 
 priceFilter.addEventListener(
-
 "change",
-
 filterProducts
-
 );
 
+categoryCards.forEach(card=>{
 
-categoryCards.forEach(
+card.onclick=()=>{
 
-(card)=>{
-
-card.onclick = ()=>{
-
-categoryCards.forEach(c=>{
-
-c.style.background =
-"white";
-
-c.style.color =
-"black";
-
-});
-
-card.style.background =
-"#2e7d32";
-
-card.style.color =
-"white";
-
-selectedCategory =
-
+selectedCategory=
 card.innerText
-
-.replace("🍫","")
-.replace("🥑","")
-.replace("🥔","")
-.replace("🌿","")
-
+.replace(/[^\w\s]/gi,"")
 .trim();
 
 filterProducts();
 
 };
 
-}
-
-);
-
-
-/* Start */
+});
 
 loadProducts();
