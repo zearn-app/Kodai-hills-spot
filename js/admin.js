@@ -84,32 +84,35 @@ variantFields.innerHTML="";
 
 /* Add quantity field */
 
-addVariantBtn.onclick=()=>{
+let quantityVariants=[];
 
-const div=
-document.createElement(
-"div"
-);
+const qtyInputs=
+document.querySelectorAll(".variantQty");
 
-div.innerHTML=`
+const priceInputs=
+document.querySelectorAll(".variantPrice");
 
-<input
-class="variantInput"
-placeholder="Example: 500g / 1kg / 2L"
-style="
-margin-top:10px;
-width:100%;
-padding:12px;
-border-radius:10px;
-">
+for(let i=0;i<qtyInputs.length;i++){
 
-`;
+const qty=
+qtyInputs[i].value.trim();
 
-variantFields.appendChild(
-div
-);
+const price=
+priceInputs[i].value.trim();
 
-};
+if(qty&&price){
+
+quantityVariants.push({
+
+qty:qty,
+
+price:Number(price)
+
+});
+
+}
+
+}
 
 
 
