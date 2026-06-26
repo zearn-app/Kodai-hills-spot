@@ -80,6 +80,54 @@ transform:translateY(0);
 }
 }
 
+
+
+/* Quantity Variant */
+
+#variantList::-webkit-scrollbar{
+display:none;
+}
+
+.variantBtn{
+
+min-width:90px;
+
+padding:15px;
+
+background:white;
+
+border:2px solid #ddd;
+
+border-radius:15px;
+
+font-size:18px;
+
+cursor:pointer;
+
+transition:.3s;
+
+flex-shrink:0;
+
+text-align:center;
+
+}
+
+.variantBtn:hover{
+
+transform:translateY(-2px);
+
+}
+
+.variantActive{
+
+border:3px solid #1565c0;
+
+background:#e3f2fd;
+
+}
+
+
+
 /* Reviews */
 
 .review{
@@ -310,6 +358,36 @@ Loading...
 <div class="category" id="category"></div>
 
 <div class="description" id="description"></div>
+
+
+
+<!-- Size / Quantity Selection -->
+
+<div
+id="variantBox"
+style="margin-top:20px;display:none;">
+
+<h3 style="
+margin-bottom:12px;
+font-size:18px;
+">
+
+Select Quantity
+
+</h3>
+
+<div
+id="variantList"
+style="
+display:flex;
+gap:10px;
+overflow:auto;
+padding-bottom:10px;
+">
+
+</div>
+
+</div>
 
 <div class="qty">
 
