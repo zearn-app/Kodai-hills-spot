@@ -247,10 +247,53 @@ searchInput.addEventListener(
 filterProducts
 );
 
-priceFilter.addEventListener(
-"change",
-filterProducts
+const filterPopup=
+document.getElementById(
+"filterPopup"
 );
+
+const openFilter=
+document.getElementById(
+"openFilter"
+);
+
+openFilter.onclick=()=>{
+
+filterPopup.style.display=
+"flex";
+
+};
+
+document.getElementById(
+"closePopup"
+).onclick=()=>{
+
+filterPopup.style.display=
+"none";
+
+};
+
+
+document
+.querySelectorAll(
+".popup-btn"
+)
+
+.forEach(btn=>{
+
+btn.onclick=()=>{
+
+priceFilter=
+btn.dataset.value;
+
+filterProducts();
+
+filterPopup.style.display=
+"none";
+
+};
+
+});
 
 categoryCards.forEach(card=>{
 
