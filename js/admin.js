@@ -336,26 +336,54 @@ alert(error.message);
 };
 
 
-
-/* LOAD PRODUCTS */
-
 async function loadProducts(){
 
 productsDiv.innerHTML=
 "Loading...";
 
 const snapshot=
-
 await getDocs(
-collection(db,"Products")
+collection(
+db,
+"Products"
+)
 );
 
 productsDiv.innerHTML="";
 
-
 snapshot.forEach((item)=>{
 
 const data=item.data();
+
+let quantityDisplay="";
+
+if(
+data.quantityVariants &&
+data.quantityVariants.length>0
+){
+
+quantityDisplay=
+data.quantityVariants
+.map(q=>`<span
+style="
+display:inline-block;
+padding:5px 10px;
+background:#f5f5f5;
+border-radius:10px;
+margin:3px;
+">
+${q}
+</span>`)
+.join("");
+
+}
+
+else{
+
+quantityDisplay=
+data.packQty||"-";
+
+}
 
 productsDiv.innerHTML+=`
 
@@ -366,7 +394,8 @@ margin-bottom:15px;
 border-radius:15px;
 ">
 
-<img src="${data.Image}"
+<img
+src="${data.Image}"
 style="
 width:100%;
 height:150px;
@@ -374,7 +403,9 @@ object-fit:cover;
 border-radius:10px;
 ">
 
-<h3>${data.name}</h3>
+<h3>
+${data.name}
+</h3>
 
 <p>
 Price: ₹${data.price}
@@ -388,8 +419,13 @@ Old Price:
 </p>
 
 <p>
-Pack:
-${data.packQty||"-"}
+
+Quantity:
+
+<br>
+
+${quantityDisplay}
+
 </p>
 
 <p>
@@ -399,8 +435,11 @@ ${data.category}
 ${
 data.fewStock
 ?
+
 "<p style='color:red'>⚠ Few Stock Left</p>"
+
 :
+
 ""
 }
 
@@ -425,7 +464,6 @@ Delete
 });
 
 }
-
 
 
 /* DELETE */
