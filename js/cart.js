@@ -259,7 +259,16 @@ text-align:center;
 padding:50px;
 ">
 
-<img src="empty-cart.jpg">
+<img 
+src="empty-cart.jpg"
+style="
+width:180px;
+max-width:80%;
+height:auto;
+object-fit:contain;
+margin-bottom:15px;
+"
+>
 
 <p>
 
@@ -345,7 +354,16 @@ padding:50px;
 ">
 
 
-<img src="empty-cart.jpg">
+<img 
+src="empty-cart.jpg"
+style="
+width:180px;
+max-width:80%;
+height:auto;
+object-fit:contain;
+margin-bottom:15px;
+"
+>
 
 </div>
 
