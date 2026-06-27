@@ -558,9 +558,22 @@ ${quantityDisplay}
 </p>
 
 <button
+onclick="editProduct('${item.id}')"
+style="
+background:#2196f3;
+color:white;
+padding:10px;
+border:none;
+border-radius:10px;
+margin-right:10px;
+">
 
+Edit
+
+</button>
+
+<button
 onclick="deleteProduct('${item.id}')"
-
 style="
 background:red;
 color:white;
