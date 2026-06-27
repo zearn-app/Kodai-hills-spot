@@ -11,10 +11,10 @@ addDoc,
 getDocs,
 deleteDoc,
 doc,
-updateDoc,
 getCountFromServer
 }
 from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
+
 
 const productsDiv=
 document.getElementById("products");
@@ -22,33 +22,22 @@ document.getElementById("products");
 const ordersDiv=
 document.getElementById("allOrders");
 
-let selectedOrderId=null;
-
-
-/* Quantity variant elements */
-
 const enableVariants=
-document.getElementById(
-"enableVariants"
-);
+document.getElementById("enableVariants");
 
 const variantSection=
-document.getElementById(
-"variantSection"
-);
+document.getElementById("variantSection");
 
 const variantFields=
-document.getElementById(
-"variantFields"
-);
+document.getElementById("variantFields");
 
 const addVariantBtn=
-document.getElementById(
-"addVariantBtn"
-);
+document.getElementById("addVariantBtn");
 
 
-/* Toggle quantity options */
+/* ------------------------------
+Quantity Toggle
+--------------------------------*/
 
 enableVariants.onchange=()=>{
 
@@ -59,12 +48,9 @@ variantSection.style.display=
 
 document.getElementById(
 "packQty"
-).style.display=
-"none";
+).style.display="none";
 
-}
-
-else{
+}else{
 
 variantSection.style.display=
 "none";
@@ -82,41 +68,83 @@ variantFields.innerHTML="";
 
 
 
-/* Add quantity field */
+/* ------------------------------
+Add Quantity Button
+--------------------------------*/
 
-let quantityVariants=[];
+addVariantBtn.onclick=()=>{
 
-const qtyInputs=
-document.querySelectorAll(".variantQty");
+const div=
+document.createElement(
+"div"
+);
 
-const priceInputs=
-document.querySelectorAll(".variantPrice");
+div.style.marginBottom=
+"10px";
 
-for(let i=0;i<qtyInputs.length;i++){
+div.innerHTML=`
 
-const qty=
-qtyInputs[i].value.trim();
+<div style="
+display:flex;
+gap:10px;
+margin-bottom:10px;
+">
 
-const price=
-priceInputs[i].value.trim();
+<input
+class="variantQty"
+placeholder="500g / 1kg"
+style="flex:1"
+>
 
-if(qty&&price){
+<input
+class="variantPrice"
+placeholder="Price"
+type="number"
+style="flex:1"
+>
 
-quantityVariants.push({
+<button
+class="removeVariant"
+style="
+width:60px;
+background:red;
+color:white;
+border:none;
+border-radius:10px;
+">
 
-qty:qty,
+✖
 
-price:Number(price)
+</button>
 
-});
+</div>
 
-}
+`;
 
-}
+variantFields.appendChild(
+div
+);
+
+
+/* Remove variant */
+
+div.querySelector(
+".removeVariant"
+)
+
+.onclick=()=>{
+
+div.remove();
+
+};
+
+};
 
 
 
-/* ADMIN LOGIN CHECK */
+/* ------------------------------
+Admin Login Check
+--------------------------------*/
 
 onAuthStateChanged(
 
@@ -162,22 +190,15 @@ loadOrders();
 
 
 
-document.getElementById(
-"userBtn"
-).onclick=()=>{
-
-window.location=
-"srkxditit.html";
-
-};
-
-
-
-/* ADD PRODUCT */
+/* ------------------------------
+Add Product
+--------------------------------*/
 
 document.getElementById(
 "addBtn"
-).onclick=
+)
+
+.onclick=
 
 async()=>{
 
@@ -242,25 +263,59 @@ return;
 }
 
 
-/* Get quantity variants */
+/* Get Variants */
 
 let quantityVariants=[];
 
-document
-.querySelectorAll(
-".variantInput"
-)
-.forEach((item)=>{
+const qtyInputs=
 
-if(item.value.trim()){
-
-quantityVariants.push(
-item.value.trim()
+document.querySelectorAll(
+".variantQty"
 );
+
+const priceInputs=
+
+document.querySelectorAll(
+".variantPrice"
+);
+
+
+for(
+
+let i=0;
+
+i<qtyInputs.length;
+
+i++
+
+){
+
+const qty=
+
+qtyInputs[i]
+.value.trim();
+
+const price=
+
+priceInputs[i]
+.value.trim();
+
+if(qty&&price){
+
+quantityVariants.push({
+
+qty:qty,
+
+price:Number(
+price
+)
+
+});
 
 }
 
-});
+}
+
 
 await addDoc(
 
@@ -273,15 +328,19 @@ db,
 
 name:name,
 
-price:Number(price),
+price:Number(
+price
+),
 
 oldPrice:
 
-oldPrice.trim() !== ""
+oldPrice
 
 ?
 
-Number(oldPrice)
+Number(
+oldPrice
+)
 
 :
 
@@ -302,25 +361,28 @@ packQty,
 quantityVariants:
 quantityVariants,
 
-category:category,
+category:
+category,
 
-Image:image,
+Image:
+image,
 
-description:description,
+description:
+description,
 
-fewStock:fewStock
+fewStock:
+fewStock
 
 }
 
 );
-
 
 alert(
 "Product Added Successfully"
 );
 
 
-/* Clear fields */
+/* Clear */
 
 document.getElementById(
 "name"
@@ -350,19 +412,14 @@ document.getElementById(
 "fewStock"
 ).checked=false;
 
-document.getElementById(
-"enableVariants"
-).checked=false;
+enableVariants.checked=
+false;
 
-variantFields.innerHTML="";
+variantFields.innerHTML=
+"";
 
 variantSection.style.display=
 "none";
-
-document.getElementById(
-"packQty"
-).style.display=
-"block";
 
 loadProducts();
 
@@ -372,12 +429,12 @@ loadStats();
 
 catch(error){
 
-alert(
-error.message
-);
-
 console.log(
 error
+);
+
+alert(
+error.message
 );
 
 }
@@ -386,7 +443,9 @@ error
 
 
 
-/* LOAD PRODUCTS */
+/* ------------------------------
+Load Products
+--------------------------------*/
 
 async function loadProducts(){
 
@@ -394,25 +453,34 @@ productsDiv.innerHTML=
 "Loading...";
 
 const snapshot=
+
 await getDocs(
+
 collection(
 db,
 "Products"
 )
+
 );
 
-productsDiv.innerHTML="";
+productsDiv.innerHTML=
+"";
 
-snapshot.forEach((item)=>{
+
+snapshot.forEach(
+
+(item)=>{
 
 const data=
 item.data();
 
-let quantityDisplay="";
+let quantityDisplay=
+"";
 
 if(
 
 data.quantityVariants &&
+
 data.quantityVariants.length>0
 
 ){
@@ -420,7 +488,10 @@ data.quantityVariants.length>0
 quantityDisplay=
 
 data.quantityVariants
-.map(q=>`
+
+.map(
+
+q=>`
 
 <span style="
 display:inline-block;
@@ -430,19 +501,22 @@ margin:4px;
 border-radius:10px;
 ">
 
-${q}
+${q.qty}
+- ₹${q.price}
 
 </span>
 
-`)
+`
+
+)
+
 .join("");
 
-}
-
-else{
+}else{
 
 quantityDisplay=
-data.packQty||"-";
+
+data.packQty || "-";
 
 }
 
@@ -466,39 +540,27 @@ border-radius:10px;
 ">
 
 <h3>
+
 ${data.name}
+
 </h3>
 
 <p>
-Price: ₹${data.price}
+
+₹${data.price}
+
 </p>
 
 <p>
-Quantity:
-<br>
+
 ${quantityDisplay}
+
 </p>
-
-<p>
-${data.category}
-</p>
-
-${
-
-data.fewStock
-
-?
-
-"<p style='color:red'>⚠ Few Stock Left</p>"
-
-:
-
-""
-
-}
 
 <button
+
 onclick="deleteProduct('${item.id}')"
+
 style="
 background:red;
 color:white;
@@ -515,13 +577,15 @@ Delete
 
 `;
 
-});
+}
+
+);
 
 }
 
 
 
-/* DELETE PRODUCT */
+/* Delete */
 
 window.deleteProduct=
 
@@ -544,44 +608,48 @@ loadStats();
 };
 
 
-
-/* LOAD STATS */
+/* Stats */
 
 async function loadStats(){
 
 const products=
 
 await getCountFromServer(
+
 collection(
 db,
 "Products"
 )
+
 );
 
 const orders=
 
 await getCountFromServer(
+
 collection(
 db,
 "Orders"
 )
+
 );
 
 document.getElementById(
 "totalProducts"
 ).innerText=
+
 products.data().count;
 
 document.getElementById(
 "totalOrders"
 ).innerText=
+
 orders.data().count;
 
 }
 
 
-
-/* LOAD ORDERS */
+/* Orders */
 
 async function loadOrders(){
 
@@ -591,52 +659,51 @@ ordersDiv.innerHTML=
 const snapshot=
 
 await getDocs(
+
 collection(
 db,
 "Orders"
 )
+
 );
 
-ordersDiv.innerHTML="";
+ordersDiv.innerHTML=
+"";
 
-snapshot.forEach((item)=>{
+snapshot.forEach(
+
+(item)=>{
 
 const data=
 item.data();
 
 ordersDiv.innerHTML+=`
 
-<div
-onclick='openOrder(${JSON.stringify({
-id:item.id,
-...data
-})})'
-
-style="
+<div style="
 background:white;
 padding:15px;
-margin-bottom:15px;
-border-radius:15px;
-cursor:pointer;
+margin-bottom:10px;
+border-radius:10px;
 ">
 
 <h3>
-${data.name||"-"}
+
+${data.name}
+
 </h3>
 
 <p>
-₹${data.price||0}
-</p>
 
-<p>
-Status:
-${data.status||"Pending"}
+₹${data.price}
+
 </p>
 
 </div>
 
 `;
 
-});
+}
+
+);
 
 }
