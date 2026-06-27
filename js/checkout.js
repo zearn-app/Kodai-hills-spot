@@ -75,29 +75,42 @@ loadCheckout();
 /* Load Checkout Items */
 function loadCheckout(){
 
-checkoutItems=
+checkoutItems =
 JSON.parse(
 localStorage.getItem(
 "checkoutItems"
 )
-)||[];
+) || [];
+
+const orderItems =
+document.getElementById(
+"orderItems"
+);
 
 if(checkoutItems.length===0){
 
-document.getElementById(
-"orderItems"
-).innerHTML=`
+orderItems.innerHTML=`
 
-<h3 style="
+<div style="
 text-align:center;
-padding:20px;
+padding:30px;
 ">
 
-Cart Empty
+<h2>
+🛒 Cart Empty
+</h2>
 
-</h3>
+</div>
 
 `;
+
+document.getElementById(
+"subtotal"
+).innerText="₹0";
+
+document.getElementById(
+"total"
+).innerText="₹0";
 
 return;
 
@@ -109,52 +122,60 @@ totalAmount=0;
 checkoutItems.forEach(item=>{
 
 const qty=
-Number(item.quantity||1);
+Number(
+item.quantity || 1
+);
 
 const unitPrice=
 Number(
-item.unitPrice||
-item.price||
+item.unitPrice ||
+item.price ||
 0
 );
 
-const total=
-unitPrice*qty;
+const itemTotal=
+Number(
+item.totalPrice ||
+(unitPrice*qty)
+);
 
-totalAmount+=total;
+totalAmount += itemTotal;
 
-html+=`
+html += `
 
-<div class="product">
+<div class="product"
+style="
+margin-bottom:20px;
+padding:15px;
+background:#fafafa;
+border-radius:15px;
+">
 
 <img
-src="${item.image||'logo.png'}"
+src="${item.image || 'logo.png'}"
 onerror="this.src='logo.png'"
 >
 
 <div class="details">
 
 <h3>
-${item.name}
+${item.name || "No Product"}
 </h3>
 
 <div class="price">
-
-₹${total}
-
+₹${itemTotal}
 </div>
 
 <p>
-
-Qty : ${qty}
-
+Unit Price : ₹${unitPrice}
 </p>
 
 <p>
+Qty : ${qty}
+</p>
 
-Pack :
-${item.pack||"-"}
-
+<p>
+Pack : ${item.pack || "-"}
 </p>
 
 </div>
@@ -165,39 +186,24 @@ ${item.pack||"-"}
 
 });
 
+orderItems.innerHTML=html;
+
+document.getElementById(
+"subtotal"
+).innerText=
+`₹${totalAmount}`;
+
+document.getElementById(
+"total"
+).innerText=
+`₹${totalAmount}`;
+
+}
+
 document.getElementById(
 "orderItems"
 ).innerHTML=html;
 
-document.getElementById(
-"subtotal"
-).innerText=
-`₹${totalAmount}`;
-
-document.getElementById(
-"total"
-).innerText=
-`₹${totalAmount}`;
-
-}
-
-document.getElementById(
-"orderItems"
-).innerHTML=
-itemsHtml;
-
-
-document.getElementById(
-"subtotal"
-).innerText=
-`₹${totalAmount}`;
-
-document.getElementById(
-"total"
-).innerText=
-`₹${totalAmount}`;
-
-}
 
 
 
