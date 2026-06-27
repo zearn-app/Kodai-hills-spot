@@ -484,74 +484,24 @@ document.getElementById(
 </script>
 
 
-
 <script>
 
-const districtData={
+// SOUTH → NORTH order
+const districtData = {
 
-"Andhra Pradesh":[
-"Anantapur","Chittoor","East Godavari","Guntur",
-"Kadapa","Krishna","Kurnool","Nellore",
-"Prakasam","Srikakulam","Visakhapatnam",
-"Vizianagaram","West Godavari"
-],
-
-"Arunachal Pradesh":[
-"Tawang","West Kameng","East Kameng",
-"Papum Pare","Lower Subansiri","Upper Subansiri"
-],
-
-"Assam":[
-"Baksa","Barpeta","Bongaigaon","Cachar",
-"Darrang","Dhemaji","Dhubri","Dibrugarh",
-"Goalpara","Golaghat","Guwahati","Jorhat",
-"Kamrup","Karbi Anglong","Lakhimpur",
-"Nagaon","Nalbari","Sivasagar","Sonitpur"
-],
-
-"Bihar":[
-"Araria","Aurangabad","Begusarai",
-"Bhagalpur","Bhojpur","Darbhanga",
-"Gaya","Katihar","Muzaffarpur",
-"Patna","Purnia","Samastipur"
-],
-
-"Chhattisgarh":[
-"Bilaspur","Durg","Raipur","Rajnandgaon",
-"Korba","Raigarh","Jagdalpur"
-],
-
-"Goa":[
-"North Goa",
-"South Goa"
-],
-
-"Gujarat":[
-"Ahmedabad","Amreli","Anand","Bhavnagar",
-"Gandhinagar","Jamnagar","Junagadh",
-"Kutch","Rajkot","Surat","Vadodara"
-],
-
-"Haryana":[
-"Ambala","Faridabad","Gurgaon",
-"Hisar","Karnal","Panipat","Rohtak"
-],
-
-"Himachal Pradesh":[
-"Bilaspur","Chamba","Hamirpur",
-"Kangra","Kullu","Shimla","Solan"
-],
-
-"Jharkhand":[
-"Bokaro","Deoghar","Dhanbad",
-"East Singhbhum","Hazaribagh",
-"Ranchi","West Singhbhum"
-],
-
-"Karnataka":[
-"Bangalore Urban","Belgaum","Bellary",
-"Bidar","Dharwad","Gulbarga",
-"Mangalore","Mysore","Shimoga"
+"Tamil Nadu":[
+"Ariyalur","Chengalpattu","Chennai","Coimbatore",
+"Cuddalore","Dharmapuri","Dindigul","Erode",
+"Kallakurichi","Kanchipuram","Kanyakumari",
+"Karur","Krishnagiri","Madurai","Mayiladuthurai",
+"Nagapattinam","Namakkal","Nilgiris",
+"Perambalur","Pudukkottai","Ramanathapuram",
+"Ranipet","Salem","Sivagangai","Tenkasi",
+"Thanjavur","Theni","Thoothukudi",
+"Tiruchirappalli","Tirunelveli","Tirupathur",
+"Tiruppur","Tiruvallur","Tiruvannamalai",
+"Tiruvarur","Vellore","Viluppuram",
+"Virudhunagar"
 ],
 
 "Kerala":[
@@ -562,123 +512,229 @@ const districtData={
 "Thiruvananthapuram","Thrissur","Wayanad"
 ],
 
-"Madhya Pradesh":[
-"Bhopal","Gwalior","Indore",
-"Jabalpur","Rewa","Sagar","Ujjain"
+"Karnataka":[
+"Bagalkot","Bangalore Rural","Bangalore Urban",
+"Belagavi","Bellary","Bidar","Chamarajanagar",
+"Chikkaballapur","Chikkamagaluru","Chitradurga",
+"Dakshina Kannada","Davanagere","Dharwad",
+"Gadag","Hassan","Haveri","Kalaburagi",
+"Kodagu","Kolar","Koppal","Mandya",
+"Mysore","Raichur","Ramanagara","Shimoga",
+"Tumkur","Udupi","Uttara Kannada","Vijayapura"
 ],
 
-"Maharashtra":[
-"Ahmednagar","Aurangabad","Kolhapur",
-"Mumbai","Nagpur","Nashik",
-"Pune","Solapur","Thane"
-],
-
-"Manipur":[
-"Bishnupur","Chandel","Imphal East",
-"Imphal West","Thoubal"
-],
-
-"Meghalaya":[
-"East Khasi Hills",
-"West Khasi Hills",
-"Ri-Bhoi"
-],
-
-"Mizoram":[
-"Aizawl","Champhai","Kolasib"
-],
-
-"Nagaland":[
-"Dimapur","Kohima","Mokokchung"
-],
-
-"Odisha":[
-"Balasore","Cuttack","Ganjam",
-"Khordha","Puri","Sambalpur"
-],
-
-"Punjab":[
-"Amritsar","Bathinda","Jalandhar",
-"Ludhiana","Mohali","Patiala"
-],
-
-"Rajasthan":[
-"Ajmer","Alwar","Bikaner",
-"Jaipur","Jodhpur","Kota","Udaipur"
-],
-
-"Sikkim":[
-"East Sikkim","North Sikkim",
-"South Sikkim","West Sikkim"
-],
-
-"Tamil Nadu":[
-"Ariyalur","Chennai","Coimbatore",
-"Cuddalore","Dharmapuri","Dindigul",
-"Erode","Kanchipuram","Karur",
-"Krishnagiri","Madurai","Namakkal",
-"Nilgiris","Salem","Sivagangai",
-"Tenkasi","Thanjavur","Theni",
-"Tirunelveli","Tiruppur",
-"Trichy","Vellore","Virudhunagar",
-"Kanyakumari"
+"Andhra Pradesh":[
+"Anantapur","Annamayya","Chittoor",
+"East Godavari","Eluru","Guntur",
+"Kadapa","Kakinada","Krishna",
+"Kurnool","Nandyal","Nellore",
+"Prakasam","Srikakulam","Tirupati",
+"Visakhapatnam","Vizianagaram",
+"West Godavari"
 ],
 
 "Telangana":[
-"Adilabad","Hyderabad",
-"Karimnagar","Khammam",
-"Nalgonda","Nizamabad","Warangal"
+"Adilabad","Bhadradri Kothagudem",
+"Hyderabad","Jagtial","Karimnagar",
+"Khammam","Mahabubnagar","Medak",
+"Nalgonda","Nizamabad",
+"Rangareddy","Warangal"
 ],
 
-"Tripura":[
-"Agartala","Dhalai","North Tripura"
+"Puducherry":[
+"Puducherry","Karaikal",
+"Mahe","Yanam"
 ],
 
-"Uttar Pradesh":[
-"Agra","Allahabad","Bareilly",
-"Ghaziabad","Kanpur","Lucknow",
-"Meerut","Noida","Varanasi"
+"Lakshadweep":[
+"Kavaratti"
+],
+
+
+// NORTH INDIA
+
+"Delhi":[
+"Central Delhi","East Delhi",
+"New Delhi","North Delhi",
+"South Delhi","West Delhi"
+],
+
+"Haryana":[
+"Ambala","Faridabad","Gurugram",
+"Hisar","Karnal","Kurukshetra",
+"Panipat","Rohtak","Sonipat"
+],
+
+"Punjab":[
+"Amritsar","Bathinda",
+"Jalandhar","Ludhiana",
+"Mohali","Patiala"
+],
+
+"Himachal Pradesh":[
+"Bilaspur","Chamba",
+"Hamirpur","Kangra",
+"Kullu","Mandi",
+"Shimla","Solan"
 ],
 
 "Uttarakhand":[
-"Dehradun","Haridwar",
-"Nainital","Pithoragarh"
+"Almora","Dehradun",
+"Haridwar","Nainital",
+"Pithoragarh","Udham Singh Nagar"
+],
+
+"Jammu and Kashmir":[
+"Anantnag","Baramulla",
+"Jammu","Pulwama",
+"Srinagar"
+],
+
+"Ladakh":[
+"Kargil","Leh"
+],
+
+
+// WEST INDIA
+
+"Maharashtra":[
+"Ahmednagar","Aurangabad",
+"Kolhapur","Mumbai",
+"Nagpur","Nashik",
+"Pune","Solapur","Thane"
+],
+
+"Gujarat":[
+"Ahmedabad","Amreli",
+"Anand","Bhavnagar",
+"Gandhinagar","Jamnagar",
+"Kutch","Rajkot",
+"Surat","Vadodara"
+],
+
+"Goa":[
+"North Goa",
+"South Goa"
+],
+
+"Rajasthan":[
+"Ajmer","Alwar",
+"Bikaner","Jaipur",
+"Jodhpur","Kota",
+"Udaipur"
+],
+
+
+// CENTRAL INDIA
+
+"Madhya Pradesh":[
+"Bhopal","Gwalior",
+"Indore","Jabalpur",
+"Rewa","Sagar",
+"Ujjain"
+],
+
+"Chhattisgarh":[
+"Bilaspur","Durg",
+"Raipur","Raigarh",
+"Rajnandgaon"
+],
+
+
+// EAST INDIA
+
+"Bihar":[
+"Bhagalpur","Darbhanga",
+"Gaya","Muzaffarpur",
+"Patna","Purnia"
+],
+
+"Jharkhand":[
+"Bokaro","Dhanbad",
+"Hazaribagh","Ranchi"
+],
+
+"Odisha":[
+"Balasore","Cuttack",
+"Ganjam","Khordha",
+"Puri","Sambalpur"
 ],
 
 "West Bengal":[
 "Asansol","Darjeeling",
-"Durgapur","Howrah",
-"Kolkata","Malda","Siliguri"
+"Howrah","Kolkata",
+"Malda","Siliguri"
+],
+
+
+// NORTHEAST
+
+"Assam":[
+"Barpeta","Cachar",
+"Dibrugarh","Guwahati",
+"Jorhat","Nagaon"
+],
+
+"Arunachal Pradesh":[
+"Tawang","Papum Pare"
+],
+
+"Manipur":[
+"Imphal East",
+"Imphal West",
+"Thoubal"
+],
+
+"Meghalaya":[
+"East Khasi Hills",
+"Ri-Bhoi"
+],
+
+"Mizoram":[
+"Aizawl","Champhai"
+],
+
+"Nagaland":[
+"Dimapur",
+"Kohima"
+],
+
+"Sikkim":[
+"East Sikkim",
+"North Sikkim",
+"South Sikkim",
+"West Sikkim"
+],
+
+"Tripura":[
+"Agartala",
+"Dhalai"
+],
+
+"Andaman and Nicobar Islands":[
+"Nicobar",
+"Port Blair"
 ]
 
 };
 
 
-const stateEl=
-document.getElementById("state");
+const stateEl = document.getElementById("state");
+const districtEl = document.getElementById("district");
 
-const districtEl=
-document.getElementById("district");
+Object.keys(districtData).forEach(state=>{
 
+const option=document.createElement("option");
 
-Object.keys(districtData)
-.sort()
-.forEach(state=>{
+option.value=state;
+option.textContent=state;
 
-stateEl.innerHTML+=`
-
-<option value="${state}">
-${state}
-</option>
-
-`;
+stateEl.appendChild(option);
 
 });
 
 
-stateEl.addEventListener(
-"change",
-()=>{
+stateEl.addEventListener("change",()=>{
 
 districtEl.innerHTML=
 '<option value="">Select District</option>';
@@ -688,13 +744,13 @@ districtData[stateEl.value]||[];
 
 districts.forEach(district=>{
 
-districtEl.innerHTML+=`
+const option=
+document.createElement("option");
 
-<option value="${district}">
-${district}
-</option>
+option.value=district;
+option.textContent=district;
 
-`;
+districtEl.appendChild(option);
 
 });
 
