@@ -4,8 +4,7 @@
 <head>
 
 <meta charset="UTF-8">
-<meta name="viewport"
-content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 
 <title>Edit Profile</title>
 
@@ -21,85 +20,214 @@ font-family:Arial,sans-serif;
 body{
 background:#f0f4f3;
 padding:20px;
-padding-bottom:30px;
+min-height:100vh;
+animation:fadeBody .8s ease;
 }
 
-.card{
+/* Animations */
 
+@keyframes fadeBody{
+from{
+opacity:0;
+transform:translateY(25px);
+}
+to{
+opacity:1;
+transform:translateY(0);
+}
+}
+
+@keyframes cardShow{
+from{
+opacity:0;
+transform:scale(.9);
+}
+to{
+opacity:1;
+transform:scale(1);
+}
+}
+
+@keyframes popupShow{
+from{
+opacity:0;
+transform:scale(.7);
+}
+to{
+opacity:1;
+transform:scale(1);
+}
+}
+
+@keyframes spin{
+100%{
+transform:rotate(360deg);
+}
+}
+
+/* Card */
+
+.card{
 background:white;
 padding:25px;
 border-radius:25px;
-box-shadow:0 5px 20px rgba(0,0,0,.1);
-
+box-shadow:0 5px 25px rgba(0,0,0,.1);
+animation:cardShow .8s ease;
 }
 
 .heading{
-
-font-size:24px;
+font-size:26px;
 font-weight:bold;
 color:#2e7d32;
 text-align:center;
 margin-bottom:25px;
-
 }
 
+/* Inputs */
+
 .input-box{
-
 margin-top:15px;
-
 }
 
 label{
-
 display:block;
 margin-bottom:8px;
 font-weight:bold;
-color:#333;
-
 }
 
 input{
-
 width:100%;
-padding:14px;
+padding:15px;
 border:1px solid #ddd;
-border-radius:12px;
+border-radius:15px;
 outline:none;
 font-size:15px;
-
+transition:.4s;
 }
 
 input:focus{
-
 border:2px solid #2e7d32;
-
+transform:scale(1.02);
+box-shadow:0 0 15px rgba(46,125,50,.2);
 }
 
-.btn{
+/* Buttons */
 
+.btn{
 width:100%;
 padding:15px;
 border:none;
-border-radius:14px;
+border-radius:15px;
 margin-top:20px;
 font-size:16px;
 font-weight:bold;
 cursor:pointer;
+transition:.4s;
+}
 
+.btn:hover{
+transform:translateY(-3px);
+}
+
+.btn:active{
+transform:scale(.95);
 }
 
 .save{
+background:#2e7d32;
+color:white;
+}
+
+.back{
+background:#777;
+color:white;
+}
+
+/* Loader */
+
+.loader{
+
+width:20px;
+height:20px;
+
+border:3px solid white;
+border-top:3px solid transparent;
+
+border-radius:50%;
+
+display:inline-block;
+
+animation:spin .7s linear infinite;
+}
+
+/* Popup */
+
+.popup-container{
+
+position:fixed;
+
+top:0;
+left:0;
+
+width:100%;
+height:100%;
+
+display:none;
+
+justify-content:center;
+align-items:center;
+
+background:rgba(0,0,0,.5);
+
+z-index:9999;
+}
+
+.popup{
+
+background:white;
+
+width:300px;
+
+padding:25px;
+
+border-radius:25px;
+
+text-align:center;
+
+animation:popupShow .3s;
+}
+
+.popup img{
+
+width:80px;
+height:80px;
+
+margin-bottom:15px;
+}
+
+.popup h2{
+
+margin-bottom:10px;
+color:#2e7d32;
+}
+
+.popup p{
+
+color:#666;
+margin-bottom:20px;
+}
+
+.popup button{
+
+padding:12px 30px;
+
+border:none;
+border-radius:10px;
 
 background:#2e7d32;
 color:white;
 
-}
-
-.back{
-
-background:#777;
-color:white;
-
+cursor:pointer;
 }
 
 </style>
@@ -116,76 +244,40 @@ color:white;
 
 </div>
 
-
 <div class="input-box">
 <label>Name</label>
-
-<input
-type="text"
-id="name"
-placeholder="Enter name">
+<input type="text" id="name">
 </div>
-
 
 <div class="input-box">
 <label>Phone</label>
-
-<input
-type="number"
-id="phone"
-placeholder="Enter phone">
+<input type="number" id="phone">
 </div>
-
 
 <div class="input-box">
 <label>Street</label>
-
-<input
-type="text"
-id="street"
-placeholder="Street">
+<input type="text" id="street">
 </div>
-
 
 <div class="input-box">
 <label>Area</label>
-
-<input
-type="text"
-id="area"
-placeholder="Area">
+<input type="text" id="area">
 </div>
-
 
 <div class="input-box">
 <label>District</label>
-
-<input
-type="text"
-id="district"
-placeholder="District">
+<input type="text" id="district">
 </div>
-
 
 <div class="input-box">
 <label>State</label>
-
-<input
-type="text"
-id="state"
-placeholder="State">
+<input type="text" id="state">
 </div>
-
 
 <div class="input-box">
 <label>Pincode</label>
-
-<input
-type="number"
-id="pincode"
-placeholder="Pincode">
+<input type="number" id="pincode">
 </div>
-
 
 <button
 class="btn save"
@@ -194,7 +286,6 @@ id="saveBtn">
 💾 Save Profile
 
 </button>
-
 
 <button
 class="btn back"
@@ -206,6 +297,39 @@ onclick="window.location='profile.html'">
 
 </div>
 
+
+<!-- Popup -->
+
+<div
+id="popupBox"
+class="popup-container">
+
+<div class="popup">
+
+<img
+id="popupImg"
+src="logo.png">
+
+<h2
+id="popupTitle">
+
+</h2>
+
+<p
+id="popupMessage">
+
+</p>
+
+<button
+onclick="closePopup()">
+
+OK
+
+</button>
+
+</div>
+
+</div>
 
 
 <script type="module">
@@ -254,9 +378,60 @@ document.getElementById("pincode");
 const saveBtn=
 document.getElementById("saveBtn");
 
-
 let currentUser;
 
+
+/* Popup */
+
+function showPopup(
+title,
+message,
+type="success"
+){
+
+document.getElementById(
+"popupTitle"
+).innerText=
+title;
+
+document.getElementById(
+"popupMessage"
+).innerText=
+message;
+
+document.getElementById(
+"popupImg"
+).src=
+
+type==="success"
+
+?
+
+"https://cdn-icons-png.flaticon.com/512/845/845646.png"
+
+:
+
+"https://cdn-icons-png.flaticon.com/512/1828/1828843.png";
+
+
+document.getElementById(
+"popupBox"
+).style.display=
+"flex";
+
+}
+
+window.closePopup=()=>{
+
+document.getElementById(
+"popupBox"
+).style.display=
+"none";
+
+};
+
+
+/* Load User */
 
 onAuthStateChanged(
 
@@ -285,7 +460,9 @@ user.uid
 );
 
 const snapshot=
-await getDoc(userRef);
+await getDoc(
+userRef
+);
 
 if(snapshot.exists()){
 
@@ -297,7 +474,6 @@ data.name || "";
 
 phoneEl.value=
 data.phone || "";
-
 
 if(data.address){
 
@@ -320,16 +496,20 @@ data.address.pincode || "";
 
 }
 
-}
+}catch(error){
 
-catch(error){
-
-console.log(error);
+showPopup(
+"Error",
+error.message,
+"error"
+);
 
 }
 
 });
 
+
+/* Save */
 
 saveBtn.onclick=
 
@@ -337,19 +517,37 @@ async()=>{
 
 try{
 
-saveBtn.innerText=
-"Saving...";
+if(
+
+!nameEl.value ||
+!phoneEl.value
+
+){
+
+showPopup(
+"Missing",
+"Please fill required fields",
+"error"
+);
+
+return;
+
+}
+
+saveBtn.innerHTML=
+
+'<span class="loader"></span>';
 
 saveBtn.disabled=true;
 
 
 const userRef=
+
 doc(
 db,
 "Users",
 currentUser.uid
 );
-
 
 await updateDoc(
 
@@ -386,27 +584,33 @@ pincodeEl.value
 
 );
 
-
-alert(
+showPopup(
+"Success",
 "Profile Updated Successfully"
 );
 
+setTimeout(()=>{
+
 window.location=
 "profile.html";
+
+},1500);
 
 }
 
 catch(error){
 
-alert(
-error.message
+showPopup(
+"Error",
+error.message,
+"error"
 );
 
 }
 
 finally{
 
-saveBtn.innerText=
+saveBtn.innerHTML=
 "💾 Save Profile";
 
 saveBtn.disabled=false;
