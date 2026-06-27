@@ -97,6 +97,11 @@ loadCheckout();
 
 
 /* Load Checkout Items */
+
+
+
+
+
 function loadCheckout(){
 
 checkoutItems =
@@ -110,6 +115,10 @@ const orderItems =
 document.getElementById(
 "orderItems"
 );
+
+if(!orderItems){
+return;
+}
 
 if(checkoutItems.length===0){
 
@@ -146,26 +155,24 @@ totalAmount=0;
 checkoutItems.forEach(item=>{
 
 const qty=
-Number(
-item.quantity || 1
-);
+Number(item.quantity||1);
 
 const unitPrice=
 Number(
-item.unitPrice ||
-item.price ||
+item.unitPrice||
+item.price||
 0
 );
 
 const itemTotal=
 Number(
-item.totalPrice ||
+item.totalPrice||
 (unitPrice*qty)
 );
 
-totalAmount += itemTotal;
+totalAmount+=itemTotal;
 
-html += `
+html+=`
 
 <div class="product"
 style="
@@ -223,7 +230,6 @@ document.getElementById(
 `₹${totalAmount}`;
 
 }
-
 
 
 
