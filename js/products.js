@@ -106,8 +106,14 @@ div.innerHTML=`
 ₹${product.price}
 </span>
 
+
 </div>
 
+<button class="btn">
+
+🛒 Add To Cart
+
+</button>
 
 
 `;
