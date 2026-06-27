@@ -308,21 +308,12 @@ placeholder="Phone Number"
 Select State
 </option>
 
-<option>Tamil Nadu</option>
-
 </select>
 
 <select id="district">
 
 <option value="">
 Select District
-</option>
-
-<option>Chennai</option>
-<option>Coimbatore</option>
-<option>Madurai</option>
-<option>Kanyakumari</option>
-<option>Salem</option>
 
 </select>
 
@@ -489,6 +480,225 @@ document.getElementById(
 ).style.display="none";
 
 };
+
+</script>
+
+
+
+<script>
+
+const districtData={
+
+"Andhra Pradesh":[
+"Anantapur","Chittoor","East Godavari","Guntur",
+"Kadapa","Krishna","Kurnool","Nellore",
+"Prakasam","Srikakulam","Visakhapatnam",
+"Vizianagaram","West Godavari"
+],
+
+"Arunachal Pradesh":[
+"Tawang","West Kameng","East Kameng",
+"Papum Pare","Lower Subansiri","Upper Subansiri"
+],
+
+"Assam":[
+"Baksa","Barpeta","Bongaigaon","Cachar",
+"Darrang","Dhemaji","Dhubri","Dibrugarh",
+"Goalpara","Golaghat","Guwahati","Jorhat",
+"Kamrup","Karbi Anglong","Lakhimpur",
+"Nagaon","Nalbari","Sivasagar","Sonitpur"
+],
+
+"Bihar":[
+"Araria","Aurangabad","Begusarai",
+"Bhagalpur","Bhojpur","Darbhanga",
+"Gaya","Katihar","Muzaffarpur",
+"Patna","Purnia","Samastipur"
+],
+
+"Chhattisgarh":[
+"Bilaspur","Durg","Raipur","Rajnandgaon",
+"Korba","Raigarh","Jagdalpur"
+],
+
+"Goa":[
+"North Goa",
+"South Goa"
+],
+
+"Gujarat":[
+"Ahmedabad","Amreli","Anand","Bhavnagar",
+"Gandhinagar","Jamnagar","Junagadh",
+"Kutch","Rajkot","Surat","Vadodara"
+],
+
+"Haryana":[
+"Ambala","Faridabad","Gurgaon",
+"Hisar","Karnal","Panipat","Rohtak"
+],
+
+"Himachal Pradesh":[
+"Bilaspur","Chamba","Hamirpur",
+"Kangra","Kullu","Shimla","Solan"
+],
+
+"Jharkhand":[
+"Bokaro","Deoghar","Dhanbad",
+"East Singhbhum","Hazaribagh",
+"Ranchi","West Singhbhum"
+],
+
+"Karnataka":[
+"Bangalore Urban","Belgaum","Bellary",
+"Bidar","Dharwad","Gulbarga",
+"Mangalore","Mysore","Shimoga"
+],
+
+"Kerala":[
+"Alappuzha","Ernakulam","Idukki",
+"Kannur","Kasaragod","Kollam",
+"Kottayam","Kozhikode","Malappuram",
+"Palakkad","Pathanamthitta",
+"Thiruvananthapuram","Thrissur","Wayanad"
+],
+
+"Madhya Pradesh":[
+"Bhopal","Gwalior","Indore",
+"Jabalpur","Rewa","Sagar","Ujjain"
+],
+
+"Maharashtra":[
+"Ahmednagar","Aurangabad","Kolhapur",
+"Mumbai","Nagpur","Nashik",
+"Pune","Solapur","Thane"
+],
+
+"Manipur":[
+"Bishnupur","Chandel","Imphal East",
+"Imphal West","Thoubal"
+],
+
+"Meghalaya":[
+"East Khasi Hills",
+"West Khasi Hills",
+"Ri-Bhoi"
+],
+
+"Mizoram":[
+"Aizawl","Champhai","Kolasib"
+],
+
+"Nagaland":[
+"Dimapur","Kohima","Mokokchung"
+],
+
+"Odisha":[
+"Balasore","Cuttack","Ganjam",
+"Khordha","Puri","Sambalpur"
+],
+
+"Punjab":[
+"Amritsar","Bathinda","Jalandhar",
+"Ludhiana","Mohali","Patiala"
+],
+
+"Rajasthan":[
+"Ajmer","Alwar","Bikaner",
+"Jaipur","Jodhpur","Kota","Udaipur"
+],
+
+"Sikkim":[
+"East Sikkim","North Sikkim",
+"South Sikkim","West Sikkim"
+],
+
+"Tamil Nadu":[
+"Ariyalur","Chennai","Coimbatore",
+"Cuddalore","Dharmapuri","Dindigul",
+"Erode","Kanchipuram","Karur",
+"Krishnagiri","Madurai","Namakkal",
+"Nilgiris","Salem","Sivagangai",
+"Tenkasi","Thanjavur","Theni",
+"Tirunelveli","Tiruppur",
+"Trichy","Vellore","Virudhunagar",
+"Kanyakumari"
+],
+
+"Telangana":[
+"Adilabad","Hyderabad",
+"Karimnagar","Khammam",
+"Nalgonda","Nizamabad","Warangal"
+],
+
+"Tripura":[
+"Agartala","Dhalai","North Tripura"
+],
+
+"Uttar Pradesh":[
+"Agra","Allahabad","Bareilly",
+"Ghaziabad","Kanpur","Lucknow",
+"Meerut","Noida","Varanasi"
+],
+
+"Uttarakhand":[
+"Dehradun","Haridwar",
+"Nainital","Pithoragarh"
+],
+
+"West Bengal":[
+"Asansol","Darjeeling",
+"Durgapur","Howrah",
+"Kolkata","Malda","Siliguri"
+]
+
+};
+
+
+const stateEl=
+document.getElementById("state");
+
+const districtEl=
+document.getElementById("district");
+
+
+Object.keys(districtData)
+.sort()
+.forEach(state=>{
+
+stateEl.innerHTML+=`
+
+<option value="${state}">
+${state}
+</option>
+
+`;
+
+});
+
+
+stateEl.addEventListener(
+"change",
+()=>{
+
+districtEl.innerHTML=
+'<option value="">Select District</option>';
+
+const districts=
+districtData[stateEl.value]||[];
+
+districts.forEach(district=>{
+
+districtEl.innerHTML+=`
+
+<option value="${district}">
+${district}
+</option>
+
+`;
+
+});
+
+});
 
 </script>
 
