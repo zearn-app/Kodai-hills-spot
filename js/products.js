@@ -142,67 +142,127 @@ productsDiv.appendChild(div);
 
 }
 
+
+
 async function addToCart(product){
 
 let cart=
 JSON.parse(
-localStorage.getItem("cart")
+localStorage.getItem("guestCart")
 )||[];
+
+
+/* Find existing item */
 
 const existing=
 cart.find(
-item=>item.id===product.id
+item=>item.productId===product.id
 );
 
 if(existing){
 
 existing.quantity++;
 
+existing.totalPrice=
+existing.unitPrice*
+existing.quantity;
+
 }else{
 
-cart.push({
+const item={
 
-id:product.id,
+productId:product.id,
+
 name:product.name,
-price:product.price,
-image:product.Image,
-quantity:1
 
-});
+image:product.Image || "logo.png",
+
+quantity:1,
+
+pack:product.pack || "-",
+
+unitPrice:Number(
+product.price
+),
+
+totalPrice:Number(
+product.price
+)
+
+};
+
+cart.push(item);
 
 }
 
+
+/* Save local cart */
+
 localStorage.setItem(
-"cart",
+
+"guestCart",
+
 JSON.stringify(cart)
+
 );
+
+
+/* Save Firebase cart */
 
 if(currentUser){
 
 await addDoc(
-collection(db,"Cart"),
+
+collection(
+db,
+"Cart"
+),
+
 {
 
 uid:currentUser.uid,
+
 productId:product.id,
+
 name:product.name,
-price:Number(product.price),
-image:product.Image,
+
+image:product.Image || "logo.png",
+
 quantity:1,
+
+pack:product.pack || "-",
+
+unitPrice:Number(
+product.price
+),
+
+totalPrice:Number(
+product.price
+),
+
 createdAt:Date.now()
 
 }
+
 );
 
 }
 
-const btn=document.querySelector(".cart-btn");
 
-btn.style.transform="scale(1.3)";
+/* Animation */
+
+const btn=
+document.querySelector(
+".cart-btn"
+);
+
+btn.style.transform=
+"scale(1.3)";
 
 setTimeout(()=>{
 
-btn.style.transform="scale(1)";
+btn.style.transform=
+"scale(1)";
 
 },300);
 
