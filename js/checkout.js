@@ -19,7 +19,31 @@ let totalAmount=0;
 
 /* Popup */
 
-function showPopup(title,message){
+function showPopup(title,message,type="info"){
+
+const popupLogo=
+document.querySelector(
+".popup-logo"
+);
+
+if(type==="success"){
+
+popupLogo.src=
+"https://cdn-icons-png.flaticon.com/512/845/845646.png";
+
+}
+else if(type==="error"){
+
+popupLogo.src=
+"https://cdn-icons-png.flaticon.com/512/1828/1828843.png";
+
+}
+else{
+
+popupLogo.src=
+"logo.png";
+
+}
 
 document.getElementById(
 "popupTitle"
