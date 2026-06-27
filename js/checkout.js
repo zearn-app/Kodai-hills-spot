@@ -73,20 +73,14 @@ loadCheckout();
 
 
 /* Load Checkout Items */
-
 function loadCheckout(){
 
 checkoutItems=
-
 JSON.parse(
-
 localStorage.getItem(
 "checkoutItems"
-
 )
-
 )||[];
-
 
 if(checkoutItems.length===0){
 
@@ -94,8 +88,7 @@ document.getElementById(
 "orderItems"
 ).innerHTML=`
 
-<h3
-style="
+<h3 style="
 text-align:center;
 padding:20px;
 ">
@@ -110,77 +103,46 @@ return;
 
 }
 
-
-let itemsHtml="";
-
+let html="";
 totalAmount=0;
 
-
-/* Show all products */
-
-checkoutItems.forEach(
-
-(item)=>{
+checkoutItems.forEach(item=>{
 
 const qty=
-
-Number(
-item.quantity||1
-);
+Number(item.quantity||1);
 
 const unitPrice=
-
 Number(
 item.unitPrice||
 item.price||
 0
 );
 
-const itemTotal=
+const total=
+unitPrice*qty;
 
-Number(
-item.totalPrice||
+totalAmount+=total;
 
-(unitPrice*qty)
-
-);
-
-
-totalAmount+=itemTotal;
-
-
-itemsHtml += `
+html+=`
 
 <div class="product">
 
 <img
-
-src="${item.image || 'logo.png'}"
-
+src="${item.image||'logo.png'}"
 onerror="this.src='logo.png'"
-
 >
 
 <div class="details">
 
 <h3>
-
 ${item.name}
-
 </h3>
 
 <div class="price">
 
-₹${itemTotal}
+₹${total}
 
 </div>
-
-<p>
-
-Unit Price :
-₹${unitPrice}
-
-</p>
 
 <p>
 
@@ -191,9 +153,7 @@ Qty : ${qty}
 <p>
 
 Pack :
-${item.pack ||
-item.selectedSize ||
-"-"}
+${item.pack||"-"}
 
 </p>
 
@@ -203,11 +163,23 @@ item.selectedSize ||
 
 `;
 
+});
+
+document.getElementById(
+"orderItems"
+).innerHTML=html;
+
+document.getElementById(
+"subtotal"
+).innerText=
+`₹${totalAmount}`;
+
+document.getElementById(
+"total"
+).innerText=
+`₹${totalAmount}`;
+
 }
-
-
-);
-
 
 document.getElementById(
 "orderItems"
