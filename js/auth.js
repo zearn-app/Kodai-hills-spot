@@ -282,7 +282,45 @@ false;
 
 /* Forgot Password */
 
-forgotBtn.onclick=
+/* Open popup */
+
+forgotBtn.onclick=()=>{
+
+const loginEmail=
+
+document.getElementById(
+"loginEmail"
+).value.trim();
+
+document.getElementById(
+"resetEmail"
+).value=loginEmail;
+
+document.getElementById(
+"resetPopup"
+).style.display=
+"flex";
+
+};
+
+
+/* Close popup */
+
+window.closeResetPopup=()=>{
+
+document.getElementById(
+"resetPopup"
+).style.display=
+"none";
+
+};
+
+
+/* Send reset link */
+
+document.getElementById(
+"sendResetBtn"
+).onclick=
 
 async()=>{
 
@@ -291,7 +329,7 @@ try{
 const email=
 
 document.getElementById(
-"loginEmail"
+"resetEmail"
 ).value.trim();
 
 
@@ -300,13 +338,19 @@ if(!email){
 showPopup(
 
 "Email Required",
-"Please enter your email"
+"Please enter Gmail"
 
 );
 
 return;
 
 }
+
+
+document.getElementById(
+"sendResetBtn"
+).innerText=
+"Sending...";
 
 
 await sendPasswordResetEmail(
@@ -317,10 +361,14 @@ email
 );
 
 
+closeResetPopup();
+
+
 showPopup(
 
-"Reset Link Sent",
-"Check your Gmail inbox"
+"Reset Link Sent ✅",
+
+"Password reset link sent to your Gmail.\n\nPlease check Inbox and Spam folder."
 
 );
 
@@ -328,14 +376,22 @@ showPopup(
 
 catch(error){
 
-console.log(error);
-
 showPopup(
 
 "Reset Failed",
+
 error.message
 
 );
+
+}
+
+finally{
+
+document.getElementById(
+"sendResetBtn"
+).innerText=
+"Send Link";
 
 }
 
