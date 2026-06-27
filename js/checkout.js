@@ -85,17 +85,269 @@ onAuthStateChanged(auth, (user) => {
 });
 
 /* Place Order Logic */
-document.getElementById("placeOrder").onclick = () => {
-    // ... (Keep your existing Razorpay / Place Order logic here, it remains correct)
-    const name = document.getElementById("name").value.trim();
-    const phone = document.getElementById("phone").value.trim();
-    // ... (Ensure all fields are gathered correctly)
-    
-    // Ensure all required fields are filled as per your original logic
-    if (!name || !phone) { 
-        showPopup("Missing Information", "Please fill all fields", "error");
-        return; 
-    }
-    
-    // ... Proceed with your existing Razorpay implementation
+/* Place Order Logic */
+
+document.getElementById(
+"placeOrder"
+).onclick=async()=>{
+
+const name=
+document.getElementById(
+"name"
+).value.trim();
+
+const phone=
+document.getElementById(
+"phone"
+).value.trim();
+
+const state=
+document.getElementById(
+"state"
+).value;
+
+const district=
+document.getElementById(
+"district"
+).value;
+
+const area=
+document.getElementById(
+"area"
+).value.trim();
+
+const street=
+document.getElementById(
+"street"
+).value.trim();
+
+const pincode=
+document.getElementById(
+"pincode"
+).value.trim();
+
+
+if(
+
+!name ||
+!phone ||
+!state ||
+!district ||
+!area ||
+!street ||
+!pincode
+
+){
+
+showPopup(
+
+"Missing Information",
+"Please fill all fields",
+"error"
+
+);
+
+return;
+
+}
+
+
+if(checkoutItems.length===0){
+
+showPopup(
+
+"Cart Empty",
+"No items available",
+"error"
+
+);
+
+return;
+
+}
+
+
+const options={
+
+key:
+"rzp_test_T5tWAjBQVPNBI4",
+
+amount:
+totalAmount*100,
+
+currency:
+"INR",
+
+name:
+"Kodai Hills Spot",
+
+description:
+"Order Payment",
+
+image:
+"logo.png",
+
+prefill:{
+
+name:name,
+
+contact:phone,
+
+email:
+currentUser?.email || ""
+
+},
+
+theme:{
+color:"#2e7d32"
+},
+
+handler:async function(response){
+
+try{
+
+for(let item of checkoutItems){
+
+await addDoc(
+
+collection(
+db,
+"Orders"
+),
+
+{
+
+uid:
+currentUser.uid,
+
+name:
+item.name,
+
+image:
+item.image,
+
+quantity:
+item.quantity,
+
+price:
+item.price,
+
+pack:
+item.selectedSize || "-",
+
+customerName:
+name,
+
+phone:
+phone,
+
+state:
+state,
+
+district:
+district,
+
+area:
+area,
+
+street:
+street,
+
+pincode:
+pincode,
+
+paymentId:
+response.razorpay_payment_id,
+
+status:
+"Pending",
+
+createdAt:
+new Date()
+
+}
+
+);
+
+}
+
+showPopup(
+
+"Success",
+
+"Order placed successfully",
+
+"success"
+
+);
+
+}
+catch(error){
+
+console.log(error);
+
+showPopup(
+
+"Error",
+
+"Order saving failed",
+
+"error"
+
+);
+
+}
+
+},
+
+modal:{
+
+ondismiss(){
+
+showPopup(
+
+"Cancelled",
+
+"Payment cancelled",
+
+"error"
+
+);
+
+}
+
+}
+
+};
+
+
+const razorpay=
+
+new Razorpay(
+options
+);
+
+
+razorpay.on(
+
+"payment.failed",
+
+()=>{
+
+showPopup(
+
+"Failed",
+
+"Payment failed",
+
+"error"
+
+);
+
+}
+
+);
+
+razorpay.open();
+
 };
