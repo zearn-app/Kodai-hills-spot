@@ -259,9 +259,7 @@ text-align:center;
 padding:50px;
 ">
 
-<h2>
-🛒 Cart Empty
-</h2>
+<img src="empty-cart.jpg">
 
 <p>
 
@@ -346,9 +344,8 @@ text-align:center;
 padding:50px;
 ">
 
-<h2>
-🛒 Cart Empty
-</h2>
+
+<img src="empty-cart.jpg">
 
 </div>
 
