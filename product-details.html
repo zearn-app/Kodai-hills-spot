@@ -23,6 +23,112 @@ overflow-x:hidden;
 animation:pageLoad .8s ease;
 }
 
+
+
+/* Popup */
+
+@keyframes popupShow{
+
+from{
+opacity:0;
+transform:scale(.7);
+}
+
+to{
+opacity:1;
+transform:scale(1);
+}
+
+}
+
+.popup-container{
+
+position:fixed;
+top:0;
+left:0;
+
+width:100%;
+height:100%;
+
+display:none;
+
+justify-content:center;
+align-items:center;
+
+background:rgba(0,0,0,.5);
+
+z-index:9999;
+
+}
+
+.popup{
+
+width:300px;
+
+background:white;
+
+padding:25px;
+
+border-radius:25px;
+
+text-align:center;
+
+animation:popupShow .3s ease;
+
+}
+
+.popup-logo{
+
+width:80px;
+height:80px;
+
+border-radius:50%;
+
+border:2px solid #2e7d32;
+
+margin-bottom:15px;
+
+}
+
+.popup h2{
+
+margin-bottom:10px;
+
+color:#2e7d32;
+
+}
+
+.popup p{
+
+margin-bottom:20px;
+
+color:#666;
+
+}
+
+.popup button{
+
+padding:12px 25px;
+
+border:none;
+
+border-radius:10px;
+
+background:#2e7d32;
+
+color:white;
+
+cursor:pointer;
+
+transition:.3s;
+
+}
+
+.popup button:active{
+
+transform:scale(.95);
+
+}
 /* Animations */
 
 @keyframes pageLoad{
@@ -449,6 +555,36 @@ Related Products
 
 
 <script type="module">
+
+
+
+/* Popup */
+
+window.showPopup=(title,message)=>{
+
+document.getElementById(
+"popupTitle"
+).innerText=title;
+
+document.getElementById(
+"popupMessage"
+).innerText=message;
+
+document.getElementById(
+"popupBox"
+).style.display=
+"flex";
+
+};
+
+window.closePopup=()=>{
+
+document.getElementById(
+"popupBox"
+).style.display=
+"none";
+
+};
 
 import { db, auth }
 from "./js/firebase.js";
@@ -966,8 +1102,9 @@ currentUser.uid,
 
 );
 
-alert(
-"Added to Cart"
+showPopup(
+"Success",
+"Product added to cart"
 );
 
 return;
@@ -998,10 +1135,11 @@ guestCart)
 
 );
 
-alert(
-"Added to Cart"
-);
 
+showPopup(
+"Success",
+"Product added to cart"
+);
 };
 
 
@@ -1025,7 +1163,27 @@ loadProduct();
 
 </script>
 
+<!-- Popup -->
 
+<div id="popupBox" class="popup-container">
+
+<div class="popup">
+
+<img src="logo.png" class="popup-logo">
+
+<h2 id="popupTitle"></h2>
+
+<p id="popupMessage"></p>
+
+<button onclick="closePopup()">
+
+OK
+
+</button>
+
+</div>
+
+</div>
 
 
 
