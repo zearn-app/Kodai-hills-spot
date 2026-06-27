@@ -502,11 +502,10 @@ currentUser.email
 
 
 const razorpay=
+new Razorpay(options);
 
-new Razorpay(
-options
-);
 
+/* Payment Failed */
 
 razorpay.on(
 
@@ -518,7 +517,32 @@ showPopup(
 
 "Payment Failed",
 
-"Please try again"
+"Your payment was unsuccessful. Please try again.",
+
+"error"
+
+);
+
+}
+
+);
+
+
+/* Payment Cancelled */
+
+razorpay.on(
+
+"modal.closed",
+
+()=>{
+
+showPopup(
+
+"Payment Cancelled",
+
+"You returned to checkout without completing payment.",
+
+"error"
 
 );
 
@@ -528,5 +552,3 @@ showPopup(
 
 
 razorpay.open();
-
-};
