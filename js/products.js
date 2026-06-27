@@ -108,9 +108,7 @@ div.innerHTML=`
 
 </div>
 
-<button class="btn">
-🛒 Add Cart
-</button>
+
 
 `;
 
