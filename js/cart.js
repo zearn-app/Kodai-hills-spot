@@ -260,7 +260,7 @@ padding:50px;
 ">
 
 <img 
-src="empty-cart.jpg"
+src="empty.png"
 style="
 width:180px;
 max-width:80%;
@@ -355,7 +355,7 @@ padding:50px;
 
 
 <img 
-src="empty-cart.jpg"
+src="empty.png"
 style="
 width:180px;
 max-width:80%;
