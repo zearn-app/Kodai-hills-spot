@@ -10,6 +10,7 @@ collection,
 addDoc,
 getDocs,
 deleteDoc,
+updateDoc,
 doc,
 getCountFromServer
 }
