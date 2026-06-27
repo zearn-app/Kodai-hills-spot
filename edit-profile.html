@@ -435,45 +435,211 @@ document.getElementById("state");
 
 
 
-const districtData={
+const districtData = {
+
+// SOUTH INDIA
 
 "Tamil Nadu":[
-"Chennai",
-"Coimbatore",
-"Madurai",
-"Salem",
-"Tiruppur",
-"Erode",
-"Kanyakumari"
+"Chennai","Coimbatore","Madurai","Salem","Tiruppur",
+"Erode","Trichy","Thanjavur","Vellore","Kanyakumari",
+"Thoothukudi","Dindigul","Karur","Namakkal","Cuddalore",
+"Tirunelveli","Sivagangai","Nagapattinam","Dharmapuri",
+"Krishnagiri","Ranipet","Tenkasi","Virudhunagar"
 ],
 
 "Kerala":[
-"Kochi",
-"Thrissur",
-"Kozhikode",
-"Kottayam"
+"Thiruvananthapuram","Kochi","Kozhikode","Thrissur",
+"Kottayam","Kollam","Kannur","Palakkad","Alappuzha",
+"Malappuram","Pathanamthitta","Idukki","Wayanad",
+"Kasaragod","Ernakulam"
 ],
 
 "Karnataka":[
-"Bangalore",
-"Mysore",
-"Mangalore"
+"Bangalore","Mysore","Mangalore","Hubli","Belgaum",
+"Shimoga","Tumkur","Bidar","Bellary","Raichur",
+"Davanagere","Udupi","Chikkamagaluru","Hassan",
+"Mandya","Kolar"
 ],
 
 "Andhra Pradesh":[
-"Vijayawada",
-"Visakhapatnam",
-"Guntur"
+"Visakhapatnam","Vijayawada","Guntur","Nellore",
+"Kurnool","Kadapa","Anantapur","Chittoor",
+"Rajahmundry","Srikakulam","Prakasam"
 ],
 
 "Telangana":[
-"Hyderabad",
-"Warangal",
-"Nizamabad"
+"Hyderabad","Warangal","Nizamabad","Karimnagar",
+"Khammam","Mahabubnagar","Adilabad","Siddipet",
+"Medak","Rangareddy"
+],
+
+
+// NORTH INDIA
+
+"Delhi":[
+"New Delhi","North Delhi","South Delhi",
+"East Delhi","West Delhi","Central Delhi"
+],
+
+"Haryana":[
+"Gurgaon","Faridabad","Panipat","Hisar",
+"Karnal","Rohtak","Ambala","Sonipat"
+],
+
+"Punjab":[
+"Amritsar","Ludhiana","Jalandhar","Patiala",
+"Bathinda","Mohali","Hoshiarpur","Moga"
+],
+
+"Himachal Pradesh":[
+"Shimla","Kullu","Manali","Solan",
+"Kangra","Mandi","Hamirpur","Una"
+],
+
+"Uttarakhand":[
+"Dehradun","Haridwar","Nainital",
+"Almora","Pithoragarh","Udham Singh Nagar"
+],
+
+"Jammu and Kashmir":[
+"Srinagar","Jammu","Anantnag",
+"Baramulla","Pulwama","Kupwara"
+],
+
+"Ladakh":[
+"Leh","Kargil"
+],
+
+"Uttar Pradesh":[
+"Lucknow","Kanpur","Agra","Varanasi",
+"Prayagraj","Meerut","Noida","Ghaziabad",
+"Gorakhpur","Mathura","Bareilly","Aligarh"
+],
+
+
+// WEST INDIA
+
+"Maharashtra":[
+"Mumbai","Pune","Nagpur","Nashik",
+"Aurangabad","Kolhapur","Solapur",
+"Thane","Satara","Sangli"
+],
+
+"Gujarat":[
+"Ahmedabad","Surat","Vadodara",
+"Rajkot","Bhavnagar","Jamnagar",
+"Gandhinagar","Kutch"
+],
+
+"Goa":[
+"North Goa","South Goa"
+],
+
+"Rajasthan":[
+"Jaipur","Jodhpur","Udaipur",
+"Kota","Ajmer","Bikaner",
+"Alwar","Sikar"
+],
+
+
+// CENTRAL INDIA
+
+"Madhya Pradesh":[
+"Bhopal","Indore","Jabalpur",
+"Gwalior","Ujjain","Sagar",
+"Rewa","Satna"
+],
+
+"Chhattisgarh":[
+"Raipur","Bilaspur","Durg",
+"Korba","Jagdalpur","Rajnandgaon"
+],
+
+
+// EAST INDIA
+
+"West Bengal":[
+"Kolkata","Howrah","Darjeeling",
+"Asansol","Siliguri","Malda",
+"Murshidabad"
+],
+
+"Bihar":[
+"Patna","Gaya","Muzaffarpur",
+"Bhagalpur","Darbhanga","Purnia"
+],
+
+"Jharkhand":[
+"Ranchi","Jamshedpur",
+"Dhanbad","Bokaro","Hazaribagh"
+],
+
+"Odisha":[
+"Bhubaneswar","Cuttack",
+"Puri","Rourkela",
+"Sambalpur","Balasore"
+],
+
+
+// NORTHEAST INDIA
+
+"Assam":[
+"Guwahati","Dibrugarh",
+"Silchar","Jorhat","Tezpur"
+],
+
+"Arunachal Pradesh":[
+"Itanagar","Tawang","Pasighat"
+],
+
+"Manipur":[
+"Imphal","Churachandpur","Thoubal"
+],
+
+"Meghalaya":[
+"Shillong","Tura","Jowai"
+],
+
+"Mizoram":[
+"Aizawl","Lunglei","Champhai"
+],
+
+"Nagaland":[
+"Kohima","Dimapur","Mokokchung"
+],
+
+"Sikkim":[
+"Gangtok","Namchi","Gyalshing"
+],
+
+"Tripura":[
+"Agartala","Dharmanagar","Udaipur"
+],
+
+
+// UNION TERRITORIES
+
+"Andaman and Nicobar Islands":[
+"Port Blair","Nicobar"
+],
+
+"Chandigarh":[
+"Chandigarh"
+],
+
+"Dadra and Nagar Haveli and Daman and Diu":[
+"Daman","Diu","Silvassa"
+],
+
+"Lakshadweep":[
+"Kavaratti","Agatti"
+],
+
+"Puducherry":[
+"Puducherry","Karaikal","Mahe","Yanam"
 ]
 
 };
-
 
 stateEl.onchange=()=>{
 
