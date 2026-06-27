@@ -419,3 +419,14 @@ window.location=
 /* Start */
 
 loadProducts();
+
+
+
+const aboutLink = document.getElementById("aboutLink");
+
+if (aboutLink) {
+    aboutLink.addEventListener("click", (e) => {
+        e.preventDefault(); // Prevents default anchor behavior if necessary
+        window.location.href = "about.html";
+    });
+}
