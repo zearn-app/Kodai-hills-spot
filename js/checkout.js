@@ -45,7 +45,7 @@ document.getElementById(
 
 
 
-/* Login */
+/* Login Check */
 
 onAuthStateChanged(
 
@@ -72,7 +72,7 @@ loadCheckout();
 
 
 
-/* Load Cart Data */
+/* Load Checkout Items */
 
 function loadCheckout(){
 
@@ -82,6 +82,7 @@ JSON.parse(
 
 localStorage.getItem(
 "checkoutItems"
+
 )
 
 )||[];
@@ -90,89 +91,128 @@ localStorage.getItem(
 if(checkoutItems.length===0){
 
 document.getElementById(
-"productName"
-).innerText=
-"Cart Empty";
+"orderItems"
+).innerHTML=`
+
+<h3
+style="
+text-align:center;
+padding:20px;
+">
+
+Cart Empty
+
+</h3>
+
+`;
 
 return;
 
 }
 
 
-const firstItem=
-checkoutItems[0];
-
-const qty=
-Number(
-firstItem.quantity||1
-);
-
-const unitPrice=
-Number(
-firstItem.unitPrice||0
-);
-
-const itemTotal=
-Number(
-firstItem.totalPrice||
-(unitPrice*qty)
-);
-
-
-/* Product Display */
-
-document.getElementById(
-"productName"
-).innerText=
-firstItem.name;
-
-document.getElementById(
-"productPrice"
-).innerText=
-`₹${itemTotal}`;
-
-document.getElementById(
-"productImage"
-).src=
-firstItem.image || "logo.png";
-
-document.getElementById(
-"productQty"
-).innerText=
-`Qty : ${qty}
-(${firstItem.pack || "-"})`;
-
-
-
-/* Total Amount */
+let itemsHtml="";
 
 totalAmount=0;
 
+
+/* Show all products */
+
 checkoutItems.forEach(
 
-item=>{
+(item)=>{
 
 const qty=
+
 Number(
 item.quantity||1
 );
 
 const unitPrice=
+
 Number(
-item.unitPrice||0
+item.unitPrice||
+item.price||
+0
 );
 
-const total=
+const itemTotal=
+
 Number(
 item.totalPrice||
+
 (unitPrice*qty)
+
 );
 
-totalAmount+=total;
+
+totalAmount+=itemTotal;
+
+
+itemsHtml += `
+
+<div class="product">
+
+<img
+
+src="${item.image || 'logo.png'}"
+
+onerror="this.src='logo.png'"
+
+>
+
+<div class="details">
+
+<h3>
+
+${item.name}
+
+</h3>
+
+<div class="price">
+
+₹${itemTotal}
+
+</div>
+
+<p>
+
+Unit Price :
+₹${unitPrice}
+
+</p>
+
+<p>
+
+Qty : ${qty}
+
+</p>
+
+<p>
+
+Pack :
+${item.pack ||
+item.selectedSize ||
+"-"}
+
+</p>
+
+</div>
+
+</div>
+
+`;
 
 }
 
+
 );
+
+
+document.getElementById(
+"orderItems"
+).innerHTML=
+itemsHtml;
 
 
 document.getElementById(
@@ -192,46 +232,76 @@ document.getElementById(
 /* Place Order */
 
 document.getElementById(
+
 "placeOrder"
+
 )
 
 .onclick=()=>{
 
 
 const name=
+
 document.getElementById(
 "name"
-).value.trim();
+)
+
+.value.trim();
+
 
 const phone=
+
 document.getElementById(
 "phone"
-).value.trim();
+)
+
+.value.trim();
+
 
 const state=
+
 document.getElementById(
 "state"
-).value;
+)
+
+.value;
+
 
 const district=
+
 document.getElementById(
 "district"
-).value;
+)
+
+.value;
+
 
 const area=
+
 document.getElementById(
 "area"
-).value.trim();
+)
+
+.value.trim();
+
 
 const street=
+
 document.getElementById(
 "street"
-).value.trim();
+)
+
+.value.trim();
+
 
 const pincode=
+
 document.getElementById(
 "pincode"
-).value.trim();
+)
+
+.value.trim();
+
 
 
 if(
@@ -259,6 +329,7 @@ return;
 }
 
 
+
 /* Razorpay */
 
 const options={
@@ -284,10 +355,38 @@ image:
 
 handler:
 
-async function(response){
+async(response)=>{
 
 
-for(let item of checkoutItems){
+for(
+
+let item of checkoutItems
+
+){
+
+const qty=
+
+Number(
+item.quantity||1
+);
+
+const unitPrice=
+
+Number(
+item.unitPrice||
+item.price||
+0
+);
+
+const itemTotal=
+
+Number(
+item.totalPrice||
+
+(unitPrice*qty)
+
+);
+
 
 await addDoc(
 
@@ -302,28 +401,36 @@ uid:
 currentUser.uid,
 
 productId:
-item.productId,
+item.productId ||
+
+"",
 
 name:
-item.name,
+item.name ||
+
+"",
 
 image:
-item.image,
+item.image ||
+
+"logo.png",
 
 quantity:
-item.quantity,
+qty,
 
 pack:
-item.pack,
+
+item.pack ||
+
+item.selectedSize ||
+
+"-",
 
 unitPrice:
-item.unitPrice,
+unitPrice,
 
 totalPrice:
-item.totalPrice || (
-item.unitPrice*
-item.quantity
-),
+itemTotal,
 
 customerName:
 name,
@@ -340,7 +447,8 @@ ${state}
 ${pincode}`,
 
 paymentId:
-response.razorpay_payment_id,
+response
+.razorpay_payment_id,
 
 status:
 "Pending",
@@ -355,6 +463,11 @@ Date.now()
 }
 
 
+localStorage.removeItem(
+"checkoutItems"
+);
+
+
 showPopup(
 
 "Success",
@@ -363,10 +476,6 @@ showPopup(
 
 );
 
-
-localStorage.removeItem(
-"checkoutItems"
-);
 
 setTimeout(()=>{
 
