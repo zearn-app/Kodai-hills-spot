@@ -470,9 +470,11 @@ localStorage.removeItem(
 
 showPopup(
 
-"Success",
+"✓ Order Success",
 
-"Order placed successfully"
+"Your order has been placed successfully",
+
+"success"
 
 );
 
