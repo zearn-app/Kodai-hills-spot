@@ -111,6 +111,27 @@ transform:scale(1.02);
 box-shadow:0 0 15px rgba(46,125,50,.2);
 }
 
+
+select{
+
+width:100%;
+padding:15px;
+border:1px solid #ddd;
+border-radius:15px;
+outline:none;
+font-size:15px;
+background:white;
+transition:.4s;
+
+}
+
+select:focus{
+
+border:2px solid #2e7d32;
+transform:scale(1.02);
+box-shadow:0 0 15px rgba(46,125,50,.2);
+
+}
 /* Buttons */
 
 .btn{
@@ -265,13 +286,52 @@ cursor:pointer;
 </div>
 
 <div class="input-box">
-<label>District</label>
-<input type="text" id="district">
+
+<label>State</label>
+
+<select id="state">
+
+<option value="">
+Select State
+</option>
+
+<option value="Tamil Nadu">
+Tamil Nadu
+</option>
+
+<option value="Kerala">
+Kerala
+</option>
+
+<option value="Karnataka">
+Karnataka
+</option>
+
+<option value="Andhra Pradesh">
+Andhra Pradesh
+</option>
+
+<option value="Telangana">
+Telangana
+</option>
+
+</select>
+
 </div>
 
+
 <div class="input-box">
-<label>State</label>
-<input type="text" id="state">
+
+<label>District</label>
+
+<select id="district">
+
+<option value="">
+Select District
+</option>
+
+</select>
+
 </div>
 
 <div class="input-box">
@@ -372,6 +432,75 @@ document.getElementById("district");
 const stateEl=
 document.getElementById("state");
 
+
+
+
+const districtData={
+
+"Tamil Nadu":[
+"Chennai",
+"Coimbatore",
+"Madurai",
+"Salem",
+"Tiruppur",
+"Erode",
+"Kanyakumari"
+],
+
+"Kerala":[
+"Kochi",
+"Thrissur",
+"Kozhikode",
+"Kottayam"
+],
+
+"Karnataka":[
+"Bangalore",
+"Mysore",
+"Mangalore"
+],
+
+"Andhra Pradesh":[
+"Vijayawada",
+"Visakhapatnam",
+"Guntur"
+],
+
+"Telangana":[
+"Hyderabad",
+"Warangal",
+"Nizamabad"
+]
+
+};
+
+
+stateEl.onchange=()=>{
+
+districtEl.innerHTML=
+'<option value="">Select District</option>';
+
+const districts=
+districtData[stateEl.value];
+
+if(districts){
+
+districts.forEach(item=>{
+
+const option=
+document.createElement("option");
+
+option.value=item;
+
+option.innerText=item;
+
+districtEl.appendChild(option);
+
+});
+
+}
+
+};
 const pincodeEl=
 document.getElementById("pincode");
 
@@ -483,11 +612,9 @@ data.address.street || "";
 areaEl.value=
 data.address.area || "";
 
-districtEl.value=
-data.address.district || "";
 
-stateEl.value=
-data.address.state || "";
+
+data.address.state
 
 pincodeEl.value=
 data.address.pincode || "";
