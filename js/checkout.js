@@ -200,9 +200,7 @@ document.getElementById(
 
 }
 
-document.getElementById(
-"orderItems"
-).innerHTML=html;
+
 
 
 
