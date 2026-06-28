@@ -1,873 +1,334 @@
-import { auth, db } from "./firebase.js";
+<!DOCTYPE html>
+<html lang="en">
+<head>
 
-import {
-onAuthStateChanged
-}
-from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 
-import {
-collection,
-addDoc,
-getDocs,
-deleteDoc,
-updateDoc,
-doc,
-getCountFromServer
-}
-from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
+<title>Kodai Hills Spot Admin</title>
 
+<link rel="stylesheet" href="css/admin.css">
 
-const productsDiv=
-document.getElementById("products");
+<style>
 
-const ordersDiv=
-document.getElementById("allOrders");
-
-const enableVariants=
-document.getElementById("enableVariants");
-
-const variantSection=
-document.getElementById("variantSection");
-
-const variantFields=
-document.getElementById("variantFields");
-
-const addVariantBtn=
-document.getElementById("addVariantBtn");
-
-
-/* ------------------------------
-Quantity Toggle
---------------------------------*/
-
-enableVariants.onchange=()=>{
-
-if(enableVariants.checked){
-
-variantSection.style.display=
-"block";
-
-document.getElementById(
-"packQty"
-).style.display="none";
-
-}else{
-
-variantSection.style.display=
-"none";
-
-document.getElementById(
-"packQty"
-).style.display=
-"block";
-
-variantFields.innerHTML="";
-
-}
-
-};
-
-
-
-/* ------------------------------
-Add Quantity Button
---------------------------------*/
-
-addVariantBtn.onclick=()=>{
-
-const div=
-document.createElement(
-"div"
-);
-
-div.style.marginBottom=
-"10px";
-
-div.innerHTML=`
-
-<div style="
-display:flex;
-gap:10px;
-margin-bottom:10px;
-">
-
-<input
-class="variantQty"
-placeholder="500g / 1kg"
-style="flex:1"
->
-
-<input
-class="variantPrice"
-placeholder="Price"
-type="number"
-style="flex:1"
->
-
-<button
-class="removeVariant"
-style="
-width:60px;
-background:red;
-color:white;
-border:none;
-border-radius:10px;
-">
-
-✖
-
-</button>
-
-</div>
-
-`;
-
-variantFields.appendChild(
-div
-);
-
-
-/* Remove variant */
-
-div.querySelector(
-".removeVariant"
-)
-
-.onclick=()=>{
-
-div.remove();
-
-};
-
-};
-
-
-
-/* ------------------------------
-Admin Login Check
---------------------------------*/
-
-onAuthStateChanged(
-
-auth,
-
-(user)=>{
-
-if(!user){
-
-window.location=
-"index.html";
-
-return;
-
-}
-
-if(
-
-user.email!=="kodaihillsspot@gmail.com"
-
-){
-
-alert(
-"Access denied"
-);
-
-window.location=
-"home.html";
-
-return;
-
-}
-
-loadStats();
-
-loadProducts();
-
-loadOrders();
-
-}
-
-);
-
-
-
-/* ------------------------------
-Add Product
---------------------------------*/
-
-document.getElementById(
-"addBtn"
-)
-
-.onclick=
-
-async()=>{
-
-try{
-
-const name=
-document.getElementById(
-"name"
-).value.trim();
-
-const price=
-document.getElementById(
-"price"
-).value.trim();
-
-const oldPrice=
-document.getElementById(
-"oldPrice"
-).value.trim();
-
-const packQty=
-document.getElementById(
-"packQty"
-).value.trim();
-
-const category=
-document.getElementById(
-"category"
-).value;
-
-const image=
-document.getElementById(
-"image"
-).value.trim();
-
-const description=
-document.getElementById(
-"description"
-).value.trim();
-
-const fewStock=
-document.getElementById(
-"fewStock"
-).checked;
-
-
-if(
-
-!name||
-!price||
-!image||
-!description
-
-){
-
-alert(
-"Fill all fields"
-);
-
-return;
-
-}
-
-
-/* Get Variants */
-
-let quantityVariants=[];
-
-const qtyInputs=
-
-document.querySelectorAll(
-".variantQty"
-);
-
-const priceInputs=
-
-document.querySelectorAll(
-".variantPrice"
-);
-
-
-for(
-
-let i=0;
-
-i<qtyInputs.length;
-
-i++
-
-){
-
-const qty=
-
-qtyInputs[i]
-.value.trim();
-
-const price=
-
-priceInputs[i]
-.value.trim();
-
-if(qty&&price){
-
-quantityVariants.push({
-
-qty:qty,
-
-price:Number(
-price
-)
-
-});
-
-}
-
-}
-
-
-await addDoc(
-
-collection(
-db,
-"Products"
-),
-
-{
-
-name:name,
-
-price:Number(
-price
-),
-
-oldPrice:
-
-oldPrice
-
-?
-
-Number(
-oldPrice
-)
-
-:
-
-null,
-
-packQty:
-
-enableVariants.checked
-
-?
-
-""
-
-:
-
-packQty,
-
-quantityVariants:
-quantityVariants,
-
-category:
-category,
-
-Image:
-image,
-
-description:
-description,
-
-fewStock:
-fewStock
-
-}
-
-);
-
-alert(
-"Product Added Successfully"
-);
-
-
-/* Clear */
-
-document.getElementById(
-"name"
-).value="";
-
-document.getElementById(
-"price"
-).value="";
-
-document.getElementById(
-"oldPrice"
-).value="";
-
-document.getElementById(
-"packQty"
-).value="";
-
-document.getElementById(
-"image"
-).value="";
-
-document.getElementById(
-"description"
-).value="";
-
-document.getElementById(
-"fewStock"
-).checked=false;
-
-enableVariants.checked=
-false;
-
-variantFields.innerHTML=
-"";
-
-variantSection.style.display=
-"none";
-
-loadProducts();
-
-loadStats();
-
-}
-
-catch(error){
-
-console.log(
-error
-);
-
-alert(
-error.message
-);
-
-}
-
-};
-
-
-
-/* ------------------------------
-Load Products
---------------------------------*/
-
-async function loadProducts(){
-
-productsDiv.innerHTML=
-"Loading...";
-
-const snapshot=
-
-await getDocs(
-
-collection(
-db,
-"Products"
-)
-
-);
-
-productsDiv.innerHTML=
-"";
-
-
-snapshot.forEach(
-
-(item)=>{
-
-const data=
-item.data();
-
-let quantityDisplay=
-"";
-
-if(
-
-data.quantityVariants &&
-
-data.quantityVariants.length>0
-
-){
-
-quantityDisplay=
-
-data.quantityVariants
-
-.map(
-
-q=>`
-
-<span style="
-display:inline-block;
-padding:5px 10px;
-background:#f5f5f5;
-margin:4px;
-border-radius:10px;
-">
-
-${q.qty}
-- ₹${q.price}
-
-</span>
-
-`
-
-)
-
-.join("");
-
-}else{
-
-quantityDisplay=
-
-data.packQty || "-";
-
-}
-
-
-productsDiv.innerHTML+=`
-
-<div style="
-background:white;
-padding:15px;
-margin-bottom:15px;
-border-radius:15px;
-">
-
-<img
-src="${data.Image}"
-style="
+#statusPopup{
+display:none;
+position:fixed;
+top:0;
+left:0;
 width:100%;
-height:150px;
-object-fit:cover;
-border-radius:10px;
-">
+height:100%;
+background:rgba(0,0,0,.5);
+justify-content:center;
+align-items:center;
+z-index:1000;
+padding:20px;
+}
 
-<h3>
+.popup-box{
+background:white;
+width:100%;
+max-height:90vh;
+overflow:auto;
+padding:20px;
+border-radius:20px;
+}
 
-${data.name}
-
-</h3>
-
-<p>
-
-₹${data.price}
-
-</p>
-
-<p>
-
-${quantityDisplay}
-
-</p>
-
-<button
-onclick="editProduct('${item.id}')"
-style="
-background:#2196f3;
-color:white;
+.detail{
+margin-top:10px;
 padding:10px;
-border:none;
+background:#f5f5f5;
 border-radius:10px;
-margin-right:10px;
-">
+}
 
-Edit
+.popup-box select,
+.popup-box input,
+.popup-box button,
+textarea{
 
-</button>
+width:100%;
+padding:12px;
+margin-top:15px;
+border-radius:10px;
+border:none;
+}
 
-<button
-onclick="deleteProduct('${item.id}')"
-style="
+.stockBox{
+display:flex;
+align-items:center;
+margin-top:15px;
+gap:10px;
+}
+
+.stockBox input{
+width:auto;
+}
+
+.updateBtn{
+background:#2e7d32;
+color:white;
+}
+
+.closeBtn{
 background:red;
 color:white;
-padding:10px;
-border:none;
-border-radius:10px;
-">
+}
 
-Delete
+</style>
 
+</head>
+
+<body>
+
+<nav class="navbar">
+
+<div class="logo-box">
+
+<img src="logo.png" class="logo-img">
+
+<div class="logo-text">
+Kodai Hills Spot Admin
+</div>
+
+</div>
+
+</nav>
+
+
+<div class="dashboard">
+
+<div class="stat-card">
+<h3>Total Products</h3>
+<h1 id="totalProducts">0</h1>
+</div>
+
+<div class="stat-card">
+<h3>Total Orders</h3>
+<h1 id="totalOrders">0</h1>
+</div>
+
+</div>
+
+
+<button id="userBtn">
+Users
+</button>
+
+
+<div class="container">
+
+<h2>Add Product</h2>
+
+<input id="name" placeholder="Product Name">
+
+<input id="price" placeholder="Current Price">
+
+<input id="oldPrice"
+placeholder="Old Price">
+
+<input id="packQty"
+placeholder="Pack Quantity (500g / 1kg / 250ml)">
+
+
+<!-- Quantity Variants -->
+
+<div class="stockBox">
+
+<input
+type="checkbox"
+id="enableVariants">
+
+<label>
+Enable Multiple Quantity Options
+</label>
+
+</div>
+
+
+<div
+id="variantSection"
+style="display:none;margin-top:15px;">
+
+<button
+type="button"
+id="addVariantBtn"
+style="background:#2196f3;color:white;margin-bottom:10px;">
+
++ Add Quantity
+
+</button>
+
+<div id="variantFields"></div>
+
+</div>
+
+
+<select id="category">
+<option>Chocolate</option>
+<option>Honey</option>
+<option>Herbs</option>
+<option>Oils</option>
+<option>fruits</option>
+<option>organic products</option>
+</select>
+
+<input id="image" placeholder="Image URL">
+
+<textarea id="description" placeholder="Description"></textarea>
+
+<!-- Few Stock -->
+<div class="stockBox">
+<input type="checkbox" id="fewStock">
+<label>Few Stock Available</label>
+</div>
+
+<!-- Free Delivery -->
+<div class="stockBox">
+<input type="checkbox" id="freeDelivery">
+<label>🚚 Free Delivery</label>
+</div>
+
+<button id="addBtn">
+Add Product
 </button>
 
 </div>
 
-`;
 
-}
+<h2 class="heading">
+Products
+</h2>
 
-);
+<div id="products">
+Loading...
+</div>
 
-}
 
+<h2>All Orders</h2>
 
+<div id="allOrders"></div>
 
-/* Delete */
 
-window.deleteProduct=
+<div id="statusPopup">
 
-async(id)=>{
+<div class="popup-box">
 
-await deleteDoc(
+<h3>Order Details</h3>
 
-doc(
-db,
-"Products",
-id
-)
+<div class="detail">
+<b>Order ID:</b>
+<div id="orderId"></div>
+</div>
 
-);
+<div class="detail">
+<b>Product:</b>
+<div id="productName"></div>
+</div>
 
-loadProducts();
+<div class="detail">
+<b>Quantity:</b>
+<div id="quantity"></div>
+</div>
 
-loadStats();
+<div class="detail">
+<b>Total Price:</b>
+<div id="totalPrice"></div>
+</div>
 
-};
+<h3>User Details</h3>
 
+<div class="detail">
+👤 <span id="userName"></span>
+</div>
 
+<div class="detail">
+📧 <span id="userEmail"></span>
+</div>
 
-let currentEditId="";
+<div class="detail">
+📱 <span id="userPhone"></span>
+</div>
 
+<div class="detail">
+🏠 <span id="userAddress"></span>
+</div>
 
-window.editProduct=
 
-async(id)=>{
+<select id="statusSelect">
+<option value="Pending">Pending</option>
+<option value="Accepted">Accepted</option>
+<option value="Delivered">Delivered</option>
+</select>
 
-currentEditId=id;
+<input
+id="trackingId"
+placeholder="Tracking ID"
+style="display:none;">
 
-const snapshot=
+<button id="updateBtn" class="updateBtn">
+Update Order
+</button>
 
-await getDocs(
-collection(db,"Products")
-);
+<button onclick="closePopup()" class="closeBtn">
+Close
+</button>
 
-snapshot.forEach((item)=>{
+</div>
+</div>
 
-if(item.id===id){
+<script type="module" src="js/admin.js"></script>
 
-const data=item.data();
 
-document.getElementById(
-"editName"
-).value=data.name||"";
-
-document.getElementById(
-"editPrice"
-).value=data.price||"";
-
-document.getElementById(
-"editOldPrice"
-).value=data.oldPrice||"";
-
-document.getElementById(
-"editPackQty"
-).value=data.packQty||"";
-
-document.getElementById(
-"editImage"
-).value=data.Image||"";
-
-document.getElementById(
-"editDescription"
-).value=
-data.description||"";
-
-}
-
-});
-
-document.getElementById(
-"editPopup"
-).style.display=
-"flex";
-
-};
-
-
-window.closeEdit=()=>{
-
-document.getElementById(
-"editPopup"
-).style.display=
-"none";
-
-};
-
-
-document.getElementById(
-"saveEditBtn"
-)
-
-.onclick=
-
-async()=>{
-
-try{
-
-await updateDoc(
-
-doc(
-db,
-"Products",
-currentEditId
-),
-
-{
-
-name:
-
-document.getElementById(
-"editName"
-).value,
-
-price:Number(
-
-document.getElementById(
-"editPrice"
-).value
-),
-
-oldPrice:Number(
-
-document.getElementById(
-"editOldPrice"
-).value
-),
-
-packQty:
-
-document.getElementById(
-"editPackQty"
-).value,
-
-Image:
-
-document.getElementById(
-"editImage"
-).value,
-
-description:
-
-document.getElementById(
-"editDescription"
-).value
-
-}
-
-);
-
-alert(
-"Product Updated Successfully"
-);
-
-closeEdit();
-
-loadProducts();
-
-}
-catch(error){
-
-alert(
-error.message
-);
-
-}
-
-};
-
-/* Stats */
-
-async function loadStats(){
-
-const products=
-
-await getCountFromServer(
-
-collection(
-db,
-"Products"
-)
-
-);
-
-const orders=
-
-await getCountFromServer(
-
-collection(
-db,
-"Orders"
-)
-
-);
-
-document.getElementById(
-"totalProducts"
-).innerText=
-
-products.data().count;
-
-document.getElementById(
-"totalOrders"
-).innerText=
-
-orders.data().count;
-
-}
-
-
-/* Orders */
-
-async function loadOrders(){
-
-ordersDiv.innerHTML=
-"Loading...";
-
-const snapshot=
-
-await getDocs(
-
-collection(
-db,
-"Orders"
-)
-
-);
-
-ordersDiv.innerHTML=
-"";
-
-snapshot.forEach(
-
-(item)=>{
-
-const data=
-item.data();
-
-ordersDiv.innerHTML+=`
-
-<div style="
-background:white;
-padding:15px;
-margin-bottom:10px;
-border-radius:10px;
+<div id="editPopup"
+style="
+display:none;
+position:fixed;
+top:0;left:0;
+width:100%;height:100%;
+background:rgba(0,0,0,.5);
+justify-content:center;
+align-items:center;
+z-index:1000;
+padding:20px;
 ">
 
-<h3>
+<div class="popup-box">
 
-${data.name}
+<h2>Edit Product</h2>
 
-</h3>
+<input id="editName" placeholder="Product Name">
+<input id="editPrice" placeholder="Price">
+<input id="editOldPrice" placeholder="Old Price">
+<input id="editPackQty" placeholder="Pack Quantity">
+<input id="editImage" placeholder="Image URL">
 
-<p>
+<textarea id="editDescription" placeholder="Description"></textarea>
 
-₹${data.price}
+<!-- Few Stock (edit) -->
+<div class="stockBox" style="margin-top:15px;">
+  <input type="checkbox" id="editFewStock">
+  <label>Few Stock Available</label>
+</div>
 
-</p>
+<!-- Free Delivery (edit) -->
+<div class="stockBox" style="margin-top:12px;">
+  <input type="checkbox" id="editFreeDelivery">
+  <label>🚚 Free Delivery</label>
+</div>
+
+<button
+  id="saveEditBtn"
+  style="background:#2e7d32;color:white;">
+  Save Changes
+</button>
+
+<button onclick="closeEdit()" class="closeBtn">
+  Close
+</button>
 
 </div>
 
-`;
+</div>
 
-}
-
-);
-
-}
+</body>
+</html>
