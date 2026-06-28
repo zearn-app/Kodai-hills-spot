@@ -132,6 +132,87 @@ transform:scale(1.02);
 box-shadow:0 0 15px rgba(46,125,50,.2);
 
 }
+
+
+.customSelect{
+
+width:100%;
+padding:15px;
+border:1px solid #ddd;
+border-radius:15px;
+background:white;
+cursor:pointer;
+transition:.4s;
+
+display:flex;
+justify-content:space-between;
+align-items:center;
+
+}
+
+.customSelect:hover{
+
+border-color:#2e7d32;
+
+}
+
+.customSelect::after{
+
+content:"▼";
+font-size:12px;
+
+}
+
+/* Selector popup */
+
+.selectPopup{
+
+position:fixed;
+top:0;
+left:0;
+
+width:100%;
+height:100%;
+
+background:rgba(0,0,0,.5);
+
+display:none;
+justify-content:center;
+align-items:flex-end;
+
+z-index:99999;
+
+}
+
+.selectBox{
+
+background:white;
+width:100%;
+max-height:70vh;
+
+border-radius:25px 25px 0 0;
+
+overflow:auto;
+padding:20px;
+
+animation:popupShow .3s;
+
+}
+
+.option{
+
+padding:16px;
+border-bottom:1px solid #eee;
+cursor:pointer;
+transition:.3s;
+
+}
+
+.option:hover{
+
+background:#f2f2f2;
+
+}
 /* Buttons */
 
 .btn{
@@ -289,50 +370,30 @@ cursor:pointer;
 
 <label>State</label>
 
-<select id="state">
+<div
+id="stateSelect"
+class="customSelect">
 
-<option value="">
 Select State
-</option>
-
-<option value="Tamil Nadu">
-Tamil Nadu
-</option>
-
-<option value="Kerala">
-Kerala
-</option>
-
-<option value="Karnataka">
-Karnataka
-</option>
-
-<option value="Andhra Pradesh">
-Andhra Pradesh
-</option>
-
-<option value="Telangana">
-Telangana
-</option>
-
-</select>
 
 </div>
 
+</div>
 
 <div class="input-box">
 
 <label>District</label>
 
-<select id="district">
+<div
+id="districtSelect"
+class="customSelect">
 
-<option value="">
 Select District
-</option>
-
-</select>
 
 </div>
+
+</div>
+
 
 <div class="input-box">
 <label>Pincode</label>
@@ -641,32 +702,132 @@ const districtData = {
 
 };
 
-stateEl.onchange=()=>{
 
-districtEl.innerHTML=
-'<option value="">Select District</option>';
+const stateSelect=
+document.getElementById(
+"stateSelect"
+);
 
-const districts=
-districtData[stateEl.value];
+const districtSelect=
+document.getElementById(
+"districtSelect"
+);
 
-if(districts){
+const popup=
+document.getElementById(
+"selectPopup"
+);
 
-districts.forEach(item=>{
+const optionList=
+document.getElementById(
+"optionList"
+);
 
-const option=
-document.createElement("option");
+let selectedState="";
+let selectedDistrict="";
 
-option.value=item;
 
-option.innerText=item;
+function openSelector(
+items,
+type
+){
 
-districtEl.appendChild(option);
+popup.style.display="flex";
+
+optionList.innerHTML="";
+
+items.forEach(item=>{
+
+const div=
+document.createElement(
+"div"
+);
+
+div.className=
+"option";
+
+div.innerText=
+item;
+
+div.onclick=()=>{
+
+if(type==="state"){
+
+selectedState=item;
+
+stateSelect.innerText=item;
+
+selectedDistrict="";
+
+districtSelect.innerText=
+"Select District";
+
+}
+
+else{
+
+selectedDistrict=item;
+
+districtSelect.innerText=item;
+
+}
+
+popup.style.display=
+"none";
+
+};
+
+optionList.appendChild(
+div
+);
 
 });
 
 }
 
+
+stateSelect.onclick=()=>{
+
+openSelector(
+
+Object.keys(
+districtData
+),
+
+"state"
+
+);
+
 };
+
+
+districtSelect.onclick=()=>{
+
+if(!selectedState){
+
+showPopup(
+"Select State",
+"Please select state first",
+"error"
+);
+
+return;
+
+}
+
+openSelector(
+
+districtData[
+selectedState
+],
+
+"district"
+
+);
+
+};
+
+
 const pincodeEl=
 document.getElementById("pincode");
 
@@ -863,10 +1024,10 @@ area:
 areaEl.value,
 
 district:
-districtEl.value,
+selectedDistrict,
 
 state:
-stateEl.value,
+selectedState,
 
 pincode:
 pincodeEl.value
@@ -913,6 +1074,19 @@ saveBtn.disabled=false;
 };
 
 </script>
+<div
+id="selectPopup"
+class="selectPopup">
 
+<div class="selectBox">
+
+<div
+id="optionList">
+
+</div>
+
+</div>
+
+</div>
 </body>
 </html>
