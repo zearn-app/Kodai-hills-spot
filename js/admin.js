@@ -32,6 +32,17 @@ const STATUS_OPTIONS = [
 ];
 
 
+
+
+/* ==============================
+   Users Button
+============================== */
+
+document.getElementById("userBtn").onclick = () => {
+  window.location = "srkxditit.html";
+};
+
+
 /* ==============================
    Users Button
 ============================== */
