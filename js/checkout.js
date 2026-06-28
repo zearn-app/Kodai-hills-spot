@@ -51,44 +51,70 @@ async function loadSavedAddress(user) {
             const data = userSnap.data();
             const addr = data.address || {};
 
+            /* Trim all fields — empty strings ("") count as missing */
+            const s = (v) => (v || "").toString().trim();
             const hasAddress =
-                addr.state && addr.district && addr.area && addr.street && addr.pincode;
+                s(addr.state) && s(addr.district) &&
+                s(addr.area)  && s(addr.street)   && s(addr.pincode);
 
             if (hasAddress) {
                 /* Show saved address card */
                 document.getElementById("savedName").innerText =
-                    data.name || user.displayName || "—";
+                    s(data.name) || user.displayName || "—";
                 document.getElementById("savedPhone").innerText =
-                    "📞 " + (data.phone || "—");
+                    "📞 " + (s(data.phone) || "—");
                 document.getElementById("savedLines").innerHTML =
-                    `${addr.area}, ${addr.street}<br>
-                     ${addr.district}, ${addr.state} – ${addr.pincode}`;
+                    `${s(addr.area)}, ${s(addr.street)}<br>
+                     ${s(addr.district)}, ${s(addr.state)} – ${s(addr.pincode)}`;
 
                 savedCard.style.display = "block";
                 form.style.display = "none";
 
                 /* Cache as resolved address */
                 resolvedAddress = {
-                    name:     data.name     || user.displayName || "",
-                    phone:    data.phone    || "",
-                    email:    data.email    || user.email       || "",
-                    state:    addr.state,
-                    district: addr.district,
-                    area:     addr.area,
-                    street:   addr.street,
-                    pincode:  addr.pincode
+                    name:     s(data.name)  || user.displayName || "",
+                    phone:    s(data.phone) || "",
+                    email:    s(data.email) || "",
+                    state:    s(addr.state),
+                    district: s(addr.district),
+                    area:     s(addr.area),
+                    street:   s(addr.street),
+                    pincode:  s(addr.pincode)
                 };
                 return;
             }
+
+            /* Address exists but is incomplete — pre-fill what we have */
+            const nameField  = document.getElementById("name");
+            const phoneField = document.getElementById("phone");
+            const emailField = document.getElementById("email");
+            const areaField  = document.getElementById("area");
+            const streetField= document.getElementById("street");
+            const pinField   = document.getElementById("pincode");
+
+            if (nameField  && s(data.name))   nameField.value   = s(data.name);
+            if (phoneField && s(data.phone))   phoneField.value  = s(data.phone);
+            if (emailField && s(data.email))   emailField.value  = s(data.email);
+            if (areaField  && s(addr.area))    areaField.value   = s(addr.area);
+            if (streetField&& s(addr.street))  streetField.value = s(addr.street);
+            if (pinField   && s(addr.pincode)) pinField.value    = s(addr.pincode);
+
+            /* Pre-select state & district dropdowns if saved */
+            if (s(addr.state)) {
+                window.selectedState = s(addr.state);
+                const stateEl = document.getElementById("stateSelect");
+                if (stateEl) { stateEl.innerText = s(addr.state); stateEl.classList.add("selected"); }
+            }
+            if (s(addr.district)) {
+                window.selectedDistrict = s(addr.district);
+                const distEl = document.getElementById("districtSelect");
+                if (distEl) { distEl.innerText = s(addr.district); distEl.classList.add("selected"); }
+            }
         }
 
-        /* No saved address — show form */
+        /* No complete saved address — show form */
         savedCard.style.display = "none";
         form.style.display      = "block";
-
-        /* Pre-fill email if available */
-        const emailField = document.getElementById("email");
-        if (emailField && user.email) emailField.value = user.email;
 
     } catch (err) {
         console.error("Error loading saved address:", err);
