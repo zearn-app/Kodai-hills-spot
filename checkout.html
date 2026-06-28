@@ -1,929 +1,452 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-
 <meta charset="UTF-8">
-<meta name="viewport"
-content="width=device-width,initial-scale=1">
-
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Kodai Hills Spot - Checkout</title>
-
 <style>
 
-*{
-margin:0;
-padding:0;
-box-sizing:border-box;
-font-family:Arial,sans-serif;
-}
+*{ margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI',Arial,sans-serif; }
 
-body{
-background:#f5f5f5;
-padding-bottom:110px;
-}
+body{ background:#f0f4f0; padding-bottom:110px; }
 
-/* Header */
-
+/* ── Header ── */
 .header{
-background:white;
-padding:15px;
-display:flex;
-align-items:center;
-gap:10px;
-position:sticky;
-top:0;
-z-index:100;
-box-shadow:0 2px 10px rgba(0,0,0,.1);
+  background:white;
+  padding:14px 16px;
+  display:flex;
+  align-items:center;
+  gap:12px;
+  position:sticky;
+  top:0;
+  z-index:100;
+  box-shadow:0 2px 12px rgba(0,0,0,.08);
 }
-
 .logo{
-width:50px;
-height:50px;
-border-radius:50%;
-border:2px solid #2e7d32;
-object-fit:cover;
+  width:46px; height:46px;
+  border-radius:50%;
+  border:2px solid #2e7d32;
+  object-fit:cover;
 }
+.title{ font-size:20px; font-weight:700; color:#2e7d32; }
 
-.title{
-font-size:22px;
-font-weight:bold;
-color:#2e7d32;
-}
-
-/* Sections */
-
+/* ── Sections ── */
 .section{
-background:white;
-margin:15px;
-padding:20px;
-border-radius:25px;
-box-shadow:0 3px 15px rgba(0,0,0,.08);
+  background:white;
+  margin:12px;
+  padding:18px;
+  border-radius:20px;
+  box-shadow:0 2px 12px rgba(0,0,0,.06);
 }
-
 .heading{
-font-size:22px;
-font-weight:bold;
-margin-bottom:15px;
+  font-size:17px;
+  font-weight:700;
+  color:#1a1a1a;
+  margin-bottom:14px;
+  display:flex;
+  align-items:center;
+  gap:7px;
 }
 
-/* Inputs */
-
-input,
-select{
-
-width:100%;
-padding:14px;
-margin-top:12px;
-border-radius:12px;
-border:1px solid #ddd;
-outline:none;
-font-size:16px;
-
+/* ── Inputs ── */
+input{
+  width:100%;
+  padding:13px 14px;
+  margin-top:10px;
+  border-radius:12px;
+  border:1.5px solid #e0e0e0;
+  outline:none;
+  font-size:15px;
+  color:#333;
+  background:#fafafa;
+  transition:border-color .2s;
 }
-
-input:focus,
-select:focus{
-
-border-color:#2e7d32;
-
-}
-
+input:focus{ border-color:#2e7d32; background:white; }
 
 .customSelect{
-
-width:100%;
-padding:14px;
-margin-top:12px;
-
-border:1px solid #ddd;
-border-radius:12px;
-
-background:white;
-cursor:pointer;
-
-display:flex;
-justify-content:space-between;
-align-items:center;
-
-transition:.4s;
-
+  width:100%;
+  padding:13px 14px;
+  margin-top:10px;
+  border:1.5px solid #e0e0e0;
+  border-radius:12px;
+  background:#fafafa;
+  cursor:pointer;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  font-size:15px;
+  color:#666;
+  transition:border-color .2s, color .2s;
+  user-select:none;
 }
+.customSelect.selected{ color:#1a1a1a; }
+.customSelect:hover{ border-color:#2e7d32; }
+.customSelect::after{ content:"▼"; font-size:11px; color:#999; }
 
-.customSelect:hover{
-
-border-color:#2e7d32;
-
-}
-
-.customSelect::after{
-
-content:"▼";
-font-size:12px;
-
-}
-
-
-/* Selector Popup */
-
+/* ── Select Popup ── */
 .selectPopup{
-
-position:fixed;
-
-top:0;
-left:0;
-
-width:100%;
-height:100%;
-
-display:none;
-
-justify-content:center;
-align-items:flex-end;
-
-background:rgba(0,0,0,.5);
-
-z-index:99999;
-
+  position:fixed; top:0; left:0;
+  width:100%; height:100%;
+  display:none;
+  justify-content:center;
+  align-items:flex-end;
+  background:rgba(0,0,0,.45);
+  z-index:99999;
 }
-
 .selectBox{
-
-width:100%;
-
-background:white;
-
-border-radius:25px 25px 0 0;
-
-padding:20px;
-
-max-height:70vh;
-
-overflow:auto;
-
-animation:popupUp .3s;
-
+  width:100%;
+  background:white;
+  border-radius:24px 24px 0 0;
+  padding:8px 0 20px;
+  max-height:72vh;
+  overflow-y:auto;
+  animation:popupUp .25s ease;
 }
-
+.selectBox-handle{
+  width:40px; height:4px;
+  background:#ddd;
+  border-radius:2px;
+  margin:12px auto 16px;
+}
 .option{
-
-padding:15px;
-
-border-bottom:1px solid #eee;
-
-cursor:pointer;
-
-transition:.3s;
-
+  padding:15px 20px;
+  font-size:15px;
+  color:#333;
+  border-bottom:1px solid #f2f2f2;
+  cursor:pointer;
+  transition:background .15s;
 }
-
-.option:hover{
-
-background:#f5f5f5;
-
-}
+.option:hover{ background:#f5faf5; color:#2e7d32; }
+.option:last-child{ border-bottom:none; }
 
 @keyframes popupUp{
-
-from{
-
-transform:translateY(100%);
-
+  from{ transform:translateY(100%); }
+  to{ transform:translateY(0); }
 }
 
-to{
+/* ── Product Card ── */
+.product-card{
+  display:flex;
+  align-items:center;
+  gap:14px;
+  padding:14px;
+  background:#f8faf8;
+  border-radius:16px;
+  border:1px solid #eaf2ea;
+  margin-bottom:12px;
+}
+.product-card:last-child{ margin-bottom:0; }
 
-transform:translateY(0);
-
+.product-img-wrap{
+  flex-shrink:0;
+  width:88px; height:88px;
+  border-radius:14px;
+  overflow:hidden;
+  background:white;
+  border:1px solid #e8e8e8;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.product-img-wrap img{
+  width:100%; height:100%;
+  object-fit:contain;
 }
 
+.product-info{ flex:1; min-width:0; }
+.product-name{
+  font-size:16px;
+  font-weight:700;
+  color:#1a1a1a;
+  margin-bottom:4px;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
 }
-/* Product */
-
-.product{
-
-display:flex;
-gap:15px;
-align-items:center;
-
+.product-price{
+  font-size:20px;
+  font-weight:700;
+  color:#2e7d32;
+  margin-bottom:6px;
 }
-
-.product img{
-
-width:100px;
-height:100px;
-border-radius:15px;
-object-fit:cover;
-border:1px solid #eee;
-
+.product-meta{
+  font-size:13px;
+  color:#777;
+  line-height:1.7;
 }
+.product-meta span{ display:block; }
 
-.details{
-
-flex:1;
-
+/* ── Summary ── */
+.summary-row{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:10px 0;
+  font-size:15px;
+  color:#444;
+  border-bottom:1px solid #f2f2f2;
 }
-
-.price{
-
-font-size:22px;
-font-weight:bold;
-color:#2e7d32;
-margin-top:5px;
-
+.summary-row:last-child{ border-bottom:none; }
+.summary-row.total-row{
+  font-size:19px;
+  font-weight:700;
+  color:#1a1a1a;
+  border-bottom:none;
+  padding-top:14px;
 }
-
-/* Summary */
-
-.row{
-
-display:flex;
-justify-content:space-between;
-margin:15px 0;
-font-size:18px;
-
+.total-amount{ color:#2e7d32; }
+.old-price{ text-decoration:line-through; color:#bbb; margin-right:6px; font-size:13px; }
+.free-tag{
+  background:#e8f5e9;
+  color:#2e7d32;
+  font-size:12px;
+  font-weight:700;
+  padding:2px 8px;
+  border-radius:20px;
 }
+.summary-divider{ border:none; border-top:2px solid #f0f0f0; margin:4px 0; }
 
-.total{
-
-font-size:28px;
-font-weight:bold;
-color:#2e7d32;
-
-}
-
-.old-price{
-
-text-decoration:line-through;
-color:red;
-
-}
-
-.free{
-
-color:#2e7d32;
-font-weight:bold;
-
-}
-
-/* Bottom Button */
-
+/* ── Bottom Button ── */
 .bottom{
-
-position:fixed;
-bottom:0;
-left:0;
-
-width:100%;
-padding:15px;
-background:white;
-
-box-shadow:0 -2px 10px rgba(0,0,0,.1);
-
+  position:fixed;
+  bottom:0; left:0;
+  width:100%;
+  padding:12px 14px;
+  background:white;
+  box-shadow:0 -2px 16px rgba(0,0,0,.08);
 }
-
 .place-btn{
-
-width:100%;
-padding:16px;
-border:none;
-border-radius:15px;
-
-background:#2e7d32;
-
-color:white;
-font-size:20px;
-font-weight:bold;
-
-cursor:pointer;
-
+  width:100%;
+  padding:16px;
+  border:none;
+  border-radius:14px;
+  background:linear-gradient(135deg,#2e7d32,#43a047);
+  color:white;
+  font-size:18px;
+  font-weight:700;
+  cursor:pointer;
+  letter-spacing:.3px;
+  box-shadow:0 4px 14px rgba(46,125,50,.35);
+  transition:opacity .2s;
 }
+.place-btn:active{ opacity:.85; }
 
-/* Popup */
-
+/* ── Alert Popup ── */
 .popup-container{
-
-position:fixed;
-
-top:0;
-left:0;
-
-width:100%;
-height:100%;
-
-display:none;
-
-justify-content:center;
-align-items:center;
-
-background:rgba(0,0,0,.5);
-
-z-index:9999;
-
+  position:fixed; top:0; left:0;
+  width:100%; height:100%;
+  display:none;
+  justify-content:center;
+  align-items:center;
+  background:rgba(0,0,0,.45);
+  z-index:9999;
 }
-
 .popup{
-
-background:white;
-width:300px;
-padding:25px;
-border-radius:20px;
-text-align:center;
-
+  background:white;
+  width:88%;
+  max-width:320px;
+  padding:28px 24px;
+  border-radius:22px;
+  text-align:center;
+  box-shadow:0 8px 32px rgba(0,0,0,.15);
 }
-
 .popup-logo{
-
-width:70px;
-height:70px;
-border-radius:50%;
-margin-bottom:15px;
-
+  width:64px; height:64px;
+  border-radius:50%;
+  margin-bottom:14px;
+  object-fit:cover;
 }
-
-.popup h2{
-
-margin-bottom:10px;
-color:#2e7d32;
-
-}
-
-.popup p{
-
-margin-bottom:20px;
-color:#666;
-
-}
-
+.popup h2{ margin-bottom:8px; color:#1a1a1a; font-size:18px; }
+.popup p{ margin-bottom:22px; color:#666; font-size:14px; line-height:1.5; }
 .popup button{
-
-padding:12px 30px;
-
-background:#2e7d32;
-color:white;
-
-border:none;
-border-radius:10px;
-
+  padding:12px 36px;
+  background:#2e7d32;
+  color:white;
+  border:none;
+  border-radius:12px;
+  font-size:15px;
+  font-weight:600;
+  cursor:pointer;
 }
 
 </style>
-
 </head>
-
 <body>
 
 <!-- Header -->
-
 <div class="header">
-
-<img
-src="logo.png"
-class="logo"
->
-
-<div class="title">
-
-Kodai Hills Spot
-
+  <img src="logo.png" class="logo">
+  <div class="title">Kodai Hills Spot</div>
 </div>
 
-</div>
-
-
-<!-- Address -->
-
+<!-- Delivery Address -->
 <div class="section">
-
-<div class="heading">
-
-📦 Delivery Address
-
+  <div class="heading">📦 Delivery Address</div>
+  <input id="name"    placeholder="Full Name">
+  <input id="phone"   placeholder="Phone Number" type="tel">
+  <div id="stateSelect"    class="customSelect">Select State</div>
+  <div id="districtSelect" class="customSelect">Select District</div>
+  <input id="area"    placeholder="Area">
+  <input id="street"  placeholder="Street">
+  <input id="pincode" placeholder="Pincode" type="number">
 </div>
 
-<input
-id="name"
-placeholder="Full Name"
->
-
-<input
-id="phone"
-placeholder="Phone Number"
->
-
-<div
-id="stateSelect"
-class="customSelect">
-
-Select State
-
-</div>
-
-<div
-id="districtSelect"
-class="customSelect">
-
-Select District
-
-</div>
-
-
-<input
-id="area"
-placeholder="Area"
->
-
-<input
-id="street"
-placeholder="Street"
->
-
-<input
-id="pincode"
-placeholder="Pincode"
->
-
-</div>
-
-
-
-<!-- Product -->
-
+<!-- Order Items -->
 <div class="section">
-
-<div class="heading">
-
-🛍 Order Item
-
+  <div class="heading">🛍️ Order Items</div>
+  <div id="orderItems">Loading...</div>
 </div>
 
-<div id="orderItems">
-
-Loading...
-
-</div>
-
-</div>
-
-
-
-<!-- Summary -->
-
+<!-- Order Summary -->
 <div class="section">
-
-<div class="heading">
-
-🧾 Order Summary
-
+  <div class="heading">🧾 Order Summary</div>
+  <div class="summary-row">
+    <span>Subtotal</span>
+    <span id="subtotal">₹0</span>
+  </div>
+  <div class="summary-row">
+    <span>Delivery</span>
+    <span>
+      <span class="old-price">₹50</span>
+      <span class="free-tag">FREE</span>
+    </span>
+  </div>
+  <hr class="summary-divider">
+  <div class="summary-row total-row">
+    <span>Total</span>
+    <span id="total" class="total-amount">₹0</span>
+  </div>
 </div>
 
-<div class="row">
-
-<span>
-Subtotal
-</span>
-
-<span id="subtotal">
-
-₹0
-
-</span>
-
-</div>
-
-<div class="row">
-
-<span>
-Delivery
-</span>
-
-<span>
-
-<span class="old-price">
-
-₹50
-
-</span>
-
-<span class="free">
-
-FREE
-
-</span>
-
-</span>
-
-</div>
-
-<hr>
-
-<div class="row total">
-
-<span>
-
-Total
-
-</span>
-
-<span id="total">
-
-₹0
-
-</span>
-
-</div>
-
-</div>
-
-
-<!-- Button -->
-
+<!-- Place Order Button -->
 <div class="bottom">
-
-<button
-class="place-btn"
-id="placeOrder"
->
-
-Place Order →
-
-</button>
-
+  <button class="place-btn" id="placeOrder">Place Order →</button>
 </div>
 
-
-
-<!-- Popup -->
-
-<div
-id="popupBox"
-class="popup-container"
->
-
-<div class="popup">
-
-<img
-src="logo.png"
-class="popup-logo"
->
-
-<h2 id="popupTitle"></h2>
-
-<p id="popupMessage"></p>
-
-<button onclick="closePopup()">
-
-OK
-
-</button>
-
+<!-- Alert Popup -->
+<div id="popupBox" class="popup-container">
+  <div class="popup">
+    <img src="logo.png" class="popup-logo">
+    <h2 id="popupTitle"></h2>
+    <p id="popupMessage"></p>
+    <button onclick="closePopup()">OK</button>
+  </div>
 </div>
 
+<!-- Select Popup -->
+<div id="selectPopup" class="selectPopup">
+  <div class="selectBox">
+    <div class="selectBox-handle"></div>
+    <div id="optionList"></div>
+  </div>
 </div>
-
-
-<!-- Select Popup — placed BEFORE the scripts that reference it -->
-<div
-id="selectPopup"
-class="selectPopup">
-
-<div class="selectBox">
-
-<div
-id="optionList">
-
-</div>
-
-</div>
-
-</div>
-
 
 <script>
-
-/* ── Popup helpers (defined first so inline scripts & module can use them) ── */
-
+/* ── Global helpers ── */
 function showPopup(title, message, type) {
-    type = type || "info";
-    var popupLogo = document.querySelector(".popup-logo");
-    popupLogo.src = type === "success"
-        ? "https://cdn-icons-png.flaticon.com/512/845/845646.png"
-        : type === "error"
-        ? "https://cdn-icons-png.flaticon.com/512/1828/1828843.png"
-        : "logo.png";
-    document.getElementById("popupTitle").innerText = title;
-    document.getElementById("popupMessage").innerText = message;
-    document.getElementById("popupBox").style.display = "flex";
+  type = type || "info";
+  var logo = document.querySelector(".popup-logo");
+  logo.src = type === "success"
+    ? "https://cdn-icons-png.flaticon.com/512/845/845646.png"
+    : type === "error"
+    ? "https://cdn-icons-png.flaticon.com/512/1828/1828843.png"
+    : "logo.png";
+  document.getElementById("popupTitle").innerText   = title;
+  document.getElementById("popupMessage").innerText = message;
+  document.getElementById("popupBox").style.display = "flex";
 }
-
-window.showPopup = showPopup;
-
-window.closePopup = function() {
-    document.getElementById("popupBox").style.display = "none";
-};
-
+window.showPopup  = showPopup;
+window.closePopup = function(){ document.getElementById("popupBox").style.display = "none"; };
 
 /* ── District data ── */
-
-// SOUTH → NORTH order
 const districtData = {
-
-"Tamil Nadu":[
-"Ariyalur","Chengalpattu","Chennai","Coimbatore",
-"Cuddalore","Dharmapuri","Dindigul","Erode",
-"Kallakurichi","Kanchipuram","Kanyakumari",
-"Karur","Krishnagiri","Madurai","Mayiladuthurai",
-"Nagapattinam","Namakkal","Nilgiris",
-"Perambalur","Pudukkottai","Ramanathapuram",
-"Ranipet","Salem","Sivagangai","Tenkasi",
-"Thanjavur","Theni","Thoothukudi",
-"Tiruchirappalli","Tirunelveli","Tirupathur",
-"Tiruppur","Tiruvallur","Tiruvannamalai",
-"Tiruvarur","Vellore","Viluppuram",
-"Virudhunagar"
-],
-
-"Kerala":[
-"Alappuzha","Ernakulam","Idukki",
-"Kannur","Kasaragod","Kollam",
-"Kottayam","Kozhikode","Malappuram",
-"Palakkad","Pathanamthitta",
-"Thiruvananthapuram","Thrissur","Wayanad"
-],
-
-"Karnataka":[
-"Bagalkot","Bangalore Rural","Bangalore Urban",
-"Belagavi","Bellary","Bidar","Chamarajanagar",
-"Chikkaballapur","Chikkamagaluru","Chitradurga",
-"Dakshina Kannada","Davanagere","Dharwad",
-"Gadag","Hassan","Haveri","Kalaburagi",
-"Kodagu","Kolar","Koppal","Mandya",
-"Mysore","Raichur","Ramanagara","Shimoga",
-"Tumkur","Udupi","Uttara Kannada","Vijayapura"
-],
-
-"Andhra Pradesh":[
-"Anantapur","Annamayya","Chittoor",
-"East Godavari","Eluru","Guntur",
-"Kadapa","Kakinada","Krishna",
-"Kurnool","Nandyal","Nellore",
-"Prakasam","Srikakulam","Tirupati",
-"Visakhapatnam","Vizianagaram",
-"West Godavari"
-],
-
-"Telangana":[
-"Adilabad","Bhadradri Kothagudem",
-"Hyderabad","Jagtial","Karimnagar",
-"Khammam","Mahabubnagar","Medak",
-"Nalgonda","Nizamabad",
-"Rangareddy","Warangal"
-],
-
-"Puducherry":[
-"Puducherry","Karaikal",
-"Mahe","Yanam"
-],
-
-"Lakshadweep":[
-"Kavaratti"
-],
-
-
-// NORTH INDIA
-
-"Delhi":[
-"Central Delhi","East Delhi",
-"New Delhi","North Delhi",
-"South Delhi","West Delhi"
-],
-
-"Haryana":[
-"Ambala","Faridabad","Gurugram",
-"Hisar","Karnal","Kurukshetra",
-"Panipat","Rohtak","Sonipat"
-],
-
-"Punjab":[
-"Amritsar","Bathinda",
-"Jalandhar","Ludhiana",
-"Mohali","Patiala"
-],
-
-"Himachal Pradesh":[
-"Bilaspur","Chamba",
-"Hamirpur","Kangra",
-"Kullu","Mandi",
-"Shimla","Solan"
-],
-
-"Uttarakhand":[
-"Almora","Dehradun",
-"Haridwar","Nainital",
-"Pithoragarh","Udham Singh Nagar"
-],
-
-"Jammu and Kashmir":[
-"Anantnag","Baramulla",
-"Jammu","Pulwama",
-"Srinagar"
-],
-
-"Ladakh":[
-"Kargil","Leh"
-],
-
-
-// WEST INDIA
-
-"Maharashtra":[
-"Ahmednagar","Aurangabad",
-"Kolhapur","Mumbai",
-"Nagpur","Nashik",
-"Pune","Solapur","Thane"
-],
-
-"Gujarat":[
-"Ahmedabad","Amreli",
-"Anand","Bhavnagar",
-"Gandhinagar","Jamnagar",
-"Kutch","Rajkot",
-"Surat","Vadodara"
-],
-
-"Goa":[
-"North Goa",
-"South Goa"
-],
-
-"Rajasthan":[
-"Ajmer","Alwar",
-"Bikaner","Jaipur",
-"Jodhpur","Kota",
-"Udaipur"
-],
-
-
-// CENTRAL INDIA
-
-"Madhya Pradesh":[
-"Bhopal","Gwalior",
-"Indore","Jabalpur",
-"Rewa","Sagar",
-"Ujjain"
-],
-
-"Chhattisgarh":[
-"Bilaspur","Durg",
-"Raipur","Raigarh",
-"Rajnandgaon"
-],
-
-
-// EAST INDIA
-
-"Bihar":[
-"Bhagalpur","Darbhanga",
-"Gaya","Muzaffarpur",
-"Patna","Purnia"
-],
-
-"Jharkhand":[
-"Bokaro","Dhanbad",
-"Hazaribagh","Ranchi"
-],
-
-"Odisha":[
-"Balasore","Cuttack",
-"Ganjam","Khordha",
-"Puri","Sambalpur"
-],
-
-"West Bengal":[
-"Asansol","Darjeeling",
-"Howrah","Kolkata",
-"Malda","Siliguri"
-],
-
-
-// NORTHEAST
-
-"Assam":[
-"Barpeta","Cachar",
-"Dibrugarh","Guwahati",
-"Jorhat","Nagaon"
-],
-
-"Arunachal Pradesh":[
-"Tawang","Papum Pare"
-],
-
-"Manipur":[
-"Imphal East",
-"Imphal West",
-"Thoubal"
-],
-
-"Meghalaya":[
-"East Khasi Hills",
-"Ri-Bhoi"
-],
-
-"Mizoram":[
-"Aizawl","Champhai"
-],
-
-"Nagaland":[
-"Dimapur",
-"Kohima"
-],
-
-"Sikkim":[
-"East Sikkim",
-"North Sikkim",
-"South Sikkim",
-"West Sikkim"
-],
-
-"Tripura":[
-"Agartala",
-"Dhalai"
-],
-
-"Andaman and Nicobar Islands":[
-"Nicobar",
-"Port Blair"
-]
-
+"Tamil Nadu":["Ariyalur","Chengalpattu","Chennai","Coimbatore","Cuddalore","Dharmapuri","Dindigul","Erode","Kallakurichi","Kanchipuram","Kanyakumari","Karur","Krishnagiri","Madurai","Mayiladuthurai","Nagapattinam","Namakkal","Nilgiris","Perambalur","Pudukkottai","Ramanathapuram","Ranipet","Salem","Sivagangai","Tenkasi","Thanjavur","Theni","Thoothukudi","Tiruchirappalli","Tirunelveli","Tirupathur","Tiruppur","Tiruvallur","Tiruvannamalai","Tiruvarur","Vellore","Viluppuram","Virudhunagar"],
+"Kerala":["Alappuzha","Ernakulam","Idukki","Kannur","Kasaragod","Kollam","Kottayam","Kozhikode","Malappuram","Palakkad","Pathanamthitta","Thiruvananthapuram","Thrissur","Wayanad"],
+"Karnataka":["Bagalkot","Bangalore Rural","Bangalore Urban","Belagavi","Bellary","Bidar","Chamarajanagar","Chikkaballapur","Chikkamagaluru","Chitradurga","Dakshina Kannada","Davanagere","Dharwad","Gadag","Hassan","Haveri","Kalaburagi","Kodagu","Kolar","Koppal","Mandya","Mysore","Raichur","Ramanagara","Shimoga","Tumkur","Udupi","Uttara Kannada","Vijayapura"],
+"Andhra Pradesh":["Anantapur","Annamayya","Chittoor","East Godavari","Eluru","Guntur","Kadapa","Kakinada","Krishna","Kurnool","Nandyal","Nellore","Prakasam","Srikakulam","Tirupati","Visakhapatnam","Vizianagaram","West Godavari"],
+"Telangana":["Adilabad","Bhadradri Kothagudem","Hyderabad","Jagtial","Karimnagar","Khammam","Mahabubnagar","Medak","Nalgonda","Nizamabad","Rangareddy","Warangal"],
+"Puducherry":["Puducherry","Karaikal","Mahe","Yanam"],
+"Lakshadweep":["Kavaratti"],
+"Delhi":["Central Delhi","East Delhi","New Delhi","North Delhi","South Delhi","West Delhi"],
+"Haryana":["Ambala","Faridabad","Gurugram","Hisar","Karnal","Kurukshetra","Panipat","Rohtak","Sonipat"],
+"Punjab":["Amritsar","Bathinda","Jalandhar","Ludhiana","Mohali","Patiala"],
+"Himachal Pradesh":["Bilaspur","Chamba","Hamirpur","Kangra","Kullu","Mandi","Shimla","Solan"],
+"Uttarakhand":["Almora","Dehradun","Haridwar","Nainital","Pithoragarh","Udham Singh Nagar"],
+"Jammu and Kashmir":["Anantnag","Baramulla","Jammu","Pulwama","Srinagar"],
+"Ladakh":["Kargil","Leh"],
+"Maharashtra":["Ahmednagar","Aurangabad","Kolhapur","Mumbai","Nagpur","Nashik","Pune","Solapur","Thane"],
+"Gujarat":["Ahmedabad","Amreli","Anand","Bhavnagar","Gandhinagar","Jamnagar","Kutch","Rajkot","Surat","Vadodara"],
+"Goa":["North Goa","South Goa"],
+"Rajasthan":["Ajmer","Alwar","Bikaner","Jaipur","Jodhpur","Kota","Udaipur"],
+"Madhya Pradesh":["Bhopal","Gwalior","Indore","Jabalpur","Rewa","Sagar","Ujjain"],
+"Chhattisgarh":["Bilaspur","Durg","Raipur","Raigarh","Rajnandgaon"],
+"Bihar":["Bhagalpur","Darbhanga","Gaya","Muzaffarpur","Patna","Purnia"],
+"Jharkhand":["Bokaro","Dhanbad","Hazaribagh","Ranchi"],
+"Odisha":["Balasore","Cuttack","Ganjam","Khordha","Puri","Sambalpur"],
+"West Bengal":["Asansol","Darjeeling","Howrah","Kolkata","Malda","Siliguri"],
+"Assam":["Barpeta","Cachar","Dibrugarh","Guwahati","Jorhat","Nagaon"],
+"Arunachal Pradesh":["Tawang","Papum Pare"],
+"Manipur":["Imphal East","Imphal West","Thoubal"],
+"Meghalaya":["East Khasi Hills","Ri-Bhoi"],
+"Mizoram":["Aizawl","Champhai"],
+"Nagaland":["Dimapur","Kohima"],
+"Sikkim":["East Sikkim","North Sikkim","South Sikkim","West Sikkim"],
+"Tripura":["Agartala","Dhalai"],
+"Andaman and Nicobar Islands":["Nicobar","Port Blair"]
 };
 
-
 /* ── Select popup logic ── */
+const stateSelectEl    = document.getElementById("stateSelect");
+const districtSelectEl = document.getElementById("districtSelect");
+const selectPopup      = document.getElementById("selectPopup");
+const optionList       = document.getElementById("optionList");
 
-const stateSelect    = document.getElementById("stateSelect");
-const districtSelect = document.getElementById("districtSelect");
-const selectPopup    = document.getElementById("selectPopup");
-const optionList     = document.getElementById("optionList");
-
-let selectedState    = "";
-let selectedDistrict = "";
-
-// Expose to module script (checkout.js reads these via window)
+let selectedState = "", selectedDistrict = "";
 Object.defineProperty(window, "selectedState",    { get: () => selectedState });
 Object.defineProperty(window, "selectedDistrict", { get: () => selectedDistrict });
 
 function openSelect(list, type) {
-    selectPopup.style.display = "flex";
-    optionList.innerHTML = "";
-
-    list.forEach(function(item) {
-        const div = document.createElement("div");
-        div.className = "option";
-        div.innerText = item;
-
-        div.onclick = function() {
-            if (type === "state") {
-                selectedState    = item;
-                stateSelect.childNodes[0].textContent = item;
-                selectedDistrict = "";
-                districtSelect.childNodes[0].textContent = "Select District";
-            } else {
-                selectedDistrict = item;
-                districtSelect.childNodes[0].textContent = item;
-            }
-            selectPopup.style.display = "none";
-        };
-
-        optionList.appendChild(div);
-    });
+  selectPopup.style.display = "flex";
+  optionList.innerHTML = "";
+  list.forEach(function(item) {
+    const div = document.createElement("div");
+    div.className = "option";
+    div.innerText = item;
+    div.onclick = function() {
+      if (type === "state") {
+        selectedState = item;
+        stateSelectEl.innerText = item;
+        stateSelectEl.classList.add("selected");
+        selectedDistrict = "";
+        districtSelectEl.innerText = "Select District";
+        districtSelectEl.classList.remove("selected");
+      } else {
+        selectedDistrict = item;
+        districtSelectEl.innerText = item;
+        districtSelectEl.classList.add("selected");
+      }
+      selectPopup.style.display = "none";
+    };
+    optionList.appendChild(div);
+  });
 }
 
-stateSelect.onclick = function() {
-    openSelect(Object.keys(districtData), "state");
+stateSelectEl.onclick = function() {
+  openSelect(Object.keys(districtData), "state");
 };
-
-districtSelect.onclick = function() {
-    if (!selectedState) {
-        showPopup("Select State", "Please select state first", "error");
-        return;
-    }
-    openSelect(districtData[selectedState], "district");
+districtSelectEl.onclick = function() {
+  if (!selectedState) {
+    showPopup("Select State", "Please select a state first", "error");
+    return;
+  }
+  openSelect(districtData[selectedState], "district");
 };
-
-/* close popup on outside click */
 selectPopup.onclick = function(e) {
-    if (e.target === selectPopup) {
-        selectPopup.style.display = "none";
-    }
+  if (e.target === selectPopup) selectPopup.style.display = "none";
 };
-
 </script>
 
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
-
-<script
-type="module"
-src="js/checkout.js"
-></script>
+<script type="module" src="js/checkout.js"></script>
 </body>
 </html>
