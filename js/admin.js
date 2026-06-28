@@ -34,13 +34,6 @@ const STATUS_OPTIONS = [
 
 
 
-/* ==============================
-   Users Button
-============================== */
-
-document.getElementById("userBtn").onclick = () => {
-  window.location = "srkxditit.html";
-};
 
 
 /* ==============================
@@ -48,7 +41,7 @@ document.getElementById("userBtn").onclick = () => {
 ============================== */
 
 document.getElementById("userBtn").onclick = () => {
-  window.location = "users.html";
+  window.location = "srkxdutit.html";
 };
 
 
