@@ -1,13 +1,16 @@
 import { auth, db } from "./firebase.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
 import {
-    collection, query, where, getDocs, addDoc, doc, getDoc
+    collection, query, where, getDocs, addDoc, doc, getDoc, setDoc
 } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
 let currentUser   = null;
 let checkoutItems = [];
 let totalAmount   = 0;
-let deliveryCharge = 0;   // ← determined per-order
+let deliveryCharge = 0;
+
+/* Holds the resolved delivery address for the order */
+let resolvedAddress = null;
 
 /* ── Delegates to global showPopup defined in checkout.html ── */
 function showPopup(title, message, type = "info") {
@@ -29,9 +32,88 @@ function updateDeliveryRow(isFree) {
         deliveryCell.innerHTML = `<span style="font-weight:700;color:#c62828;">₹50</span>`;
     }
 
-    /* Recalculate total */
     const grandTotal = totalAmount + deliveryCharge;
     document.getElementById("total").innerText = `₹${grandTotal}`;
+}
+
+/* ─────────────── Load & display saved address ─────────────── */
+async function loadSavedAddress(user) {
+    const skeleton  = document.getElementById("addressSkeleton");
+    const savedCard = document.getElementById("savedAddressCard");
+    const form      = document.getElementById("addressForm");
+
+    try {
+        const userSnap = await getDoc(doc(db, "Users", user.uid));
+
+        skeleton.style.display = "none";
+
+        if (userSnap.exists()) {
+            const data = userSnap.data();
+            const addr = data.address || {};
+
+            const hasAddress =
+                addr.state && addr.district && addr.area && addr.street && addr.pincode;
+
+            if (hasAddress) {
+                /* Show saved address card */
+                document.getElementById("savedName").innerText =
+                    data.name || user.displayName || "—";
+                document.getElementById("savedPhone").innerText =
+                    "📞 " + (data.phone || "—");
+                document.getElementById("savedLines").innerHTML =
+                    `${addr.area}, ${addr.street}<br>
+                     ${addr.district}, ${addr.state} – ${addr.pincode}`;
+
+                savedCard.style.display = "block";
+                form.style.display = "none";
+
+                /* Cache as resolved address */
+                resolvedAddress = {
+                    name:     data.name     || user.displayName || "",
+                    phone:    data.phone    || "",
+                    email:    data.email    || user.email       || "",
+                    state:    addr.state,
+                    district: addr.district,
+                    area:     addr.area,
+                    street:   addr.street,
+                    pincode:  addr.pincode
+                };
+                return;
+            }
+        }
+
+        /* No saved address — show form */
+        savedCard.style.display = "none";
+        form.style.display      = "block";
+
+        /* Pre-fill email if available */
+        const emailField = document.getElementById("email");
+        if (emailField && user.email) emailField.value = user.email;
+
+    } catch (err) {
+        console.error("Error loading saved address:", err);
+        skeleton.style.display = "none";
+        form.style.display     = "block";
+    }
+}
+
+/* ─────────────── Collect address from form ─────────────── */
+function collectFormAddress() {
+    const name     = document.getElementById("name").value.trim();
+    const phone    = document.getElementById("phone").value.trim();
+    const email    = document.getElementById("email").value.trim();
+    const state    = window.selectedState;
+    const district = window.selectedDistrict;
+    const area     = document.getElementById("area").value.trim();
+    const street   = document.getElementById("street").value.trim();
+    const pincode  = document.getElementById("pincode").value.trim();
+
+    if (!name || !phone || !email || !state || !district || !area || !street || !pincode) {
+        showPopup("Missing Information", "Please fill in all delivery details.", "error");
+        return null;
+    }
+
+    return { name, phone, email, state, district, area, street, pincode };
 }
 
 /* ─────────────── Load checkout items ─────────────── */
@@ -46,15 +128,9 @@ async function loadCheckout() {
 
     try {
         if (mode === "buyNow") {
-            /*
-             * Direct Buy Now — single item stored by products.js / home.js
-             * Also fetch the product doc from Firestore to get freeDelivery flag.
-             */
             const raw = sessionStorage.getItem("buyNowItem");
             if (raw) {
                 const item = JSON.parse(raw);
-
-                /* Fetch freeDelivery from Firestore */
                 try {
                     const productSnap = await getDoc(doc(db, "Products", item.productId));
                     if (productSnap.exists()) {
@@ -63,21 +139,18 @@ async function loadCheckout() {
                 } catch (e) {
                     item.freeDelivery = false;
                 }
-
                 checkoutItems = [item];
             }
             sessionStorage.removeItem("buyNowItem");
             sessionStorage.removeItem("checkoutMode");
 
         } else if (currentUser) {
-            /* Normal cart flow — load full Firebase Cart */
             const q        = query(
                 collection(db, "Cart"),
                 where("uid", "==", currentUser.uid)
             );
             const snapshot = await getDocs(q);
 
-            /* For each cart item, also fetch the product to get freeDelivery */
             const fetchPromises = snapshot.docs.map(async (d) => {
                 const item = d.data();
                 try {
@@ -94,10 +167,8 @@ async function loadCheckout() {
             checkoutItems = await Promise.all(fetchPromises);
 
         } else {
-            /* Guest fallback */
             const raw = JSON.parse(localStorage.getItem("guestCart")) || [];
 
-            /* Fetch freeDelivery for each guest cart item */
             const fetchPromises = raw.map(async (item) => {
                 try {
                     const productSnap = await getDoc(doc(db, "Products", item.productId));
@@ -153,11 +224,6 @@ async function loadCheckout() {
         orderItems.innerHTML = html;
         document.getElementById("subtotal").innerText = `₹${totalAmount}`;
 
-        /*
-         * Delivery logic:
-         * FREE if ALL items in the order have freeDelivery === true.
-         * ₹50 if even ONE item does not have free delivery.
-         */
         const allFree = checkoutItems.every(item => item.freeDelivery === true);
         updateDeliveryRow(allFree);
 
@@ -169,33 +235,61 @@ async function loadCheckout() {
 }
 
 /* ─────────────── Auth ─────────────── */
-onAuthStateChanged(auth, (user) => {
+onAuthStateChanged(auth, async (user) => {
     if (!user) { window.location = "login.html"; return; }
     currentUser = user;
+
+    /* Load address first, then items in parallel */
+    await loadSavedAddress(user);
     loadCheckout();
 });
 
 /* ─────────────── Place Order ─────────────── */
 document.getElementById("placeOrder").onclick = async () => {
 
-    const name     = document.getElementById("name").value.trim();
-    const phone    = document.getElementById("phone").value.trim();
-    const state    = window.selectedState;
-    const district = window.selectedDistrict;
-    const area     = document.getElementById("area").value.trim();
-    const street   = document.getElementById("street").value.trim();
-    const pincode  = document.getElementById("pincode").value.trim();
+    /* Decide which address to use */
+    const form      = document.getElementById("addressForm");
+    const formVisible = form && form.style.display !== "none";
 
-    if (!name || !phone || !state || !district || !area || !street || !pincode) {
-        showPopup("Missing Information", "Please fill in all delivery details.", "error");
-        return;
+    let addr;
+    if (formVisible || window.usingNewAddress) {
+        /* User filled in the form (new or changed address) */
+        addr = collectFormAddress();
+        if (!addr) return; /* validation failed */
+    } else {
+        /* Use cached saved address */
+        addr = resolvedAddress;
+        if (!addr) {
+            showPopup("Missing Information", "Please provide a delivery address.", "error");
+            return;
+        }
     }
+
     if (checkoutItems.length === 0) {
         showPopup("Cart Empty", "No items to order.", "error");
         return;
     }
 
     const grandTotal = totalAmount + deliveryCharge;
+
+    /* Save / update address in Firestore for next time */
+    try {
+        await setDoc(doc(db, "Users", currentUser.uid), {
+            name:  addr.name,
+            phone: addr.phone,
+            email: addr.email,
+            uid:   currentUser.uid,
+            address: {
+                state:    addr.state,
+                district: addr.district,
+                area:     addr.area,
+                street:   addr.street,
+                pincode:  addr.pincode
+            }
+        }, { merge: true });
+    } catch (e) {
+        console.warn("Could not save address:", e);
+    }
 
     const options = {
         key:         "rzp_test_T5tWAjBQVPNBI4",
@@ -204,7 +298,7 @@ document.getElementById("placeOrder").onclick = async () => {
         name:        "Kodai Hills Spot",
         description: "Order Payment",
         image:       "logo.png",
-        prefill:     { name, contact: phone, email: currentUser?.email || "" },
+        prefill:     { name: addr.name, contact: addr.phone, email: addr.email },
         theme:       { color: "#2e7d32" },
 
         handler: async function(response) {
@@ -217,8 +311,14 @@ document.getElementById("placeOrder").onclick = async () => {
                         quantity:      item.quantity,
                         price:         item.unitPrice || item.price,
                         pack:          item.selectedSize || item.pack || "-",
-                        customerName:  name,
-                        phone, state, district, area, street, pincode,
+                        customerName:  addr.name,
+                        phone:         addr.phone,
+                        email:         addr.email,
+                        state:         addr.state,
+                        district:      addr.district,
+                        area:          addr.area,
+                        street:        addr.street,
+                        pincode:       addr.pincode,
                         deliveryCharge,
                         grandTotal,
                         paymentId:     response.razorpay_payment_id,
