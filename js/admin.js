@@ -513,4 +513,6 @@ onAuthStateChanged(auth, (user) => {
   loadStats();
   loadProducts();
   loadOrders();
-  loadC
+  loadCategoryChips();
+
+}); /* end onAuthStateChanged */
