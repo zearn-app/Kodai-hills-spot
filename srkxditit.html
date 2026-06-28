@@ -1,289 +1,90 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-
-<title>Kodai Hills Spot Users</title>
-
+<title>Users — Admin</title>
 <style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif;}
+body{display:none;background:#f0f4f0;padding:16px 16px 60px;}
 
-*{
-  margin:0;
-  padding:0;
-  box-sizing:border-box;
-  font-family:Arial,sans-serif;
+#authLoader{
+  position:fixed;top:0;left:0;width:100%;height:100%;
+  background:#f0f4f0;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;z-index:9999;
 }
+.loader-spinner{width:32px;height:32px;border:3px solid #c8e6c9;border-top-color:#2e7d32;border-radius:50%;animation:spin .7s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.loader-text{font-size:14px;color:#888;margin-top:10px;}
 
-body{
-  background:#f5f5f5;
-  padding:20px;
-  padding-bottom:40px;
-}
+.navbar{background:white;padding:14px 16px;border-radius:16px;display:flex;align-items:center;gap:12px;margin-bottom:20px;box-shadow:0 2px 10px rgba(0,0,0,.08);}
+.back-btn{background:#f0f4f0;border:none;border-radius:10px;padding:8px 12px;font-size:18px;cursor:pointer;color:#2e7d32;font-weight:700;}
+.navbar-title{font-size:17px;font-weight:700;color:#1a1a1a;}
 
-.navbar{
-  background:white;
-  padding:15px;
-  border-radius:15px;
-  display:flex;
-  align-items:center;
-  gap:10px;
-  margin-bottom:20px;
-  box-shadow:0 2px 10px rgba(0,0,0,.1);
-}
+.stats{background:white;border-radius:14px;padding:18px;text-align:center;margin-bottom:16px;box-shadow:0 2px 8px rgba(0,0,0,.07);}
+.stats p{font-size:12px;color:#888;text-transform:uppercase;letter-spacing:.5px;}
+.stats h1{font-size:36px;font-weight:800;color:#2e7d32;}
 
-.logo{
-  width:50px;
-  height:50px;
-  border-radius:50%;
-}
+.search{width:100%;padding:13px 14px;border:1.5px solid #e0e0e0;border-radius:12px;font-size:14px;outline:none;margin-bottom:16px;background:white;}
+.search:focus{border-color:#2e7d32;}
 
-.title{
-  font-size:22px;
-  font-weight:bold;
-  color:#2e7d32;
-}
+.user-card{background:white;padding:14px;margin-bottom:12px;border-radius:14px;box-shadow:0 2px 8px rgba(0,0,0,.07);cursor:pointer;}
+.user-card h3{font-size:15px;font-weight:700;color:#2e7d32;margin-bottom:6px;}
+.user-card .info{font-size:13px;color:#555;margin-bottom:3px;}
+.user-card .uid{font-size:11px;color:#bbb;margin-top:4px;}
+.del-btn{width:100%;padding:10px;margin-top:10px;background:red;color:white;border:none;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;}
 
-.stats{
-  background:white;
-  padding:20px;
-  border-radius:15px;
-  text-align:center;
-  margin-bottom:20px;
-  box-shadow:0 2px 10px rgba(0,0,0,.1);
-}
-
-.count{
-  font-size:35px;
-  font-weight:bold;
-  color:#2e7d32;
-}
-
-.search{
-  width:100%;
-  padding:15px;
-  border:none;
-  outline:none;
-  border-radius:10px;
-  margin-bottom:20px;
-  box-shadow:0 2px 10px rgba(0,0,0,.1);
-  font-size:15px;
-}
-
-/* User card */
-.user{
-  background:white;
-  padding:15px;
-  margin-bottom:15px;
-  border-radius:15px;
-  box-shadow:0 2px 10px rgba(0,0,0,.1);
-  cursor:pointer;
-  transition:.15s;
-}
-.user:active{ transform:scale(.98); }
-
-.user h3{
-  color:#2e7d32;
-  margin-bottom:6px;
-}
-
-.info{
-  margin-top:6px;
-  color:#555;
-  font-size:14px;
-}
-
-.delete{
-  width:100%;
-  padding:12px;
-  margin-top:15px;
-  border:none;
-  border-radius:10px;
-  background:red;
-  color:white;
-  cursor:pointer;
-  font-size:14px;
-  font-weight:600;
-}
-
-/* ── User Detail Popup ── */
-.popup-overlay{
-  display:none;
-  position:fixed;
-  top:0; left:0;
-  width:100%; height:100%;
-  background:rgba(0,0,0,.5);
-  justify-content:center;
-  align-items:flex-end;
-  z-index:999;
-}
-.popup-overlay.open{ display:flex; }
-
-.popup-sheet{
-  background:white;
-  width:100%;
-  max-height:90vh;
-  overflow-y:auto;
-  border-radius:28px 28px 0 0;
-  padding:20px;
-  animation:slideUp .3s ease;
-}
-
-@keyframes slideUp{
-  from{ transform:translateY(100%); }
-  to{ transform:translateY(0); }
-}
-
-.sheet-handle{
-  width:40px; height:4px;
-  background:#ddd;
-  border-radius:2px;
-  margin:0 auto 18px;
-}
-
-.sheet-close{
-  float:right;
-  font-size:24px;
-  cursor:pointer;
-  color:#999;
-  line-height:1;
-}
-
-/* Avatar circle */
-.avatar{
-  width:70px; height:70px;
-  border-radius:50%;
-  background:#e8f5e9;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:30px;
-  margin:10px auto 16px;
-}
-
-.popup-name{
-  text-align:center;
-  font-size:20px;
-  font-weight:700;
-  color:#1a1a1a;
-  margin-bottom:4px;
-}
-
-.popup-id{
-  text-align:center;
-  font-size:12px;
-  color:#aaa;
-  margin-bottom:20px;
-  word-break:break-all;
-}
-
-.detail-row{
-  display:flex;
-  align-items:center;
-  gap:12px;
-  padding:12px 14px;
-  background:#f9f9f9;
-  border-radius:12px;
-  margin-bottom:10px;
-}
-
-.detail-icon{ font-size:20px; flex-shrink:0; }
-
-.detail-info{ flex:1; }
-.detail-label{
-  font-size:11px;
-  color:#aaa;
-  margin-bottom:2px;
-  text-transform:uppercase;
-  letter-spacing:.5px;
-}
-.detail-value{
-  font-size:15px;
-  color:#1a1a1a;
-  font-weight:600;
-  word-break:break-all;
-}
-
-.popup-delete{
-  width:100%;
-  padding:14px;
-  margin-top:18px;
-  border:none;
-  border-radius:14px;
-  background:red;
-  color:white;
-  font-size:15px;
-  font-weight:700;
-  cursor:pointer;
-}
-.popup-delete:active{ opacity:.8; }
-
+.popup-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.5);justify-content:center;align-items:flex-end;z-index:999;}
+.popup-overlay.open{display:flex;}
+.popup-sheet{background:white;width:100%;max-height:92vh;overflow-y:auto;padding:20px;border-radius:24px 24px 0 0;animation:slideUp .3s ease;}
+@keyframes slideUp{from{transform:translateY(100%);}to{transform:translateY(0);}}
+.sheet-handle{width:40px;height:4px;background:#ddd;border-radius:2px;margin:0 auto 16px;}
+.sheet-close{float:right;font-size:22px;cursor:pointer;color:#aaa;background:none;border:none;}
+.avatar{width:68px;height:68px;border-radius:50%;background:#e8f5e9;display:flex;align-items:center;justify-content:center;font-size:28px;margin:8px auto 12px;}
+.pop-name{text-align:center;font-size:19px;font-weight:700;color:#1a1a1a;margin-bottom:3px;}
+.pop-id{text-align:center;font-size:11px;color:#aaa;margin-bottom:18px;word-break:break-all;}
+.detail-row{display:flex;align-items:center;gap:12px;padding:12px;background:#f8f8f8;border-radius:12px;margin-bottom:8px;}
+.detail-icon{font-size:20px;flex-shrink:0;}
+.detail-label{font-size:11px;color:#aaa;text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px;}
+.detail-value{font-size:14px;color:#1a1a1a;font-weight:600;word-break:break-all;}
+.pop-del{width:100%;padding:13px;margin-top:16px;background:red;color:white;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;}
 </style>
 </head>
 <body>
 
-<div class="navbar">
-  <img src="logo.png" class="logo" onerror="this.style.display='none'">
-  <div class="title">Users Management</div>
+<div id="authLoader">
+  <div class="loader-spinner"></div>
+  <div class="loader-text">Checking access…</div>
 </div>
+
+<nav class="navbar">
+  <button class="back-btn" onclick="window.location='admin.html'">‹</button>
+  <span class="navbar-title">Users</span>
+</nav>
 
 <div class="stats">
-  <div>Total Users</div>
-  <div class="count" id="totalUsers">0</div>
+  <p>Total Users</p>
+  <h1 id="totalUsers">—</h1>
 </div>
 
-<input id="searchInput" class="search" placeholder="🔍 Search Users">
+<input class="search" id="searchInput" placeholder="🔍 Search users…">
+<div id="users"><p style="color:#aaa;padding:10px;">Loading…</p></div>
 
-<div id="users">Loading Users...</div>
-
-<!-- ── User Detail Popup ── -->
 <div class="popup-overlay" id="userPopup">
   <div class="popup-sheet">
     <div class="sheet-handle"></div>
-    <span class="sheet-close" id="popupClose">✕</span>
-
+    <button class="sheet-close" id="popupClose">✕</button>
     <div class="avatar">👤</div>
-    <div class="popup-name"  id="popName"></div>
-    <div class="popup-id"    id="popId"></div>
-
-    <div class="detail-row">
-      <div class="detail-icon">📧</div>
-      <div class="detail-info">
-        <div class="detail-label">Email</div>
-        <div class="detail-value" id="popEmail">—</div>
-      </div>
-    </div>
-
-    <div class="detail-row">
-      <div class="detail-icon">📱</div>
-      <div class="detail-info">
-        <div class="detail-label">Phone</div>
-        <div class="detail-value" id="popPhone">—</div>
-      </div>
-    </div>
-
-    <div class="detail-row">
-      <div class="detail-icon">🏠</div>
-      <div class="detail-info">
-        <div class="detail-label">Address</div>
-        <div class="detail-value" id="popAddress">—</div>
-      </div>
-    </div>
-
-    <div class="detail-row">
-      <div class="detail-icon">📅</div>
-      <div class="detail-info">
-        <div class="detail-label">Joined</div>
-        <div class="detail-value" id="popJoined">—</div>
-      </div>
-    </div>
-
-    <button class="popup-delete" id="popDeleteBtn">🗑️ Delete This User</button>
+    <div class="pop-name" id="popName"></div>
+    <div class="pop-id"   id="popId"></div>
+    <div class="detail-row"><div class="detail-icon">📧</div><div><div class="detail-label">Email</div><div class="detail-value" id="popEmail">—</div></div></div>
+    <div class="detail-row"><div class="detail-icon">📱</div><div><div class="detail-label">Phone</div><div class="detail-value" id="popPhone">—</div></div></div>
+    <div class="detail-row"><div class="detail-icon">🏠</div><div><div class="detail-label">Address</div><div class="detail-value" id="popAddress">—</div></div></div>
+    <div class="detail-row"><div class="detail-icon">📅</div><div><div class="detail-label">Joined</div><div class="detail-value" id="popJoined">—</div></div></div>
+    <button class="pop-del" id="popDeleteBtn">🗑️ Delete This User</button>
   </div>
 </div>
 
-<script type="module" src="./js/srkxditit.js"></script>
-
+<script type="module" src="js/admin_users.js"></script>
 </body>
 </html>
