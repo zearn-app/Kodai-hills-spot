@@ -48,6 +48,48 @@ body{ background:#f0f4f0; padding-bottom:110px; }
   gap:7px;
 }
 
+/* ── Saved Address Card ── */
+.saved-address-card{
+  background:#f0f7f0;
+  border:1.5px solid #c8e6c9;
+  border-radius:16px;
+  padding:16px;
+  display:none; /* shown by JS */
+}
+.saved-address-name{
+  font-size:16px;
+  font-weight:700;
+  color:#1a1a1a;
+  margin-bottom:4px;
+}
+.saved-address-phone{
+  font-size:14px;
+  color:#555;
+  margin-bottom:8px;
+}
+.saved-address-lines{
+  font-size:14px;
+  color:#444;
+  line-height:1.7;
+}
+.change-address-btn{
+  margin-top:12px;
+  width:100%;
+  padding:11px;
+  border:1.5px solid #2e7d32;
+  border-radius:12px;
+  background:white;
+  color:#2e7d32;
+  font-size:15px;
+  font-weight:600;
+  cursor:pointer;
+  transition:background .15s, color .15s;
+}
+.change-address-btn:active{ background:#e8f5e9; }
+
+/* ── Address Form ── */
+#addressForm{ display:none; /* shown by JS when needed */ }
+
 /* ── Inputs ── */
 input{
   width:100%;
@@ -269,6 +311,21 @@ input:focus{ border-color:#2e7d32; background:white; }
   cursor:pointer;
 }
 
+/* ── Address skeleton loader ── */
+.skeleton{
+  background:linear-gradient(90deg,#f0f0f0 25%,#e0e0e0 50%,#f0f0f0 75%);
+  background-size:200% 100%;
+  animation:shimmer 1.2s infinite;
+  border-radius:8px;
+  height:16px;
+  margin-bottom:10px;
+}
+.skeleton.short{ width:60%; }
+@keyframes shimmer{
+  0%{ background-position:200% 0; }
+  100%{ background-position:-200% 0; }
+}
+
 </style>
 </head>
 <body>
@@ -282,13 +339,34 @@ input:focus{ border-color:#2e7d32; background:white; }
 <!-- Delivery Address -->
 <div class="section">
   <div class="heading">📦 Delivery Address</div>
-  <input id="name"    placeholder="Full Name">
-  <input id="phone"   placeholder="Phone Number" type="tel">
-  <div id="stateSelect"    class="customSelect">Select State</div>
-  <div id="districtSelect" class="customSelect">Select District</div>
-  <input id="area"    placeholder="Area">
-  <input id="street"  placeholder="Street">
-  <input id="pincode" placeholder="Pincode" type="number">
+
+  <!-- Skeleton shown while loading -->
+  <div id="addressSkeleton">
+    <div class="skeleton" style="width:50%;height:18px;"></div>
+    <div class="skeleton short"></div>
+    <div class="skeleton" style="width:80%;"></div>
+    <div class="skeleton short"></div>
+  </div>
+
+  <!-- Saved address card (shown when address exists in Firestore) -->
+  <div class="saved-address-card" id="savedAddressCard">
+    <div class="saved-address-name" id="savedName"></div>
+    <div class="saved-address-phone" id="savedPhone"></div>
+    <div class="saved-address-lines" id="savedLines"></div>
+    <button class="change-address-btn" id="changeAddressBtn">✏️ Change Address</button>
+  </div>
+
+  <!-- Address form (shown when no saved address, or user clicks Change) -->
+  <div id="addressForm">
+    <input id="name"    placeholder="Full Name">
+    <input id="phone"   placeholder="Phone Number" type="tel">
+    <input id="email"   placeholder="Gmail / Email" type="email">
+    <div id="stateSelect"    class="customSelect">Select State</div>
+    <div id="districtSelect" class="customSelect">Select District</div>
+    <input id="area"    placeholder="Area">
+    <input id="street"  placeholder="Street">
+    <input id="pincode" placeholder="Pincode" type="number">
+  </div>
 </div>
 
 <!-- Order Items -->
@@ -306,7 +384,6 @@ input:focus{ border-color:#2e7d32; background:white; }
   </div>
   <div class="summary-row">
     <span>Delivery</span>
-    <!-- id="deliveryCell" is updated dynamically by checkout.js -->
     <span id="deliveryCell">
       <span class="old-price">₹50</span>
       <span class="free-tag">FREE</span>
@@ -403,8 +480,8 @@ const selectPopup      = document.getElementById("selectPopup");
 const optionList       = document.getElementById("optionList");
 
 let selectedState = "", selectedDistrict = "";
-Object.defineProperty(window, "selectedState",    { get: () => selectedState });
-Object.defineProperty(window, "selectedDistrict", { get: () => selectedDistrict });
+Object.defineProperty(window, "selectedState",    { get: () => selectedState, set: v => { selectedState = v; } });
+Object.defineProperty(window, "selectedDistrict", { get: () => selectedDistrict, set: v => { selectedDistrict = v; } });
 
 function openSelect(list, type) {
   selectPopup.style.display = "flex";
@@ -444,6 +521,14 @@ districtSelectEl.onclick = function() {
 };
 selectPopup.onclick = function(e) {
   if (e.target === selectPopup) selectPopup.style.display = "none";
+};
+
+/* ── Change address button ── */
+document.getElementById("changeAddressBtn").onclick = function() {
+  document.getElementById("savedAddressCard").style.display = "none";
+  document.getElementById("addressForm").style.display = "block";
+  // Clear so user enters fresh
+  window.usingNewAddress = true;
 };
 </script>
 
