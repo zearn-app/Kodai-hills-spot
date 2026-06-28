@@ -61,10 +61,10 @@ body{
   font-size:13px;
   font-weight:700;
 }
-.pill-placed    { background:#fff3cd; color:#856404; }
-.pill-accepted  { background:#d4edda; color:#155724; }
-.pill-dispatched{ background:#cce5ff; color:#004085; }
-.pill-received  { background:#d1f0e0; color:#0a5c36; }
+.pill-placed     { background:#fff3cd; color:#856404; }
+.pill-accepted   { background:#d4edda; color:#155724; }
+.pill-dispatched { background:#cce5ff; color:#004085; }
+.pill-received   { background:#d1f0e0; color:#0a5c36; }
 
 /* ── Order Detail Popup ── */
 .popup-overlay{
@@ -118,7 +118,7 @@ body{
 .step{ position:relative; padding-bottom:24px; }
 .step:last-child{ padding-bottom:0; }
 
-/* Vertical line */
+/* Vertical line between steps */
 .step::before{
   content:"";
   position:absolute;
@@ -139,7 +139,7 @@ body{
   border:2px solid #ccc;
   background:white;
 }
-.step.done  .step-dot{ background:#2e7d32; border-color:#2e7d32; }
+.step.done   .step-dot{ background:#2e7d32; border-color:#2e7d32; }
 .step.active .step-dot{
   background:white;
   border-color:#2e7d32;
@@ -155,7 +155,6 @@ body{
 
 /* ── Tracking ID box ── */
 .tracking-box{
-  display:none;
   background:#e8f5e9;
   border:1px solid #c8e6c9;
   border-radius:14px;
@@ -281,7 +280,7 @@ body{
   font-size:13px;
   text-align:center;
 }
-.active{ color:#2e7d32; font-weight:700; }
+.nav-active{ color:#2e7d32; font-weight:700; }
 
 /* Toast */
 .toast{
@@ -316,7 +315,7 @@ body{
     <div class="sheet-handle"></div>
     <span class="sheet-close" id="sheetClose">✕</span>
 
-    <img class="popup-product-img" id="popImg">
+    <img class="popup-product-img" id="popImg" src="" alt="Product">
     <div class="popup-name"  id="popName"></div>
     <div class="popup-price" id="popPrice"></div>
     <div class="popup-meta"  id="popMeta"></div>
@@ -365,13 +364,13 @@ body{
   <a href="index.html">🏠<br>Home</a>
   <a href="products.html">🛍️<br>Products</a>
   <a href="cart.html">🛒<br>Cart</a>
-  <a href="profile.html" class="active">👤<br>Profile</a>
+  <a href="profile.html" class="nav-active">👤<br>Profile</a>
 </nav>
 
 <script type="module">
 import { db, auth } from "./js/firebase.js";
 import {
-  collection, query, where, getDocs, addDoc, doc, getDoc
+  collection, query, where, getDocs, addDoc
 } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
 
@@ -389,12 +388,15 @@ function fmt(ts) {
   return d.toLocaleDateString("en-IN", { day:"numeric", month:"short", year:"numeric" });
 }
 
-/* ── Status config ── */
+/* ── Status config ──
+   These keys MUST match exactly what admin saves to Firestore.
+   Admin uses: "Order Placed", "Accepted", "Dispatched", "Received"
+*/
 const STEPS = [
-  { key:"Order Placed", label:"Order Placed",  icon:"🛒" },
-  { key:"Accepted",     label:"Accepted",       icon:"✅" },
-  { key:"Dispatched",   label:"Dispatched",     icon:"🚚" },
-  { key:"Received",     label:"Received",       icon:"📬" }
+  { key: "Order Placed", label: "Order Placed",  icon: "🛒" },
+  { key: "Accepted",     label: "Accepted",       icon: "✅" },
+  { key: "Dispatched",   label: "Dispatched",     icon: "🚚" },
+  { key: "Received",     label: "Received",       icon: "📬" }
 ];
 
 function stepIndex(status) {
@@ -403,18 +405,19 @@ function stepIndex(status) {
 }
 
 function pillClass(status) {
-  return {
+  const map = {
     "Order Placed": "pill-placed",
     "Accepted":     "pill-accepted",
     "Dispatched":   "pill-dispatched",
     "Received":     "pill-received"
-  }[status] || "pill-placed";
+  };
+  return map[status] || "pill-placed";
 }
 
 /* ── State ── */
-let allOrders = [];
-let currentUser = null;
-let activeOrderId = null;   // for review submission
+let allOrders    = [];
+let currentUser  = null;
+let activeOrderId = null;
 
 /* ── Auth ── */
 onAuthStateChanged(auth, async (user) => {
@@ -427,7 +430,7 @@ onAuthStateChanged(auth, async (user) => {
   allOrders = [];
   snap.forEach(d => allOrders.push({ id: d.id, ...d.data() }));
 
-  // Newest first
+  /* Newest first */
   allOrders.sort((a, b) => {
     const ta = a.createdAt?.toDate?.() || new Date(a.createdAt || 0);
     const tb = b.createdAt?.toDate?.() || new Date(b.createdAt || 0);
@@ -456,7 +459,7 @@ function showOrders() {
 
   div.innerHTML = filtered.map(item => `
     <div class="order-card" onclick="openDetail('${item.id}')">
-      <img src="${item.image || 'logo.png'}" onerror="this.src='logo.png'">
+      <img src="${item.image || 'logo.png'}" onerror="this.src='logo.png'" alt="${item.name}">
       <div class="details">
         <h3>${item.name || "Product"}</h3>
         <div class="det-price">₹${item.grandTotal || item.price || 0}</div>
@@ -475,18 +478,21 @@ window.openDetail = (id) => {
   if (!item) return;
   activeOrderId = id;
 
-  document.getElementById("popImg").src   = item.image || "logo.png";
-  document.getElementById("popName").innerText  = item.name || "Product";
+  document.getElementById("popImg").src         = item.image || "logo.png";
+  document.getElementById("popName").innerText  = item.name  || "Product";
   document.getElementById("popPrice").innerText = `₹${item.grandTotal || item.price || 0}`;
   document.getElementById("popMeta").innerText  =
     `Qty: ${item.quantity || 1}  |  Pack: ${item.pack || item.selectedSize || "—"}  |  Ordered: ${fmt(item.createdAt)}`;
 
-  /* Step tracker */
+  /* ── Build step tracker ── */
   const currentStep = stepIndex(item.status || "Order Placed");
+
   document.getElementById("stepTrack").innerHTML = STEPS.map((s, i) => {
     let cls = "";
-    if (i < currentStep)  cls = "done";
-    if (i === currentStep) cls = "done active";
+    if (i < currentStep)   cls = "done";
+    if (i === currentStep) cls = "done active";   // current step = completed + active glow
+    // future steps stay unstyled (grey)
+
     return `
       <div class="step ${cls}">
         <div class="step-dot"></div>
@@ -496,31 +502,29 @@ window.openDetail = (id) => {
     `;
   }).join("");
 
-  /* Tracking ID */
+  /* ── Tracking ID — show when Dispatched or Received AND trackingId exists ── */
   const trackBox = document.getElementById("trackingBox");
-  if (item.trackingId && item.status === "Dispatched" || item.status === "Received") {
-    if (item.trackingId) {
-      trackBox.classList.remove("hidden");
-      document.getElementById("trackingIdVal").innerText = item.trackingId;
-    } else {
-      trackBox.classList.add("hidden");
-    }
+  const isDispatched = item.status === "Dispatched" || item.status === "Received";
+
+  if (isDispatched && item.trackingId) {
+    trackBox.classList.remove("hidden");
+    document.getElementById("trackingIdVal").innerText = item.trackingId;
   } else {
     trackBox.classList.add("hidden");
   }
 
-  /* Review button — only when Received */
+  /* ── Review button — only when Received ── */
   const reviewBtn = document.getElementById("openReviewBtn");
   if (item.status === "Received") {
-    reviewBtn.classList.add("visible");
+    reviewBtn.style.display = "block";
   } else {
-    reviewBtn.classList.remove("visible");
+    reviewBtn.style.display = "none";
   }
 
   document.getElementById("detailOverlay").style.display = "flex";
 };
 
-/* Close sheet */
+/* ── Close sheet ── */
 document.getElementById("sheetClose").onclick = () => {
   document.getElementById("detailOverlay").style.display = "none";
 };
@@ -529,7 +533,7 @@ document.getElementById("detailOverlay").onclick = (e) => {
     document.getElementById("detailOverlay").style.display = "none";
 };
 
-/* Copy tracking ID */
+/* ── Copy tracking ID ── */
 document.getElementById("copyBtn").onclick = () => {
   const val = document.getElementById("trackingIdVal").innerText;
   navigator.clipboard.writeText(val).then(() => toast("Tracking ID copied!"));
@@ -582,7 +586,7 @@ document.getElementById("submitReview").onclick = async () => {
   }
 };
 
-/* Search / date filter */
+/* ── Search / date filter ── */
 document.getElementById("search").oninput = showOrders;
 document.getElementById("date").onchange  = showOrders;
 </script>
