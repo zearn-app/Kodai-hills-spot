@@ -41,7 +41,7 @@ const STATUS_OPTIONS = [
 ============================== */
 
 document.getElementById("userBtn").onclick = () => {
-  window.location = "srkxdutit.html";
+  window.location = "srkxditit.html";
 };
 
 
