@@ -89,6 +89,115 @@ border-color:#2e7d32;
 
 }
 
+
+.customSelect{
+
+width:100%;
+padding:14px;
+margin-top:12px;
+
+border:1px solid #ddd;
+border-radius:12px;
+
+background:white;
+cursor:pointer;
+
+display:flex;
+justify-content:space-between;
+align-items:center;
+
+transition:.4s;
+
+}
+
+.customSelect:hover{
+
+border-color:#2e7d32;
+
+}
+
+.customSelect::after{
+
+content:"▼";
+font-size:12px;
+
+}
+
+
+/* Selector Popup */
+
+.selectPopup{
+
+position:fixed;
+
+top:0;
+left:0;
+
+width:100%;
+height:100%;
+
+display:none;
+
+justify-content:center;
+align-items:flex-end;
+
+background:rgba(0,0,0,.5);
+
+z-index:99999;
+
+}
+
+.selectBox{
+
+width:100%;
+
+background:white;
+
+border-radius:25px 25px 0 0;
+
+padding:20px;
+
+max-height:70vh;
+
+overflow:auto;
+
+animation:popupUp .3s;
+
+}
+
+.option{
+
+padding:15px;
+
+border-bottom:1px solid #eee;
+
+cursor:pointer;
+
+transition:.3s;
+
+}
+
+.option:hover{
+
+background:#f5f5f5;
+
+}
+
+@keyframes popupUp{
+
+from{
+
+transform:translateY(100%);
+
+}
+
+to{
+
+transform:translateY(0);
+
+}
+
+}
 /* Product */
 
 .product{
@@ -302,20 +411,22 @@ id="phone"
 placeholder="Phone Number"
 >
 
-<select id="state">
+<div
+id="stateSelect"
+class="customSelect">
 
-<option value="">
 Select State
-</option>
 
-</select>
+</div>
 
-<select id="district">
+<div
+id="districtSelect"
+class="customSelect">
 
-<option value="">
 Select District
 
-</select>
+</div>
+
 
 <input
 id="area"
@@ -719,42 +830,160 @@ const districtData = {
 };
 
 
-const stateEl = document.getElementById("state");
-const districtEl = document.getElementById("district");
+const stateSelect=
+document.getElementById(
+"stateSelect"
+);
 
-Object.keys(districtData).forEach(state=>{
+const districtSelect=
+document.getElementById(
+"districtSelect"
+);
 
-const option=document.createElement("option");
+const selectPopup=
+document.getElementById(
+"selectPopup"
+);
 
-option.value=state;
-option.textContent=state;
+const optionList=
+document.getElementById(
+"optionList"
+);
 
-stateEl.appendChild(option);
+let selectedState="";
+let selectedDistrict="";
+
+
+function openSelect(
+list,
+type
+){
+
+selectPopup.style.display=
+"flex";
+
+optionList.innerHTML="";
+
+
+list.forEach(item=>{
+
+const div=
+document.createElement(
+"div"
+);
+
+div.className=
+"option";
+
+div.innerText=
+item;
+
+
+div.onclick=()=>{
+
+if(type==="state"){
+
+selectedState=item;
+
+stateSelect.innerText=
+item;
+
+selectedDistrict="";
+
+districtSelect.innerText=
+"Select District";
+
+}
+else{
+
+selectedDistrict=item;
+
+districtSelect.innerText=
+item;
+
+}
+
+selectPopup.style.display=
+"none";
+
+};
+
+optionList.appendChild(
+div
+);
 
 });
 
+}
 
-stateEl.addEventListener("change",()=>{
 
-districtEl.innerHTML=
-'<option value="">Select District</option>';
+stateSelect.onclick=()=>{
 
-const districts=
-districtData[stateEl.value]||[];
+openSelect(
 
-districts.forEach(district=>{
+Object.keys(
+districtData
+),
 
-const option=
-document.createElement("option");
+"state"
 
-option.value=district;
-option.textContent=district;
+);
 
-districtEl.appendChild(option);
+};
 
-});
 
-});
+districtSelect.onclick=()=>{
+
+if(!selectedState){
+
+showPopup(
+
+"Select State",
+
+"Please select state first",
+
+"error"
+
+);
+
+return;
+
+}
+
+openSelect(
+
+districtData[
+selectedState
+],
+
+"district"
+
+);
+
+};
+
+
+/* close popup outside click */
+
+selectPopup.onclick=(e)=>{
+
+if(
+
+e.target===selectPopup
+
+){
+
+selectPopup.style.display=
+"none";
+
+}
+
+};
+
+
+
+
+
 
 </script>
 
@@ -764,6 +993,19 @@ districtEl.appendChild(option);
 type="module"
 src="js/checkout.js"
 ></script>
+<div
+id="selectPopup"
+class="selectPopup">
 
+<div class="selectBox">
+
+<div
+id="optionList">
+
+</div>
+
+</div>
+
+</div>
 </body>
 </html>
