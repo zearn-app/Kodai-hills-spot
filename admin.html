@@ -25,6 +25,8 @@ body{background:#f0f4f0;min-height:100vh;padding:20px 16px 40px;}
 }
 .stat-card h3{font-size:12px;color:#888;font-weight:500;margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px;}
 .stat-card h1{font-size:34px;font-weight:800;color:#2e7d32;}
+.stat-card .loading{font-size:22px;animation:pulse 1s infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.3;}}
 
 .section-title{font-size:13px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:.8px;margin-bottom:12px;}
 
@@ -64,18 +66,17 @@ body{background:#f0f4f0;min-height:100vh;padding:20px 16px 40px;}
 <div class="stats-row">
   <div class="stat-card">
     <h3>Products</h3>
-    <h1 id="totalProducts">—</h1>
+    <h1 id="totalProducts"><span class="loading">…</span></h1>
   </div>
   <div class="stat-card">
     <h3>Orders</h3>
-    <h1 id="totalOrders">—</h1>
+    <h1 id="totalOrders"><span class="loading">…</span></h1>
   </div>
 </div>
 
 <p class="section-title">Manage</p>
 
 <div class="nav-cards">
-
   <a class="nav-card" href="admin_product.html">
     <div class="nav-icon green">🛒</div>
     <div class="nav-info">
@@ -94,7 +95,6 @@ body{background:#f0f4f0;min-height:100vh;padding:20px 16px 40px;}
     <span class="nav-arrow">›</span>
   </a>
 
-
   <a class="nav-card" href="srkxditit.html">
     <div class="nav-icon orange">👤</div>
     <div class="nav-info">
@@ -103,13 +103,12 @@ body{background:#f0f4f0;min-height:100vh;padding:20px 16px 40px;}
     </div>
     <span class="nav-arrow">›</span>
   </a>
-
 </div>
 
 <script type="module">
 import { auth, db } from "./firebase.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
-import { collection, getCountFromServer } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
+import { collection, getDocs } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
 onAuthStateChanged(auth, async (user) => {
   if (!user) { window.location = "index.html"; return; }
@@ -118,12 +117,20 @@ onAuthStateChanged(auth, async (user) => {
     window.location = "home.html";
     return;
   }
+
+  // Fetch counts using getDocs — works with standard Firestore rules
   try {
-    const p = await getCountFromServer(collection(db, "Products"));
-    const o = await getCountFromServer(collection(db, "Orders"));
-    document.getElementById("totalProducts").innerText = p.data().count;
-    document.getElementById("totalOrders").innerText   = o.data().count;
-  } catch(e) { console.error(e); }
+    const [pSnap, oSnap] = await Promise.all([
+      getDocs(collection(db, "Products")),
+      getDocs(collection(db, "Orders"))
+    ]);
+    document.getElementById("totalProducts").innerText = pSnap.size;
+    document.getElementById("totalOrders").innerText   = oSnap.size;
+  } catch(e) {
+    console.error("Stats error:", e);
+    document.getElementById("totalProducts").innerText = "!";
+    document.getElementById("totalOrders").innerText   = "!";
+  }
 });
 </script>
 </body>
