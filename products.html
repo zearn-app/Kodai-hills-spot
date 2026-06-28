@@ -118,7 +118,6 @@ body{ background:#f0f4f0; padding:15px; padding-bottom:90px; overflow-x:hidden; 
   flex-direction:column;
 }
 .card:hover{ transform:translateY(-4px); }
-
 @keyframes show{ to{ opacity:1; transform:translateY(0); } }
 
 .card-img{
@@ -145,6 +144,7 @@ body{ background:#f0f4f0; padding:15px; padding-bottom:90px; overflow-x:hidden; 
 .old-price{ text-decoration:line-through; color:#bbb; font-size:12px; }
 .price{ font-size:17px; font-weight:700; color:#2e7d32; }
 
+/* ── Add to Cart button ── */
 .add-btn{
   width:100%;
   padding:10px;
@@ -163,7 +163,34 @@ body{ background:#f0f4f0; padding:15px; padding-bottom:90px; overflow-x:hidden; 
   gap:5px;
 }
 .add-btn:active{ transform:scale(.95); opacity:.85; }
-.add-btn.added{ background:#1b5e20; }
+
+/* ── Buy Now button ── */
+button.buy-btn{
+  width:100%;
+  padding:11px 10px;
+  background:linear-gradient(135deg,#ff6f00,#ffa000);
+  border:none;
+  border-radius:10px;
+  color:#fff;
+  font-size:14px;
+  font-weight:700;
+  cursor:pointer;
+  margin-top:auto;
+  transition:.2s;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+  animation:popIn .25s ease;
+  box-shadow:0 4px 12px rgba(255,111,0,.35);
+  letter-spacing:.3px;
+}
+button.buy-btn:active{ transform:scale(.95); box-shadow:none; }
+
+@keyframes popIn{
+  from{ transform:scale(.82); opacity:0; }
+  to{   transform:scale(1);   opacity:1; }
+}
 
 /* ── Filter popup ── */
 .filter-overlay{
@@ -289,7 +316,7 @@ body{ background:#f0f4f0; padding:15px; padding-bottom:90px; overflow-x:hidden; 
 </div>
 
 <!-- Toast -->
-<div id="toast" class="toast">✓ Added to cart</div>
+<div id="toast" class="toast"></div>
 
 <nav class="bottom-nav">
   <a href="index.html">🏠<br>Home</a>
