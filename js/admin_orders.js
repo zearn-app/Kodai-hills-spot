@@ -52,6 +52,10 @@ async function loadOrders() {
       return tb - ta;
     });
 
+    // Debug: open browser console to see actual status values from Firestore
+    console.log("Orders loaded:", allOrders.length);
+    console.log("Status values:", [...new Set(allOrders.map(o => JSON.stringify(o.status)))]);
+
     updateCounts();
     renderOrders();
   } catch(e) {
@@ -127,6 +131,7 @@ function renderOrders() {
   // When showing "All", group by status in logical order
   if (activeFilter === "All" && !searchQuery) {
     div.innerHTML = "";
+    // Render known statuses first
     STATUS_OPTIONS.forEach(status => {
       const group = list.filter(o => (o.status || "Order Placed") === status);
       if (!group.length) return;
@@ -138,6 +143,20 @@ function renderOrders() {
         </div>`;
       group.forEach(data => div.innerHTML += buildCard(data));
     });
+    // Catch any orders with unexpected/null status values
+    const unknown = list.filter(o => !STATUS_OPTIONS.includes(o.status || "Order Placed") && o.status !== undefined && o.status !== null && o.status !== "");
+    const missing  = list.filter(o => !o.status);
+    // Treat missing status as "Order Placed" — they'll already be caught above.
+    // Log for debugging:
+    if (unknown.length) {
+      console.warn("Orders with unrecognized status:", unknown.map(o => ({ id: o.id, status: o.status })));
+      div.innerHTML += `
+        <div class="status-section-header">
+          <span class="status-section-label" style="color:#e53935;">Unknown Status (${unknown.length})</span>
+          <span class="status-section-line"></span>
+        </div>`;
+      unknown.forEach(data => div.innerHTML += buildCard(data));
+    }
   } else {
     div.innerHTML = list.map(buildCard).join("");
   }
