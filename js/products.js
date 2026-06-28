@@ -1,28 +1,44 @@
 import { db, auth } from "./firebase.js";
 import {
-    collection, getDocs, addDoc,
-    query, where, updateDoc, doc
+    collection, getDocs, addDoc, getDoc, doc,
+    query, where, updateDoc
 } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
 
-/* ─────────────── State ─────────────── */
-const productsDiv   = document.getElementById("products");
-const searchInput   = document.getElementById("searchInput");
-const filterOverlay = document.getElementById("filterOverlay");
-const profileNav    = document.getElementById("profileNav");
-const toast         = document.getElementById("toast");
-const categoryCards = document.querySelectorAll(".category-card");
+/* ─────────────── Elements ─────────────── */
+const productsDiv    = document.getElementById("products");
+const searchInput    = document.getElementById("searchInput");
+const filterOverlay  = document.getElementById("filterOverlay");
+const profileNav     = document.getElementById("profileNav");
+const toast          = document.getElementById("toast");
+const categoryScroll = document.getElementById("categoryScroll");
 
+/* ─────────────── State ─────────────── */
 let allProducts      = [];
 let currentUser      = null;
 let priceFilter      = "";
-let selectedCategory = "";
+let selectedCategory = "All"; // "All" = no category filter
 
 /*
  * inCartIds — tracks which productIds are already in cart
  * so the button stays "Buy Now" even after filter/search re-renders.
  */
 const inCartIds = new Set();
+
+/* ─────────────── Category emoji map ─────────────── */
+const CAT_EMOJI = {
+    "chocolate":        "🍫",
+    "honey":            "🍯",
+    "herbs":            "🌿",
+    "oils":             "🫙",
+    "fruits":           "🍎",
+    "organic products": "🌱",
+    "vegetables":       "🥕",
+    "organic":          "🌿",
+};
+function emojiFor(cat) {
+    return CAT_EMOJI[(cat || "").toLowerCase()] || "🏷️";
+}
 
 /* ─────────────── Auth ─────────────── */
 onAuthStateChanged(auth, async (user) => {
@@ -37,8 +53,6 @@ onAuthStateChanged(auth, async (user) => {
             const q        = query(collection(db, "Cart"), where("uid", "==", user.uid));
             const snapshot = await getDocs(q);
             snapshot.forEach(d => inCartIds.add(d.data().productId));
-            /* Re-render so existing cart items show Buy Now immediately */
-            applyFilters();
         } catch (e) {
             console.error("Pre-load cart error:", e);
         }
@@ -49,8 +63,56 @@ onAuthStateChanged(auth, async (user) => {
         /* Pre-load from local guest cart */
         const local = JSON.parse(localStorage.getItem("guestCart")) || [];
         local.forEach(item => inCartIds.add(item.productId));
-        applyFilters();
     }
+
+    /* Re-render so existing cart items show Buy Now immediately */
+    applyFilters();
+});
+
+/* ─────────────── Load categories (Firestore, with fallback) ─────────────── */
+async function loadCategories() {
+    const DEFAULT = ["Chocolate", "Honey", "Herbs", "Oils", "Fruits", "Organic Products"];
+    let cats = DEFAULT;
+
+    try {
+        const snap = await getDoc(doc(db, "Categories", "list"));
+        if (snap.exists() && snap.data().items?.length) {
+            cats = snap.data().items;
+        }
+    } catch (e) {
+        console.warn("Could not load categories:", e);
+    }
+
+    categoryScroll.innerHTML = "";
+
+    /* "All" chip */
+    const allChip = document.createElement("div");
+    allChip.className = "category-card active";
+    allChip.textContent = "🏠 All";
+    allChip.dataset.category = "All";
+    categoryScroll.appendChild(allChip);
+
+    /* One chip per category */
+    cats.forEach(cat => {
+        const chip = document.createElement("div");
+        chip.className = "category-card";
+        chip.textContent = `${emojiFor(cat)} ${cat}`;
+        chip.dataset.category = cat;
+        categoryScroll.appendChild(chip);
+    });
+}
+
+/* Delegated click handler — works even though chips are created
+   dynamically AFTER this listener is attached */
+categoryScroll.addEventListener("click", (e) => {
+    const chip = e.target.closest(".category-card");
+    if (!chip) return;
+
+    document.querySelectorAll(".category-card").forEach(c => c.classList.remove("active"));
+    chip.classList.add("active");
+
+    selectedCategory = chip.dataset.category;
+    applyFilters();
 });
 
 /* ─────────────── Load products ─────────────── */
@@ -58,7 +120,7 @@ async function loadProducts() {
     try {
         const snapshot = await getDocs(collection(db, "Products"));
         allProducts = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
-        showProducts(allProducts);
+        applyFilters();
     } catch (err) {
         console.error("Load error:", err);
         productsDiv.innerHTML =
@@ -212,13 +274,6 @@ async function handleAddToCart(product, btn) {
 
 /* ─────────────── Buy Now → Checkout ─────────────── */
 function goToCheckout(product) {
-    /*
-     * Store a single-item checkout payload in sessionStorage.
-     * checkout.js reads window.checkoutSource to decide whether to
-     * load from Firebase Cart or from this direct buy.
-     *
-     * We pass everything checkout.js needs to render the order summary.
-     */
     const buyNowItem = {
         productId:  product.id,
         name:       product.name,
@@ -229,7 +284,6 @@ function goToCheckout(product) {
         totalPrice: Number(product.price)
     };
 
-    /* Tag the source so checkout knows to use this item, not the full cart */
     sessionStorage.setItem("buyNowItem",   JSON.stringify(buyNowItem));
     sessionStorage.setItem("checkoutMode", "buyNow");
 
@@ -252,7 +306,7 @@ function applyFilters() {
     if (term) {
         list = list.filter(p => (p.name || "").toLowerCase().includes(term));
     }
-    if (selectedCategory) {
+    if (selectedCategory && selectedCategory !== "All") {
         list = list.filter(p =>
             (p.category || "").toLowerCase() === selectedCategory.toLowerCase()
         );
@@ -264,22 +318,6 @@ function applyFilters() {
 }
 
 searchInput.addEventListener("input", applyFilters);
-
-/* ─────────────── Category pills ─────────────── */
-categoryCards.forEach(card => {
-    card.addEventListener("click", () => {
-        const clicked = card.dataset.category;
-        if (selectedCategory === clicked) {
-            selectedCategory = "";
-            card.classList.remove("active");
-        } else {
-            categoryCards.forEach(c => c.classList.remove("active"));
-            card.classList.add("active");
-            selectedCategory = clicked;
-        }
-        applyFilters();
-    });
-});
 
 /* ─────────────── Filter popup ─────────────── */
 document.getElementById("openFilter").addEventListener("click", () => {
@@ -302,4 +340,5 @@ document.querySelectorAll(".popup-btn").forEach(btn => {
 });
 
 /* ─────────────── Init ─────────────── */
+loadCategories();
 loadProducts();
