@@ -1,16 +1,37 @@
 import { auth, db } from "./firebase.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
 import {
-    collection, query, where, getDocs, addDoc
+    collection, query, where, getDocs, addDoc, doc, getDoc
 } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
 let currentUser   = null;
-let checkoutItems = [];   /* items to render & place order for */
+let checkoutItems = [];
 let totalAmount   = 0;
+let deliveryCharge = 0;   // ← determined per-order
 
 /* ── Delegates to global showPopup defined in checkout.html ── */
 function showPopup(title, message, type = "info") {
     window.showPopup(title, message, type);
+}
+
+/* ─────────────── Delivery row updater ─────────────── */
+function updateDeliveryRow(isFree) {
+    const deliveryCell = document.getElementById("deliveryCell");
+    if (!deliveryCell) return;
+
+    if (isFree) {
+        deliveryCharge = 0;
+        deliveryCell.innerHTML = `
+          <span class="old-price">₹50</span>
+          <span class="free-tag">FREE</span>`;
+    } else {
+        deliveryCharge = 50;
+        deliveryCell.innerHTML = `<span style="font-weight:700;color:#c62828;">₹50</span>`;
+    }
+
+    /* Recalculate total */
+    const grandTotal = totalAmount + deliveryCharge;
+    document.getElementById("total").innerText = `₹${grandTotal}`;
 }
 
 /* ─────────────── Load checkout items ─────────────── */
@@ -21,37 +42,78 @@ async function loadCheckout() {
     checkoutItems = [];
     totalAmount   = 0;
 
-    const mode = sessionStorage.getItem("checkoutMode");   /* "buyNow" or null */
+    const mode = sessionStorage.getItem("checkoutMode");
 
     try {
         if (mode === "buyNow") {
             /*
-             * Direct Buy Now flow — single item stored by products.js
-             * No need to touch the full Firebase Cart at all.
+             * Direct Buy Now — single item stored by products.js / home.js
+             * Also fetch the product doc from Firestore to get freeDelivery flag.
              */
             const raw = sessionStorage.getItem("buyNowItem");
             if (raw) {
-                checkoutItems = [JSON.parse(raw)];
+                const item = JSON.parse(raw);
+
+                /* Fetch freeDelivery from Firestore */
+                try {
+                    const productSnap = await getDoc(doc(db, "Products", item.productId));
+                    if (productSnap.exists()) {
+                        item.freeDelivery = productSnap.data().freeDelivery || false;
+                    }
+                } catch (e) {
+                    item.freeDelivery = false;
+                }
+
+                checkoutItems = [item];
             }
-            /* Clear after reading so back-navigation doesn't reuse it */
             sessionStorage.removeItem("buyNowItem");
             sessionStorage.removeItem("checkoutMode");
 
         } else if (currentUser) {
-            /* Normal cart flow — load full Firebase Cart for this user */
+            /* Normal cart flow — load full Firebase Cart */
             const q        = query(
                 collection(db, "Cart"),
                 where("uid", "==", currentUser.uid)
             );
             const snapshot = await getDocs(q);
-            snapshot.forEach(d => checkoutItems.push(d.data()));
+
+            /* For each cart item, also fetch the product to get freeDelivery */
+            const fetchPromises = snapshot.docs.map(async (d) => {
+                const item = d.data();
+                try {
+                    const productSnap = await getDoc(doc(db, "Products", item.productId));
+                    item.freeDelivery = productSnap.exists()
+                        ? (productSnap.data().freeDelivery || false)
+                        : false;
+                } catch (e) {
+                    item.freeDelivery = false;
+                }
+                return item;
+            });
+
+            checkoutItems = await Promise.all(fetchPromises);
 
         } else {
-            /* Guest fallback — local storage cart */
-            checkoutItems = JSON.parse(localStorage.getItem("guestCart")) || [];
+            /* Guest fallback */
+            const raw = JSON.parse(localStorage.getItem("guestCart")) || [];
+
+            /* Fetch freeDelivery for each guest cart item */
+            const fetchPromises = raw.map(async (item) => {
+                try {
+                    const productSnap = await getDoc(doc(db, "Products", item.productId));
+                    item.freeDelivery = productSnap.exists()
+                        ? (productSnap.data().freeDelivery || false)
+                        : false;
+                } catch (e) {
+                    item.freeDelivery = false;
+                }
+                return item;
+            });
+
+            checkoutItems = await Promise.all(fetchPromises);
         }
 
-        /* ── Render ── */
+        /* ── Render items ── */
         if (checkoutItems.length === 0) {
             orderItems.innerHTML = `
               <div style="text-align:center;padding:30px 10px;">
@@ -90,7 +152,14 @@ async function loadCheckout() {
 
         orderItems.innerHTML = html;
         document.getElementById("subtotal").innerText = `₹${totalAmount}`;
-        document.getElementById("total").innerText    = `₹${totalAmount}`;
+
+        /*
+         * Delivery logic:
+         * FREE if ALL items in the order have freeDelivery === true.
+         * ₹50 if even ONE item does not have free delivery.
+         */
+        const allFree = checkoutItems.every(item => item.freeDelivery === true);
+        updateDeliveryRow(allFree);
 
     } catch (err) {
         console.error("Checkout load error:", err);
@@ -126,9 +195,11 @@ document.getElementById("placeOrder").onclick = async () => {
         return;
     }
 
+    const grandTotal = totalAmount + deliveryCharge;
+
     const options = {
         key:         "rzp_test_T5tWAjBQVPNBI4",
-        amount:      totalAmount * 100,
+        amount:      grandTotal * 100,
         currency:    "INR",
         name:        "Kodai Hills Spot",
         description: "Order Payment",
@@ -140,17 +211,19 @@ document.getElementById("placeOrder").onclick = async () => {
             try {
                 for (const item of checkoutItems) {
                     await addDoc(collection(db, "Orders"), {
-                        uid:          currentUser.uid,
-                        name:         item.name,
-                        image:        item.image,
-                        quantity:     item.quantity,
-                        price:        item.unitPrice || item.price,
-                        pack:         item.selectedSize || item.pack || "-",
-                        customerName: name,
+                        uid:           currentUser.uid,
+                        name:          item.name,
+                        image:         item.image,
+                        quantity:      item.quantity,
+                        price:         item.unitPrice || item.price,
+                        pack:          item.selectedSize || item.pack || "-",
+                        customerName:  name,
                         phone, state, district, area, street, pincode,
-                        paymentId:    response.razorpay_payment_id,
-                        status:       "Pending",
-                        createdAt:    new Date()
+                        deliveryCharge,
+                        grandTotal,
+                        paymentId:     response.razorpay_payment_id,
+                        status:        "Pending",
+                        createdAt:     new Date()
                     });
                 }
                 showPopup("Order Placed! 🎉", "Your order was placed successfully.", "success");
