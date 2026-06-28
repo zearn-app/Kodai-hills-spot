@@ -25,6 +25,26 @@ let allOrders    = [];
 let activeFilter = "All";
 let searchQuery  = "";
 
+/* ─── Helpers for reading customer fields ───
+   Firestore "Orders" docs store these as customerName / email / phone
+   plus a split address (street, area, district, state, pincode) —
+   not userName / userEmail / userAddress. Fall back to the older
+   names too, in case some legacy orders used them. */
+function getCustomerName(o) {
+  return o.customerName || o.userName || "—";
+}
+function getCustomerEmail(o) {
+  return o.email || o.userEmail || "—";
+}
+function getCustomerPhone(o) {
+  return o.phone || o.userPhone || "—";
+}
+function getCustomerAddress(o) {
+  const parts = [o.street, o.area, o.district, o.state, o.pincode].filter(Boolean);
+  if (parts.length) return parts.join(", ");
+  return o.userAddress || o.address || "—";
+}
+
 /* ─── Auth ─── */
 onAuthStateChanged(auth, (user) => {
   if (!user) { window.location.replace("index.html"); return; }
@@ -51,10 +71,6 @@ async function loadOrders() {
       const tb = b.createdAt?.toDate?.() ?? new Date(b.createdAt || 0);
       return tb - ta;
     });
-
-    // Debug: open browser console to see actual status values from Firestore
-    console.log("Orders loaded:", allOrders.length);
-    console.log("Status values:", [...new Set(allOrders.map(o => JSON.stringify(o.status)))]);
 
     updateCounts();
     renderOrders();
@@ -104,12 +120,12 @@ function renderOrders() {
   if (searchQuery) {
     const q = searchQuery.toLowerCase();
     list = list.filter(o =>
-      (o.name        || "").toLowerCase().includes(q) ||
-      (o.userName    || "").toLowerCase().includes(q) ||
-      (o.userPhone   || o.phone || "").toLowerCase().includes(q) ||
-      (o.userEmail   || "").toLowerCase().includes(q) ||
-      (o.id          || "").toLowerCase().includes(q) ||
-      (o.trackingId  || "").toLowerCase().includes(q)
+      (o.name           || "").toLowerCase().includes(q) ||
+      getCustomerName(o).toLowerCase().includes(q) ||
+      getCustomerPhone(o).toLowerCase().includes(q) ||
+      getCustomerEmail(o).toLowerCase().includes(q) ||
+      (o.id             || "").toLowerCase().includes(q) ||
+      (o.trackingId     || "").toLowerCase().includes(q)
     );
   }
 
@@ -131,7 +147,6 @@ function renderOrders() {
   // When showing "All", group by status in logical order
   if (activeFilter === "All" && !searchQuery) {
     div.innerHTML = "";
-    // Render known statuses first
     STATUS_OPTIONS.forEach(status => {
       const group = list.filter(o => (o.status || "Order Placed") === status);
       if (!group.length) return;
@@ -145,9 +160,6 @@ function renderOrders() {
     });
     // Catch any orders with unexpected/null status values
     const unknown = list.filter(o => !STATUS_OPTIONS.includes(o.status || "Order Placed") && o.status !== undefined && o.status !== null && o.status !== "");
-    const missing  = list.filter(o => !o.status);
-    // Treat missing status as "Order Placed" — they'll already be caught above.
-    // Log for debugging:
     if (unknown.length) {
       console.warn("Orders with unrecognized status:", unknown.map(o => ({ id: o.id, status: o.status })));
       div.innerHTML += `
@@ -171,6 +183,10 @@ function buildCard(data) {
     const d = data.createdAt.toDate ? data.createdAt.toDate() : new Date(data.createdAt);
     dateStr = d.toLocaleDateString("en-IN", { day:"numeric", month:"short", year:"numeric" });
   }
+
+  const custName  = getCustomerName(data);
+  const custPhone = getCustomerPhone(data);
+
   return `
     <div class="order-card">
       <div class="order-header">
@@ -182,8 +198,8 @@ function buildCard(data) {
       </div>
       <p class="order-meta">₹${data.grandTotal ?? data.price ?? 0} &nbsp;|&nbsp; Qty: ${data.quantity || 1}${
         data.pack || data.selectedSize ? ` &nbsp;|&nbsp; ${data.pack || data.selectedSize}` : ""}</p>
-      ${data.userName  ? `<p class="order-meta">👤 ${data.userName}</p>` : ""}
-      ${(data.userPhone || data.phone) ? `<p class="order-meta">📱 ${data.userPhone || data.phone}</p>` : ""}
+      ${custName  !== "—" ? `<p class="order-meta">👤 ${custName}</p>` : ""}
+      ${custPhone !== "—" ? `<p class="order-meta">📱 ${custPhone}</p>` : ""}
       ${data.trackingId ? `<p class="order-meta">🚚 Tracking: <b>${data.trackingId}</b></p>` : ""}
       <p class="order-id">ID: ${data.id}</p>
       <button class="manage-btn" onclick="window._openOrderPopup('${data.id}')">Manage Order</button>
@@ -226,10 +242,10 @@ window._openOrderPopup = (id) => {
   document.getElementById("productName").innerText = data.name       || "—";
   document.getElementById("quantity").innerText    = data.quantity   || 1;
   document.getElementById("totalPrice").innerText  = `₹${data.grandTotal ?? data.price ?? 0}`;
-  document.getElementById("userName").innerText    = data.userName    || "—";
-  document.getElementById("userEmail").innerText   = data.userEmail   || "—";
-  document.getElementById("userPhone").innerText   = data.userPhone   || data.phone || "—";
-  document.getElementById("userAddress").innerText = data.userAddress || data.address || "—";
+  document.getElementById("userName").innerText    = getCustomerName(data);
+  document.getElementById("userEmail").innerText   = getCustomerEmail(data);
+  document.getElementById("userPhone").innerText   = getCustomerPhone(data);
+  document.getElementById("userAddress").innerText = getCustomerAddress(data);
 
   const select = document.getElementById("statusSelect");
   select.innerHTML = STATUS_OPTIONS.map(s =>
