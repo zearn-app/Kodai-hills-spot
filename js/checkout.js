@@ -8,80 +8,80 @@ let totalAmount = 0;
 
 /* Popup helper */
 function showPopup(title, message, type = "info") {
-    const popupLogo = document.querySelector(".popup-logo");
-    popupLogo.src = type === "success" ? "https://cdn-icons-png.flaticon.com/512/845/845646.png" : 
-                    type === "error" ? "https://cdn-icons-png.flaticon.com/512/1828/1828843.png" : "logo.png";
-    document.getElementById("popupTitle").innerText = title;
-    document.getElementById("popupMessage").innerText = message;
-    document.getElementById("popupBox").style.display = "flex";
+    const popupLogo = document.querySelector(".popup-logo");
+    popupLogo.src = type === "success" ? "https://cdn-icons-png.flaticon.com/512/845/845646.png" : 
+                    type === "error" ? "https://cdn-icons-png.flaticon.com/512/1828/1828843.png" : "logo.png";
+    document.getElementById("popupTitle").innerText = title;
+    document.getElementById("popupMessage").innerText = message;
+    document.getElementById("popupBox").style.display = "flex";
 }
 
 window.closePopup = () => { document.getElementById("popupBox").style.display = "none"; };
 
 /* Load Items logic */
 async function loadCheckout() {
-    const orderItems = document.getElementById("orderItems");
-    if (!orderItems) return;
+    const orderItems = document.getElementById("orderItems");
+    if (!orderItems) return;
 
-    checkoutItems = [];
-    totalAmount = 0;
+    checkoutItems = [];
+    totalAmount = 0;
 
-    try {
-        if (currentUser) {
-            // Fetch from Firebase
-            const q = query(collection(db, "Cart"), where("uid", "==", currentUser.uid));
-            const snapshot = await getDocs(q);
-            snapshot.forEach(doc => checkoutItems.push(doc.data()));
-        } else {
-            // Fallback to LocalStorage
-            checkoutItems = JSON.parse(localStorage.getItem("checkoutItems")) || [];
-        }
+    try {
+        if (currentUser) {
+            // Fetch from Firebase
+            const q = query(collection(db, "Cart"), where("uid", "==", currentUser.uid));
+            const snapshot = await getDocs(q);
+            snapshot.forEach(doc => checkoutItems.push(doc.data()));
+        } else {
+            // Fallback to LocalStorage
+            checkoutItems = JSON.parse(localStorage.getItem("checkoutItems")) || [];
+        }
 
-        if (checkoutItems.length === 0) {
-            orderItems.innerHTML = `<div style="text-align:center; padding:30px;"><h2>🛒 Cart Empty</h2></div>`;
-            document.getElementById("subtotal").innerText = "₹0";
-            document.getElementById("total").innerText = "₹0";
-            return;
-        }
+        if (checkoutItems.length === 0) {
+            orderItems.innerHTML = `<div style="text-align:center; padding:30px;"><h2>🛒 Cart Empty</h2></div>`;
+            document.getElementById("subtotal").innerText = "₹0";
+            document.getElementById("total").innerText = "₹0";
+            return;
+        }
 
-        let html = "";
-        checkoutItems.forEach(item => {
-            const qty = Number(item.quantity || 1);
-            const unitPrice = Number(item.unitPrice || item.price || 0);
-            const itemTotal = Number(item.totalPrice || (unitPrice * qty));
-            totalAmount += itemTotal;
+        let html = "";
+        checkoutItems.forEach(item => {
+            const qty = Number(item.quantity || 1);
+            const unitPrice = Number(item.unitPrice || item.price || 0);
+            const itemTotal = Number(item.totalPrice || (unitPrice * qty));
+            totalAmount += itemTotal;
 
-            html += `
-            <div class="product" style="margin-bottom:20px; padding:15px; background:#fafafa; border-radius:15px;">
-                <img src="${item.image || 'logo.png'}" onerror="this.src='logo.png'">
-                <div class="details">
-                    <h3>${item.name || "No Product"}</h3>
-                    <div class="price">₹${itemTotal}</div>
-                    <p>Unit Price : ₹${unitPrice}</p>
-                    <p>Qty : ${qty}</p>
-                    <p>Pack : ${item.pack || "-"}</p>
-                </div>
-            </div>`;
-        });
+            html += `
+            <div class="product" style="margin-bottom:20px; padding:15px; background:#fafafa; border-radius:15px;">
+                <img src="${item.image || 'logo.png'}" onerror="this.src='logo.png'">
+                <div class="details">
+                    <h3>${item.name || "No Product"}</h3>
+                    <div class="price">₹${itemTotal}</div>
+                    <p>Unit Price : ₹${unitPrice}</p>
+                    <p>Qty : ${qty}</p>
+                    <p>Pack : ${item.pack || "-"}</p>
+                </div>
+            </div>`;
+        });
 
-        orderItems.innerHTML = html;
-        document.getElementById("subtotal").innerText = `₹${totalAmount}`;
-        document.getElementById("total").innerText = `₹${totalAmount}`;
+        orderItems.innerHTML = html;
+        document.getElementById("subtotal").innerText = `₹${totalAmount}`;
+        document.getElementById("total").innerText = `₹${totalAmount}`;
 
-    } catch (error) {
-        console.error("Error loading checkout:", error);
-        orderItems.innerHTML = `<p style="text-align:center;">Error loading items.</p>`;
-    }
+    } catch (error) {
+        console.error("Error loading checkout:", error);
+        orderItems.innerHTML = `<p style="text-align:center;">Error loading items.</p>`;
+    }
 }
 
 /* Authentication Check */
 onAuthStateChanged(auth, (user) => {
-    if (!user) {
-        window.location = "login.html";
-        return;
-    }
-    currentUser = user;
-    loadCheckout();
+    if (!user) {
+        window.location = "login.html";
+        return;
+    }
+    currentUser = user;
+    loadCheckout();
 });
 
 /* Place Order Logic */
@@ -101,15 +101,13 @@ document.getElementById(
 "phone"
 ).value.trim();
 
+
 const state=
-document.getElementById(
-"state"
-).value;
+selectedState;
 
 const district=
-document.getElementById(
-"district"
-).value;
+selectedDistrict;
+
 
 const area=
 document.getElementById(
