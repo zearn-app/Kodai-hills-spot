@@ -1,573 +1,156 @@
 import { auth, db } from "./firebase.js";
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
+import { collection, query, where, getDocs, addDoc } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
-import {
-collection,
-query,
-where,
-getDocs,
-deleteDoc,
-doc,
-addDoc
-}
-from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
+let currentUser = null;
+let checkoutItems = [];
+let totalAmount = 0;
 
-import {
-onAuthStateChanged
-}
-from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
-
-
-const cartItems =
-document.getElementById("cartItems");
-
-const totalDiv =
-document.getElementById("total");
-
-const checkoutBtn =
-document.getElementById("checkoutBtn");
-
-let cartData=[];
-
-
-/* POPUP */
-
-window.showPopup=(title,message)=>{
-
-document.getElementById(
-"popupTitle"
-).innerText=title;
-
-document.getElementById(
-"popupMessage"
-).innerText=message;
-
-document.getElementById(
-"popupBox"
-).style.display="flex";
-
-};
-
-window.closePopup=()=>{
-
-document.getElementById(
-"popupBox"
-).style.display="none";
-
-};
-
-
-
-/* Move Guest Cart To Firebase */
-
-async function moveGuestCart(user){
-
-let guestCart=
-
-JSON.parse(
-localStorage.getItem(
-"guestCart"
-)
-)||[];
-
-
-if(guestCart.length===0){
-return;
+/* Popup helper — delegates to the global defined in HTML */
+function showPopup(title, message, type = "info") {
+    window.showPopup(title, message, type);
 }
 
+/* Load Items logic */
+async function loadCheckout() {
+    const orderItems = document.getElementById("orderItems");
+    if (!orderItems) return;
 
-for(let item of guestCart){
+    checkoutItems = [];
+    totalAmount = 0;
 
-await addDoc(
+    try {
+        if (currentUser) {
+            // Fetch from Firebase
+            const q = query(collection(db, "Cart"), where("uid", "==", currentUser.uid));
+            const snapshot = await getDocs(q);
+            snapshot.forEach(doc => checkoutItems.push(doc.data()));
+        } else {
+            // Fallback to LocalStorage
+            checkoutItems = JSON.parse(localStorage.getItem("checkoutItems")) || [];
+        }
 
-collection(
-db,
-"Cart"
-),
+        if (checkoutItems.length === 0) {
+            orderItems.innerHTML = `<div style="text-align:center; padding:30px;"><h2>🛒 Cart Empty</h2></div>`;
+            document.getElementById("subtotal").innerText = "₹0";
+            document.getElementById("total").innerText = "₹0";
+            return;
+        }
 
-{
+        let html = "";
+        checkoutItems.forEach(item => {
+            const qty = Number(item.quantity || 1);
+            const unitPrice = Number(item.unitPrice || item.price || 0);
+            const itemTotal = Number(item.totalPrice || (unitPrice * qty));
+            totalAmount += itemTotal;
 
-uid:user.uid,
+            html += `
+            <div class="product" style="margin-bottom:20px; padding:15px; background:#fafafa; border-radius:15px;">
+                <img src="${item.image || 'logo.png'}" onerror="this.src='logo.png'">
+                <div class="details">
+                    <h3>${item.name || "No Product"}</h3>
+                    <div class="price">₹${itemTotal}</div>
+                    <p>Unit Price : ₹${unitPrice}</p>
+                    <p>Qty : ${qty}</p>
+                    <p>Pack : ${item.pack || "-"}</p>
+                </div>
+            </div>`;
+        });
 
-productId:
-item.productId,
+        orderItems.innerHTML = html;
+        document.getElementById("subtotal").innerText = `₹${totalAmount}`;
+        document.getElementById("total").innerText = `₹${totalAmount}`;
 
-name:
-item.name,
-
-image:
-item.image,
-
-quantity:
-item.quantity || 1,
-
-pack:
-item.pack || "",
-
-unitPrice:
-item.unitPrice || 0,
-
-totalPrice:
-item.totalPrice || 0
-
+    } catch (error) {
+        console.error("Error loading checkout:", error);
+        orderItems.innerHTML = `<p style="text-align:center;">Error loading items.</p>`;
+    }
 }
 
-);
-
-}
-
-localStorage.removeItem(
-"guestCart"
-);
-
-}
-
-
-
-/* Create Card */
-
-function createCard(
-item,
-removeFunction
-){
-
-const qty=
-Number(
-item.quantity || 1
-);
-
-const unitPrice=
-Number(
-item.unitPrice || 0
-);
-
-const itemTotal=
-Number(
-item.totalPrice ||
-(unitPrice*qty)
-);
-
-const card=
-document.createElement(
-"div"
-);
-
-card.className=
-"card";
-
-card.innerHTML=`
-
-<img
-src="${item.image || "logo.png"}"
-onerror="this.src='logo.png'"
->
-
-<div class="details">
-
-<h3>
-
-${item.name || "No Product"}
-
-</h3>
-
-<div class="price">
-
-₹${itemTotal}
-
-</div>
-
-<p>
-
-Unit Price :
-₹${unitPrice}
-
-</p>
-
-<p>
-
-Qty :
-${qty}
-
-</p>
-
-<p>
-
-Pack :
-${item.pack || "-"}
-
-</p>
-
-<button
-class="remove"
-onclick="${removeFunction}"
->
-
-Remove
-
-</button>
-
-</div>
-
-`;
-
-return {
-card,
-itemTotal
-};
-
-}
-
-
-
-/* Load Cart */
-
-async function loadCart(){
-
-try{
-
-cartItems.innerHTML=
-"Loading...";
-
-cartData=[];
-
-let total=0;
-
-const user=
-auth.currentUser;
-
-cartItems.innerHTML="";
-
-
-/* Guest Cart */
-
-if(!user){
-
-let guestCart=
-
-JSON.parse(
-localStorage.getItem(
-"guestCart"
-)
-)||[];
-
-
-if(guestCart.length===0){
-
-cartItems.innerHTML=`
-
-<div style="
-text-align:center;
-padding:50px;
-">
-
-<img 
-src="empty.png"
-style="
-width:180px;
-max-width:80%;
-height:auto;
-object-fit:contain;
-margin-bottom:15px;
-"
->
-
-<p>
-
-Add products to continue
-
-</p>
-
-</div>
-
-`;
-
-totalDiv.innerText=
-"Total : ₹0";
-
-return;
-}
-
-
-guestCart.forEach(
-
-(item,index)=>{
-
-cartData.push(item);
-
-const result=
-
-createCard(
-
-item,
-
-`removeGuestItem(${index})`
-
-);
-
-total+=
-result.itemTotal;
-
-cartItems.appendChild(
-result.card
-);
-
+/* Authentication Check */
+onAuthStateChanged(auth, (user) => {
+    if (!user) {
+        window.location = "login.html";
+        return;
+    }
+    currentUser = user;
+    loadCheckout();
 });
 
-totalDiv.innerText=
-`Total : ₹${total}`;
-
-return;
-
-}
-
-
-/* Firebase Cart */
-
-const q=
-
-query(
-
-collection(
-db,
-"Cart"
-),
-
-where(
-"uid",
-"==",
-user.uid
-)
-
-);
-
-const snapshot=
-
-await getDocs(q);
-
-
-if(snapshot.empty){
-
-cartItems.innerHTML=`
-
-<div style="
-text-align:center;
-padding:50px;
-">
-
-
-<img 
-src="empty.png"
-style="
-width:180px;
-max-width:80%;
-height:auto;
-object-fit:contain;
-margin-bottom:15px;
-"
->
-
-</div>
-
-`;
-
-totalDiv.innerText=
-"Total : ₹0";
-
-return;
-
-}
-
-
-snapshot.forEach(
-
-(itemDoc)=>{
-
-const item=
-itemDoc.data();
-
-item.docId=
-itemDoc.id;
-
-cartData.push(item);
-
-const result=
-
-createCard(
-
-item,
-
-`removeItem('${itemDoc.id}')`
-
-);
-
-total+=
-result.itemTotal;
-
-cartItems.appendChild(
-result.card
-);
-
-});
-
-
-totalDiv.innerText=
-`Total : ₹${total}`;
-
-}
-
-catch(error){
-
-console.log(error);
-
-showPopup(
-"Error",
-"Unable to load cart"
-);
-
-}
-
-}
-
-
-
-/* Remove Firebase */
-
-window.removeItem=
-
-async(id)=>{
-
-await deleteDoc(
-
-doc(
-db,
-"Cart",
-id
-)
-
-);
-
-showPopup(
-"Removed",
-"Product removed"
-);
-
-loadCart();
-
-};
-
-
-
-/* Remove Guest */
-
-window.removeGuestItem=
-
-(index)=>{
-
-let guestCart=
-
-JSON.parse(
-localStorage.getItem(
-"guestCart"
-)
-)||[];
-
-guestCart.splice(
-index,
-1
-);
-
-localStorage.setItem(
-
-"guestCart",
-
-JSON.stringify(
-guestCart
-)
-
-);
-
-showPopup(
-"Removed",
-"Product removed"
-);
-
-loadCart();
-
-};
-
-
-
-/* Login */
-
-onAuthStateChanged(
-
-auth,
-
-async(user)=>{
-
-if(user){
-
-await moveGuestCart(
-user
-);
-
-}
-
-loadCart();
-
-}
-
-);
-
-
-
-/* Checkout */
-
-checkoutBtn.onclick=()=>{
-
-if(!auth.currentUser){
-
-showPopup(
-
-"Login Required",
-
-"Please login first"
-
-);
-
-return;
-
-}
-
-
-if(cartData.length===0){
-
-showPopup(
-
-"Cart Empty",
-
-"Add products first"
-
-);
-
-return;
-
-}
-
-
-/* Save checkout data */
-
-localStorage.setItem(
-
-"checkoutItems",
-
-JSON.stringify(
-cartData
-)
-
-);
-
-
-window.location=
-"checkout.html";
-
+/* Place Order Logic */
+document.getElementById("placeOrder").onclick = async () => {
+
+    const name     = document.getElementById("name").value.trim();
+    const phone    = document.getElementById("phone").value.trim();
+    const state    = window.selectedState;
+    const district = window.selectedDistrict;
+    const area     = document.getElementById("area").value.trim();
+    const street   = document.getElementById("street").value.trim();
+    const pincode  = document.getElementById("pincode").value.trim();
+
+    if (!name || !phone || !state || !district || !area || !street || !pincode) {
+        showPopup("Missing Information", "Please fill all fields", "error");
+        return;
+    }
+
+    if (checkoutItems.length === 0) {
+        showPopup("Cart Empty", "No items available", "error");
+        return;
+    }
+
+    const options = {
+        key: "rzp_test_T5tWAjBQVPNBI4",
+        amount: totalAmount * 100,
+        currency: "INR",
+        name: "Kodai Hills Spot",
+        description: "Order Payment",
+        image: "logo.png",
+        prefill: {
+            name: name,
+            contact: phone,
+            email: currentUser?.email || ""
+        },
+        theme: { color: "#2e7d32" },
+
+        handler: async function(response) {
+            try {
+                for (let item of checkoutItems) {
+                    await addDoc(collection(db, "Orders"), {
+                        uid:          currentUser.uid,
+                        name:         item.name,
+                        image:        item.image,
+                        quantity:     item.quantity,
+                        price:        item.price,
+                        pack:         item.selectedSize || "-",
+                        customerName: name,
+                        phone:        phone,
+                        state:        state,
+                        district:     district,
+                        area:         area,
+                        street:       street,
+                        pincode:      pincode,
+                        paymentId:    response.razorpay_payment_id,
+                        status:       "Pending",
+                        createdAt:    new Date()
+                    });
+                }
+                showPopup("Success", "Order placed successfully", "success");
+            } catch (error) {
+                console.log(error);
+                showPopup("Error", "Order saving failed", "error");
+            }
+        },
+
+        modal: {
+            ondismiss() {
+                showPopup("Cancelled", "Payment cancelled", "error");
+            }
+        }
+    };
+
+    const razorpay = new Razorpay(options);
+    razorpay.on("payment.failed", () => {
+        showPopup("Failed", "Payment failed", "error");
+    });
+    razorpay.open();
 };
