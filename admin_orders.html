@@ -1,194 +1,290 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Orders — Admin</title>
-<style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif;}
-body{display:none;background:#f0f4f0;padding-top:0;padding-bottom:60px;}
+import { auth, db } from "./firebase.js";
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
+import {
+  collection, getDocs, updateDoc, doc
+} from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
-#authLoader{
-  position:fixed;top:0;left:0;width:100%;height:100%;
-  background:#f0f4f0;display:flex;flex-direction:column;
-  align-items:center;justify-content:center;z-index:9999;
+const STATUS_OPTIONS = ["Order Placed","Accepted","Dispatched","Received"];
+
+const BADGE = {
+  "Order Placed": { bg:"#fff3cd", color:"#856404" },
+  "Accepted":     { bg:"#d4edda", color:"#155724" },
+  "Dispatched":   { bg:"#cce5ff", color:"#004085" },
+  "Received":     { bg:"#d1f0e0", color:"#0a5c36" }
+};
+
+// Maps status → chip count element ID
+const COUNT_IDS = {
+  "Order Placed": "countOrderPlaced",
+  "Accepted":     "countAccepted",
+  "Dispatched":   "countDispatched",
+  "Received":     "countReceived"
+};
+
+let allOrders    = [];
+let activeFilter = "All";
+let searchQuery  = "";
+
+/* ─── Auth ─── */
+onAuthStateChanged(auth, (user) => {
+  if (!user) { window.location.replace("index.html"); return; }
+  if (user.email !== "kodaihillsspot@gmail.com") {
+    window.location.replace("home.html"); return;
+  }
+  document.getElementById("authLoader").style.display = "none";
+  document.body.style.display = "block";
+  loadOrders();
+});
+
+/* ─── Fetch ─── */
+async function loadOrders() {
+  const div = document.getElementById("allOrders");
+  div.innerHTML = "<p style='color:#aaa;padding:10px;'>Loading…</p>";
+  try {
+    const snapshot = await getDocs(collection(db, "Orders"));
+    allOrders = [];
+    snapshot.forEach(item => allOrders.push({ id: item.id, ...item.data() }));
+
+    // Newest first
+    allOrders.sort((a, b) => {
+      const ta = a.createdAt?.toDate?.() ?? new Date(a.createdAt || 0);
+      const tb = b.createdAt?.toDate?.() ?? new Date(b.createdAt || 0);
+      return tb - ta;
+    });
+
+    // Debug: open browser console to see actual status values from Firestore
+    console.log("Orders loaded:", allOrders.length);
+    console.log("Status values:", [...new Set(allOrders.map(o => JSON.stringify(o.status)))]);
+
+    updateCounts();
+    renderOrders();
+  } catch(e) {
+    div.innerHTML = `<p style='color:red;padding:10px;'>Failed: ${e.message}</p>`;
+  }
 }
-.loader-spinner{width:32px;height:32px;border:3px solid #c8e6c9;border-top-color:#2e7d32;border-radius:50%;animation:spin .7s linear infinite;}
-@keyframes spin{to{transform:rotate(360deg);}}
-.loader-text{font-size:14px;color:#888;margin-top:10px;}
 
-/* ── Sticky top bar ── */
-.sticky-top{
-  position:sticky;top:0;z-index:100;
-  background:#f0f4f0;padding:12px 16px 0;
+/* ─── Count badges with pop animation ─── */
+function updateCounts() {
+  const counts = { "Order Placed":0, "Accepted":0, "Dispatched":0, "Received":0 };
+  allOrders.forEach(o => {
+    const s = o.status || "Order Placed";
+    if (counts[s] !== undefined) counts[s]++;
+  });
+
+  setCount("countAll", allOrders.length);
+  Object.entries(COUNT_IDS).forEach(([status, elId]) => {
+    setCount(elId, counts[status]);
+  });
 }
 
-.navbar{
-  background:white;padding:14px 16px;border-radius:16px;
-  display:flex;align-items:center;gap:12px;margin-bottom:12px;
-  box-shadow:0 2px 10px rgba(0,0,0,.08);
-}
-.back-btn{background:#f0f4f0;border:none;border-radius:10px;padding:8px 12px;font-size:18px;cursor:pointer;color:#2e7d32;font-weight:700;}
-.navbar-title{font-size:17px;font-weight:700;color:#1a1a1a;flex:1;}
-.order-count{font-size:13px;color:#888;white-space:nowrap;}
-
-/* Search */
-.search-wrap{position:relative;margin-bottom:10px;}
-.search-bar{
-  width:100%;padding:13px 14px 13px 40px;border:1.5px solid #e0e0e0;
-  border-radius:12px;font-size:14px;outline:none;background:white;
-  box-shadow:0 1px 4px rgba(0,0,0,.05);
-}
-.search-bar:focus{border-color:#2e7d32;}
-.search-icon{position:absolute;left:13px;top:50%;transform:translateY(-50%);font-size:16px;pointer-events:none;}
-.search-clear{
-  position:absolute;right:13px;top:50%;transform:translateY(-50%);
-  font-size:18px;cursor:pointer;color:#aaa;display:none;
-  background:none;border:none;padding:0;line-height:1;
+function setCount(elId, value) {
+  const el = document.getElementById(elId);
+  if (!el) return;
+  const prev = el.innerText;
+  el.innerText = value;
+  if (String(prev) !== String(value)) {
+    el.classList.remove("pop");
+    void el.offsetWidth; // reflow to restart animation
+    el.classList.add("pop");
+  }
 }
 
-/* Filter chips */
-.filter-row{
-  display:flex;gap:8px;overflow-x:auto;padding-bottom:10px;
-  scrollbar-width:none;
+/* ─── Render ─── */
+function renderOrders() {
+  const div = document.getElementById("allOrders");
+
+  let list = allOrders;
+
+  // Status filter
+  if (activeFilter !== "All") {
+    list = list.filter(o => (o.status || "Order Placed") === activeFilter);
+  }
+
+  // Search filter
+  if (searchQuery) {
+    const q = searchQuery.toLowerCase();
+    list = list.filter(o =>
+      (o.name        || "").toLowerCase().includes(q) ||
+      (o.userName    || "").toLowerCase().includes(q) ||
+      (o.userPhone   || o.phone || "").toLowerCase().includes(q) ||
+      (o.userEmail   || "").toLowerCase().includes(q) ||
+      (o.id          || "").toLowerCase().includes(q) ||
+      (o.trackingId  || "").toLowerCase().includes(q)
+    );
+  }
+
+  // Navbar count
+  document.getElementById("orderCount").innerText =
+    list.length === allOrders.length
+      ? `${allOrders.length} orders`
+      : `${list.length} / ${allOrders.length}`;
+
+  if (!list.length) {
+    div.innerHTML = `
+      <div class="no-results">
+        <div>📭</div>
+        ${searchQuery ? "No orders match your search." : "No orders in this status."}
+      </div>`;
+    return;
+  }
+
+  // When showing "All", group by status in logical order
+  if (activeFilter === "All" && !searchQuery) {
+    div.innerHTML = "";
+    // Render known statuses first
+    STATUS_OPTIONS.forEach(status => {
+      const group = list.filter(o => (o.status || "Order Placed") === status);
+      if (!group.length) return;
+      const badge = BADGE[status];
+      div.innerHTML += `
+        <div class="status-section-header">
+          <span class="status-section-label" style="color:${badge.color};">${status} (${group.length})</span>
+          <span class="status-section-line"></span>
+        </div>`;
+      group.forEach(data => div.innerHTML += buildCard(data));
+    });
+    // Catch any orders with unexpected/null status values
+    const unknown = list.filter(o => !STATUS_OPTIONS.includes(o.status || "Order Placed") && o.status !== undefined && o.status !== null && o.status !== "");
+    const missing  = list.filter(o => !o.status);
+    // Treat missing status as "Order Placed" — they'll already be caught above.
+    // Log for debugging:
+    if (unknown.length) {
+      console.warn("Orders with unrecognized status:", unknown.map(o => ({ id: o.id, status: o.status })));
+      div.innerHTML += `
+        <div class="status-section-header">
+          <span class="status-section-label" style="color:#e53935;">Unknown Status (${unknown.length})</span>
+          <span class="status-section-line"></span>
+        </div>`;
+      unknown.forEach(data => div.innerHTML += buildCard(data));
+    }
+  } else {
+    div.innerHTML = list.map(buildCard).join("");
+  }
 }
-.filter-row::-webkit-scrollbar{display:none;}
-.filter-chip{
-  white-space:nowrap;padding:8px 14px;border-radius:20px;
-  border:1.5px solid #e0e0e0;background:white;font-size:13px;
-  font-weight:600;color:#888;cursor:pointer;flex-shrink:0;
-  transition:all .18s;display:flex;align-items:center;gap:5px;
+
+/* ─── Build a single order card ─── */
+function buildCard(data) {
+  const status = data.status || "Order Placed";
+  const badge  = BADGE[status] || BADGE["Order Placed"];
+  let dateStr  = "";
+  if (data.createdAt) {
+    const d = data.createdAt.toDate ? data.createdAt.toDate() : new Date(data.createdAt);
+    dateStr = d.toLocaleDateString("en-IN", { day:"numeric", month:"short", year:"numeric" });
+  }
+  return `
+    <div class="order-card">
+      <div class="order-header">
+        <div>
+          <div class="order-name">${data.name || "Product"}</div>
+          ${dateStr ? `<div class="order-date">${dateStr}</div>` : ""}
+        </div>
+        <span class="status-badge" style="background:${badge.bg};color:${badge.color};">${status}</span>
+      </div>
+      <p class="order-meta">₹${data.grandTotal ?? data.price ?? 0} &nbsp;|&nbsp; Qty: ${data.quantity || 1}${
+        data.pack || data.selectedSize ? ` &nbsp;|&nbsp; ${data.pack || data.selectedSize}` : ""}</p>
+      ${data.userName  ? `<p class="order-meta">👤 ${data.userName}</p>` : ""}
+      ${(data.userPhone || data.phone) ? `<p class="order-meta">📱 ${data.userPhone || data.phone}</p>` : ""}
+      ${data.trackingId ? `<p class="order-meta">🚚 Tracking: <b>${data.trackingId}</b></p>` : ""}
+      <p class="order-id">ID: ${data.id}</p>
+      <button class="manage-btn" onclick="window._openOrderPopup('${data.id}')">Manage Order</button>
+    </div>`;
 }
-.filter-chip:active{transform:scale(.96);}
-.filter-chip.active{border-color:transparent;color:white;}
-.filter-chip[data-status="All"].active          {background:#2e7d32;}
-.filter-chip[data-status="Order Placed"].active {background:#856404;}
-.filter-chip[data-status="Accepted"].active     {background:#155724;}
-.filter-chip[data-status="Dispatched"].active   {background:#004085;}
-.filter-chip[data-status="Received"].active     {background:#0a5c36;}
 
-.chip-count{
-  display:inline-flex;align-items:center;justify-content:center;
-  background:rgba(0,0,0,.15);border-radius:10px;
-  padding:1px 7px;font-size:11px;min-width:20px;
-  transition:transform .2s;
+/* ─── Filter chip clicks ─── */
+document.getElementById("filterRow").addEventListener("click", (e) => {
+  const chip = e.target.closest(".filter-chip");
+  if (!chip) return;
+  document.querySelectorAll(".filter-chip").forEach(c => c.classList.remove("active"));
+  chip.classList.add("active");
+  activeFilter = chip.dataset.status;
+  renderOrders();
+});
+
+/* ─── Search ─── */
+document.getElementById("searchInput").addEventListener("input", (e) => {
+  searchQuery = e.target.value.trim();
+  document.getElementById("searchClear").style.display = searchQuery ? "block" : "none";
+  renderOrders();
+});
+
+window.clearSearch = () => {
+  document.getElementById("searchInput").value = "";
+  searchQuery = "";
+  document.getElementById("searchClear").style.display = "none";
+  renderOrders();
+};
+
+/* ─── Order popup ─── */
+let currentOrderId = "";
+
+window._openOrderPopup = (id) => {
+  currentOrderId = id;
+  const data = allOrders.find(o => o.id === id);
+  if (!data) { alert("Order not found"); return; }
+
+  document.getElementById("orderId").innerText     = id;
+  document.getElementById("productName").innerText = data.name       || "—";
+  document.getElementById("quantity").innerText    = data.quantity   || 1;
+  document.getElementById("totalPrice").innerText  = `₹${data.grandTotal ?? data.price ?? 0}`;
+  document.getElementById("userName").innerText    = data.userName    || "—";
+  document.getElementById("userEmail").innerText   = data.userEmail   || "—";
+  document.getElementById("userPhone").innerText   = data.userPhone   || data.phone || "—";
+  document.getElementById("userAddress").innerText = data.userAddress || data.address || "—";
+
+  const select = document.getElementById("statusSelect");
+  select.innerHTML = STATUS_OPTIONS.map(s =>
+    `<option value="${s}" ${s === (data.status || "Order Placed") ? "selected" : ""}>${s}</option>`
+  ).join("");
+
+  document.getElementById("trackingId").value = data.trackingId || "";
+  toggleTracking(data.status || "Order Placed");
+  select.onchange = () => toggleTracking(select.value);
+
+  document.getElementById("statusPopup").style.display = "flex";
+};
+
+function toggleTracking(status) {
+  const el = document.getElementById("trackingId");
+  const show = status === "Dispatched" || status === "Received";
+  el.style.display = show ? "block" : "none";
+  if (!show) el.value = "";
 }
-.chip-count.pop{animation:popBadge .25s ease;}
-@keyframes popBadge{0%{transform:scale(1.4);}100%{transform:scale(1);}}
 
-/* Scrollable content area */
-.orders-area{padding:0 16px 16px;}
+window.closePopup = () => {
+  document.getElementById("statusPopup").style.display = "none";
+};
 
-/* Status section headers */
-.status-section-header{
-  display:flex;align-items:center;gap:8px;
-  padding:6px 0 8px;margin-top:4px;
-}
-.status-section-label{
-  font-size:12px;font-weight:700;text-transform:uppercase;
-  letter-spacing:.6px;color:#aaa;
-}
-.status-section-line{flex:1;height:1px;background:#e8e8e8;}
+// Close popup on overlay tap
+document.getElementById("statusPopup").addEventListener("click", (e) => {
+  if (e.target === document.getElementById("statusPopup")) window.closePopup();
+});
 
-/* Order cards */
-.order-card{
-  background:white;padding:14px;margin-bottom:12px;
-  border-radius:14px;box-shadow:0 2px 8px rgba(0,0,0,.07);
-  animation:fadeUp .2s ease;
-}
-@keyframes fadeUp{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+document.getElementById("updateBtn").onclick = async () => {
+  const newStatus   = document.getElementById("statusSelect").value;
+  const newTracking = document.getElementById("trackingId").value.trim();
 
-.order-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;}
-.order-name{font-size:15px;font-weight:700;color:#1a1a1a;}
-.order-date{font-size:12px;color:#aaa;margin-top:2px;}
-.status-badge{padding:5px 12px;border-radius:20px;font-size:12px;font-weight:700;white-space:nowrap;margin-left:8px;flex-shrink:0;}
-.order-meta{font-size:13px;color:#555;margin-bottom:3px;}
-.order-id{font-size:11px;color:#bbb;margin-top:4px;}
-.manage-btn{margin-top:10px;width:100%;padding:11px;background:#2e7d32;color:white;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;transition:background .15s;}
-.manage-btn:active{background:#1b5e20;}
+  if ((newStatus === "Dispatched" || newStatus === "Received") && !newTracking) {
+    alert("Please enter a Tracking ID."); return;
+  }
+  try {
+    const updateData = { status: newStatus, updatedAt: new Date() };
+    if (newStatus === "Dispatched" || newStatus === "Received") {
+      updateData.trackingId = newTracking;
+    }
+    await updateDoc(doc(db, "Orders", currentOrderId), updateData);
 
-.no-results{text-align:center;padding:50px 20px;color:#bbb;font-size:14px;}
-.no-results div{font-size:36px;margin-bottom:10px;}
+    // Update local cache instantly — no refetch needed
+    const idx = allOrders.findIndex(o => o.id === currentOrderId);
+    if (idx !== -1) {
+      allOrders[idx].status = newStatus;
+      if (newTracking) allOrders[idx].trackingId = newTracking;
+    }
 
-/* ── Popup ── */
-.popup-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.5);justify-content:center;align-items:flex-end;z-index:1000;}
-.popup-sheet{background:white;width:100%;max-height:92vh;overflow-y:auto;padding:20px;border-radius:24px 24px 0 0;}
-.sheet-handle{width:40px;height:4px;background:#ddd;border-radius:2px;margin:0 auto 16px;}
-.popup-sheet h3{font-size:16px;font-weight:700;color:#1a1a1a;margin-bottom:12px;}
-.detail{padding:10px 12px;background:#f8f8f8;border-radius:10px;margin-bottom:8px;font-size:13px;color:#444;}
-.detail b{display:block;font-size:11px;color:#aaa;text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px;}
-.popup-sheet select,.popup-sheet input[type=text]{width:100%;padding:12px 14px;margin-top:10px;border:1.5px solid #e0e0e0;border-radius:10px;font-size:14px;outline:none;background:white;}
-.popup-sheet select:focus,.popup-sheet input:focus{border-color:#2e7d32;}
-.update-btn{width:100%;padding:13px;margin-top:12px;background:#2e7d32;color:white;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;}
-.close-btn{width:100%;padding:13px;margin-top:8px;background:red;color:white;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;}
-</style>
-</head>
-<body>
-
-<div id="authLoader">
-  <div class="loader-spinner"></div>
-  <div class="loader-text">Checking access…</div>
-</div>
-
-<!-- ── Sticky top: navbar + search + chips ── -->
-<div class="sticky-top">
-  <nav class="navbar">
-    <button class="back-btn" onclick="window.location='admin.html'">‹</button>
-    <span class="navbar-title">Orders</span>
-    <span class="order-count" id="orderCount"></span>
-  </nav>
-
-  <div class="search-wrap">
-    <span class="search-icon">🔍</span>
-    <input class="search-bar" id="searchInput" placeholder="Search by name, phone, ID…">
-    <button class="search-clear" id="searchClear" onclick="clearSearch()">✕</button>
-  </div>
-
-  <div class="filter-row" id="filterRow">
-    <button class="filter-chip active" data-status="All">
-      All <span class="chip-count" id="countAll">0</span>
-    </button>
-    <button class="filter-chip" data-status="Order Placed">
-      🟡 Order Placed <span class="chip-count" id="countOrderPlaced">0</span>
-    </button>
-    <button class="filter-chip" data-status="Accepted">
-      ✅ Accepted <span class="chip-count" id="countAccepted">0</span>
-    </button>
-    <button class="filter-chip" data-status="Dispatched">
-      🚚 Dispatched <span class="chip-count" id="countDispatched">0</span>
-    </button>
-    <button class="filter-chip" data-status="Received">
-      📦 Received <span class="chip-count" id="countReceived">0</span>
-    </button>
-  </div>
-</div>
-
-<!-- ── Order list ── -->
-<div class="orders-area">
-  <div id="allOrders"><p style="color:#aaa;padding:10px;">Loading…</p></div>
-</div>
-
-<!-- ── Manage popup ── -->
-<div class="popup-overlay" id="statusPopup">
-  <div class="popup-sheet">
-    <div class="sheet-handle"></div>
-    <h3>Manage Order</h3>
-    <div class="detail"><b>Order ID</b><span id="orderId"></span></div>
-    <div class="detail"><b>Product</b><span id="productName"></span></div>
-    <div class="detail"><b>Quantity</b><span id="quantity"></span></div>
-    <div class="detail"><b>Total</b><span id="totalPrice"></span></div>
-    <h3 style="margin-top:14px;">Customer</h3>
-    <div class="detail"><b>Name</b><span id="userName"></span></div>
-    <div class="detail"><b>Email</b><span id="userEmail"></span></div>
-    <div class="detail"><b>Phone</b><span id="userPhone"></span></div>
-    <div class="detail"><b>Address</b><span id="userAddress"></span></div>
-    <select id="statusSelect"></select>
-    <input type="text" id="trackingId" placeholder="Enter Tracking ID" style="display:none;">
-    <button class="update-btn" id="updateBtn">Update Order</button>
-    <button class="close-btn" onclick="closePopup()">Close</button>
-  </div>
-</div>
-
-<script type="module" src="js/admin_orders.js"></script>
-</body>
-</html>
+    alert(`✅ Order updated to "${newStatus}"!`);
+    window.closePopup();
+    updateCounts();   // refresh badge counts (with pop animation)
+    renderOrders();   // re-render current view
+  } catch(e) {
+    alert("Update failed: " + e.message);
+  }
+};
