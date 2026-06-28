@@ -23,20 +23,24 @@ style.innerHTML = `
   position: relative;
   cursor: pointer;
   background: white;
-  min-width: 180px;
   padding: 10px;
-  border-radius: 15px;
-  box-shadow: 0 2px 10px rgba(0,0,0,.1);
+  border-radius: 16px;
+  box-shadow: 0 3px 12px rgba(0,0,0,.08);
   animation: slideUp .7s;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
+  transition: transform .3s;
 }
+.card:hover { transform: translateY(-4px); }
 .card img {
   width: 100%;
-  height: 150px;
+  height: 135px;
   object-fit: cover;
-  border-radius: 10px;
+  border-radius: 11px;
+  transition: .3s;
 }
+.card:hover img { transform: scale(1.04); }
 .card h3 {
   margin-top: 10px;
   font-size: 16px;
