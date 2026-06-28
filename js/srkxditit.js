@@ -126,8 +126,16 @@ window.openUserPopup = (id) => {
   document.getElementById("popPhone").innerText =
     user.phone || user.mobile || "—";
 
-  document.getElementById("popAddress").innerText =
-    user.address || user.userAddress || "—";
+  /* address is stored as a map: { street, area, district, state, pincode } */
+  const addr = user.address || user.userAddress;
+  let addressStr = "-";
+  if (addr && typeof addr === "object") {
+    const parts = [addr.street, addr.area, addr.district, addr.state, addr.pincode].filter(Boolean);
+    addressStr = parts.length > 0 ? parts.join(", ") : "-";
+  } else if (typeof addr === "string" && addr) {
+    addressStr = addr;
+  }
+  document.getElementById("popAddress").innerText = addressStr;
 
   /* Format joined date if available */
   let joinedStr = "—";
