@@ -332,3 +332,4 @@ function init() {
   loadProducts();
 
 } // end init()
+
