@@ -69,6 +69,7 @@ async function saveCategories(items) {
 
 /* Populate any <select> element with current categories */
 async function populateCategorySelect(selectEl, selectedValue) {
+  if (!selectEl) return; /* guard against missing element */
   const cats = await getCategories();
   selectEl.innerHTML = cats
     .map(c => `<option value="${c}" ${c === selectedValue ? "selected" : ""}>${c}</option>`)
@@ -77,29 +78,33 @@ async function populateCategorySelect(selectEl, selectedValue) {
 
 /* Render the chip list in the manager UI */
 async function loadCategoryChips() {
-  const cats  = await getCategories();
-  const chips = document.getElementById("categoryChips");
-  chips.innerHTML = "";
+  try {
+    const cats  = await getCategories();
+    const chips = document.getElementById("categoryChips");
+    if (!chips) return;
+    chips.innerHTML = "";
 
-  cats.forEach(cat => {
-    const isDefault = DEFAULT_CATEGORIES.map(d => d.toLowerCase()).includes(cat.toLowerCase());
-    const chip = document.createElement("span");
-    chip.className = `category-chip${isDefault ? " builtin" : ""}`;
+    cats.forEach(cat => {
+      const isDefault = DEFAULT_CATEGORIES.map(d => d.toLowerCase()).includes(cat.toLowerCase());
+      const chip = document.createElement("span");
+      chip.className = `category-chip${isDefault ? " builtin" : ""}`;
 
-    chip.innerHTML = `
-      ${cat}
-      ${isDefault
-        ? ""
-        : `<button class="chip-delete" title="Delete category" onclick="deleteCategory('${cat}')">✕</button>`
-      }
-    `;
-    chips.appendChild(chip);
-  });
+      chip.innerHTML = `
+        ${cat}
+        ${isDefault
+          ? ""
+          : `<button class="chip-delete" title="Delete category" onclick="deleteCategory('${cat}')">✕</button>`
+        }
+      `;
+      chips.appendChild(chip);
+    });
 
-  /* Also refresh both category dropdowns */
-  await populateCategorySelect(document.getElementById("category"));
-  const editCatEl = document.getElementById("editCategory");
-  if (editCatEl) await populateCategorySelect(editCatEl);
+    /* Refresh category dropdowns — guarded */
+    await populateCategorySelect(document.getElementById("category"));
+    await populateCategorySelect(document.getElementById("editCategory"));
+  } catch (err) {
+    console.error("loadCategoryChips error:", err);
+  }
 }
 
 
@@ -209,7 +214,7 @@ onAuthStateChanged(auth, (user) => {
   loadStats();
   loadProducts();
   loadOrders();
-  loadCategoryChips(); /* initialise category UI */
+  loadCategoryChips().catch(err => console.error("Category init error:", err));
 });
 
 
@@ -604,8 +609,4 @@ window.openOrderPopup = async (id) => {
 
 /* Show tracking input only for Dispatched / Received */
 function toggleTrackingField(status) {
-  const trackingInput = document.getElementById("trackingId");
-  if (status === "Dispatched" || status === "Received") {
-    trackingInput.style.display = "block";
-    trackingInput.placeholder   = "Enter Tracking ID (required)";
-  
+  const trackingInput = document.getElementBy
