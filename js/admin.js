@@ -11,7 +11,9 @@ import {
   deleteDoc,
   updateDoc,
   doc,
-  getCountFromServer
+  getCountFromServer,
+  setDoc,
+  getDoc
 } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
 
@@ -31,9 +33,116 @@ const STATUS_OPTIONS = [
   "Received"
 ];
 
+/* ── Default categories (always present, cannot be deleted) ── */
+const DEFAULT_CATEGORIES = [
+  "Chocolate",
+  "Honey",
+  "Herbs",
+  "Oils",
+  "Fruits",
+  "Organic Products"
+];
 
 
+/* ==============================
+   Categories — Firestore helpers
+   Stored as a single doc: Categories/list  { items: [...] }
+============================== */
 
+const CAT_DOC = doc(db, "Categories", "list");
+
+async function getCategories() {
+  try {
+    const snap = await getDoc(CAT_DOC);
+    if (snap.exists()) {
+      return snap.data().items || DEFAULT_CATEGORIES;
+    }
+    return DEFAULT_CATEGORIES;
+  } catch {
+    return DEFAULT_CATEGORIES;
+  }
+}
+
+async function saveCategories(items) {
+  await setDoc(CAT_DOC, { items });
+}
+
+/* Populate any <select> element with current categories */
+async function populateCategorySelect(selectEl, selectedValue) {
+  const cats = await getCategories();
+  selectEl.innerHTML = cats
+    .map(c => `<option value="${c}" ${c === selectedValue ? "selected" : ""}>${c}</option>`)
+    .join("");
+}
+
+/* Render the chip list in the manager UI */
+async function loadCategoryChips() {
+  const cats  = await getCategories();
+  const chips = document.getElementById("categoryChips");
+  chips.innerHTML = "";
+
+  cats.forEach(cat => {
+    const isDefault = DEFAULT_CATEGORIES.map(d => d.toLowerCase()).includes(cat.toLowerCase());
+    const chip = document.createElement("span");
+    chip.className = `category-chip${isDefault ? " builtin" : ""}`;
+
+    chip.innerHTML = `
+      ${cat}
+      ${isDefault
+        ? ""
+        : `<button class="chip-delete" title="Delete category" onclick="deleteCategory('${cat}')">✕</button>`
+      }
+    `;
+    chips.appendChild(chip);
+  });
+
+  /* Also refresh both category dropdowns */
+  await populateCategorySelect(document.getElementById("category"));
+  const editCatEl = document.getElementById("editCategory");
+  if (editCatEl) await populateCategorySelect(editCatEl);
+}
+
+
+/* ==============================
+   Add Category
+============================== */
+
+document.getElementById("addCategoryBtn").onclick = async () => {
+  const input = document.getElementById("newCategoryInput");
+  const name  = input.value.trim();
+  if (!name) { alert("Enter a category name."); return; }
+
+  const cats = await getCategories();
+
+  if (cats.some(c => c.toLowerCase() === name.toLowerCase())) {
+    alert("This category already exists.");
+    return;
+  }
+
+  cats.push(name);
+  await saveCategories(cats);
+  input.value = "";
+  await loadCategoryChips();
+};
+
+/* Allow pressing Enter in the input */
+document.getElementById("newCategoryInput").addEventListener("keydown", (e) => {
+  if (e.key === "Enter") document.getElementById("addCategoryBtn").click();
+});
+
+
+/* ==============================
+   Delete Category
+============================== */
+
+window.deleteCategory = async (name) => {
+  if (!confirm(`Delete category "${name}"? Products in this category won't be affected.`)) return;
+
+  const cats    = await getCategories();
+  const updated = cats.filter(c => c !== name);
+  await saveCategories(updated);
+  await loadCategoryChips();
+};
 
 
 /* ==============================
@@ -100,6 +209,7 @@ onAuthStateChanged(auth, (user) => {
   loadStats();
   loadProducts();
   loadOrders();
+  loadCategoryChips(); /* initialise category UI */
 });
 
 
@@ -272,19 +382,28 @@ window.editProduct = async (id) => {
   currentEditId = id;
 
   const snapshot = await getDocs(collection(db, "Products"));
+  let productData = null;
+
   snapshot.forEach((item) => {
-    if (item.id === id) {
-      const data = item.data();
-      document.getElementById("editName").value        = data.name        || "";
-      document.getElementById("editPrice").value       = data.price       || "";
-      document.getElementById("editOldPrice").value    = data.oldPrice    || "";
-      document.getElementById("editPackQty").value     = data.packQty     || "";
-      document.getElementById("editImage").value       = data.Image       || "";
-      document.getElementById("editDescription").value = data.description || "";
-      document.getElementById("editFewStock").checked      = data.fewStock     || false;
-      document.getElementById("editFreeDelivery").checked  = data.freeDelivery || false;
-    }
+    if (item.id === id) productData = item.data();
   });
+
+  if (!productData) { alert("Product not found."); return; }
+
+  document.getElementById("editName").value        = productData.name        || "";
+  document.getElementById("editPrice").value       = productData.price       || "";
+  document.getElementById("editOldPrice").value    = productData.oldPrice    || "";
+  document.getElementById("editPackQty").value     = productData.packQty     || "";
+  document.getElementById("editImage").value       = productData.Image       || "";
+  document.getElementById("editDescription").value = productData.description || "";
+  document.getElementById("editFewStock").checked      = productData.fewStock     || false;
+  document.getElementById("editFreeDelivery").checked  = productData.freeDelivery || false;
+
+  /* Populate and pre-select category */
+  await populateCategorySelect(
+    document.getElementById("editCategory"),
+    productData.category || ""
+  );
 
   document.getElementById("editPopup").style.display = "flex";
 };
@@ -302,6 +421,7 @@ document.getElementById("saveEditBtn").onclick = async () => {
       packQty:      document.getElementById("editPackQty").value.trim(),
       Image:        document.getElementById("editImage").value.trim(),
       description:  document.getElementById("editDescription").value.trim(),
+      category:     document.getElementById("editCategory").value,
       fewStock:     document.getElementById("editFewStock").checked,
       freeDelivery: document.getElementById("editFreeDelivery").checked
     });
@@ -488,54 +608,4 @@ function toggleTrackingField(status) {
   if (status === "Dispatched" || status === "Received") {
     trackingInput.style.display = "block";
     trackingInput.placeholder   = "Enter Tracking ID (required)";
-  } else {
-    trackingInput.style.display = "none";
-    trackingInput.value         = "";
-  }
-}
-
-
-/* ==============================
-   Order Popup — Close
-============================== */
-
-window.closePopup = () => {
-  document.getElementById("statusPopup").style.display = "none";
-};
-
-
-/* ==============================
-   Update Order Status
-============================== */
-
-document.getElementById("updateBtn").onclick = async () => {
-  const newStatus   = document.getElementById("statusSelect").value;
-  const newTracking = document.getElementById("trackingId").value.trim();
-
-  /* Tracking ID required when Dispatched or Received */
-  if ((newStatus === "Dispatched" || newStatus === "Received") && !newTracking) {
-    alert("Please enter a Tracking ID before setting this status.");
-    return;
-  }
-
-  try {
-    const updateData = {
-      status:    newStatus,
-      updatedAt: new Date()
-    };
-
-    if (newStatus === "Dispatched" || newStatus === "Received") {
-      updateData.trackingId = newTracking;
-    }
-
-    await updateDoc(doc(db, "Orders", currentOrderId), updateData);
-
-    alert(`✅ Order updated to "${newStatus}" successfully!`);
-    closePopup();
-    loadOrders();
-
-  } catch (error) {
-    alert("Update failed: " + error.message);
-    console.error(error);
-  }
-};
+  
