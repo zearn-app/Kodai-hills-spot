@@ -74,6 +74,88 @@ background:red;
 color:white;
 }
 
+/* Category Manager */
+.category-manager {
+  background: white;
+  border-radius: 15px;
+  padding: 18px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.07);
+}
+
+.category-manager h3 {
+  margin: 0 0 14px 0;
+  font-size: 16px;
+  color: #1a1a1a;
+}
+
+.category-add-row {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.category-add-row input {
+  flex: 1;
+  padding: 10px 14px;
+  border: 1.5px solid #e0e0e0;
+  border-radius: 10px;
+  font-size: 14px;
+  outline: none;
+}
+
+.category-add-row input:focus {
+  border-color: #2e7d32;
+}
+
+.category-add-row button {
+  padding: 10px 16px;
+  background: #2e7d32;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.category-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.category-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: #f0f7f0;
+  border: 1.5px solid #c8e6c9;
+  border-radius: 20px;
+  font-size: 13px;
+  color: #2e7d32;
+  font-weight: 500;
+}
+
+.category-chip .chip-delete {
+  background: none;
+  border: none;
+  color: #c62828;
+  font-size: 15px;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+  font-weight: 700;
+}
+
+.category-chip.builtin {
+  background: #f5f5f5;
+  border-color: #e0e0e0;
+  color: #888;
+}
+
 </style>
 
 </head>
@@ -163,14 +245,8 @@ style="background:#2196f3;color:white;margin-bottom:10px;">
 </div>
 
 
-<select id="category">
-<option>Chocolate</option>
-<option>Honey</option>
-<option>Herbs</option>
-<option>Oils</option>
-<option>fruits</option>
-<option>organic products</option>
-</select>
+<!-- Category dropdown (populated dynamically) -->
+<select id="category"></select>
 
 <input id="image" placeholder="Image URL">
 
@@ -192,6 +268,23 @@ style="background:#2196f3;color:white;margin-bottom:10px;">
 Add Product
 </button>
 
+</div>
+
+
+<!-- ── Category Manager ── -->
+<h2 class="heading">Categories</h2>
+
+<div class="container">
+  <div class="category-manager">
+    <h3>Manage Categories</h3>
+    <div class="category-add-row">
+      <input id="newCategoryInput" placeholder="New category name…">
+      <button id="addCategoryBtn">+ Add</button>
+    </div>
+    <div class="category-chips" id="categoryChips">
+      <!-- chips rendered by JS -->
+    </div>
+  </div>
 </div>
 
 
@@ -303,6 +396,10 @@ padding:20px;
 <input id="editImage" placeholder="Image URL">
 
 <textarea id="editDescription" placeholder="Description"></textarea>
+
+<!-- Category (edit) — populated dynamically -->
+<label style="display:block;margin-top:15px;font-size:13px;color:#555;font-weight:600;">Category</label>
+<select id="editCategory" style="width:100%;padding:12px;margin-top:6px;border-radius:10px;border:1.5px solid #e0e0e0;font-size:14px;"></select>
 
 <!-- Few Stock (edit) -->
 <div class="stockBox" style="margin-top:15px;">
