@@ -582,20 +582,48 @@ OK
 </div>
 
 
+<!-- Select Popup — placed BEFORE the scripts that reference it -->
+<div
+id="selectPopup"
+class="selectPopup">
+
+<div class="selectBox">
+
+<div
+id="optionList">
+
+</div>
+
+</div>
+
+</div>
+
+
 <script>
 
-window.closePopup=()=>{
+/* ── Popup helpers (defined first so inline scripts & module can use them) ── */
 
-document.getElementById(
-"popupBox"
-).style.display="none";
+function showPopup(title, message, type) {
+    type = type || "info";
+    var popupLogo = document.querySelector(".popup-logo");
+    popupLogo.src = type === "success"
+        ? "https://cdn-icons-png.flaticon.com/512/845/845646.png"
+        : type === "error"
+        ? "https://cdn-icons-png.flaticon.com/512/1828/1828843.png"
+        : "logo.png";
+    document.getElementById("popupTitle").innerText = title;
+    document.getElementById("popupMessage").innerText = message;
+    document.getElementById("popupBox").style.display = "flex";
+}
 
+window.showPopup = showPopup;
+
+window.closePopup = function() {
+    document.getElementById("popupBox").style.display = "none";
 };
 
-</script>
 
-
-<script>
+/* ── District data ── */
 
 // SOUTH → NORTH order
 const districtData = {
@@ -830,178 +858,66 @@ const districtData = {
 };
 
 
-const stateSelect=
-document.getElementById(
-"stateSelect"
-);
+/* ── Select popup logic ── */
 
-const districtSelect=
-document.getElementById(
-"districtSelect"
-);
+const stateSelect    = document.getElementById("stateSelect");
+const districtSelect = document.getElementById("districtSelect");
+const selectPopup    = document.getElementById("selectPopup");
+const optionList     = document.getElementById("optionList");
 
-const selectPopup=
-document.getElementById(
-"selectPopup"
-);
+let selectedState    = "";
+let selectedDistrict = "";
 
-const optionList=
-document.getElementById(
-"optionList"
-);
+// Expose to module script (checkout.js reads these via window)
+Object.defineProperty(window, "selectedState",    { get: () => selectedState });
+Object.defineProperty(window, "selectedDistrict", { get: () => selectedDistrict });
 
-let selectedState="";
-let selectedDistrict="";
+function openSelect(list, type) {
+    selectPopup.style.display = "flex";
+    optionList.innerHTML = "";
 
+    list.forEach(function(item) {
+        const div = document.createElement("div");
+        div.className = "option";
+        div.innerText = item;
 
-function openSelect(
-list,
-type
-){
+        div.onclick = function() {
+            if (type === "state") {
+                selectedState    = item;
+                stateSelect.childNodes[0].textContent = item;
+                selectedDistrict = "";
+                districtSelect.childNodes[0].textContent = "Select District";
+            } else {
+                selectedDistrict = item;
+                districtSelect.childNodes[0].textContent = item;
+            }
+            selectPopup.style.display = "none";
+        };
 
-selectPopup.style.display=
-"flex";
-
-optionList.innerHTML="";
-
-
-list.forEach(item=>{
-
-const div=
-document.createElement(
-"div"
-);
-
-div.className=
-"option";
-
-div.innerText=
-item;
-
-
-div.onclick=()=>{
-
-if(type==="state"){
-
-selectedState=item;
-
-stateSelect.innerText=
-item;
-
-selectedDistrict="";
-
-districtSelect.innerText=
-"Select District";
-
-}
-else{
-
-selectedDistrict=item;
-
-districtSelect.innerText=
-item;
-
+        optionList.appendChild(div);
+    });
 }
 
-selectPopup.style.display=
-"none";
-
+stateSelect.onclick = function() {
+    openSelect(Object.keys(districtData), "state");
 };
 
-optionList.appendChild(
-div
-);
-
-});
-
-}
-
-
-stateSelect.onclick=()=>{
-
-openSelect(
-
-Object.keys(
-districtData
-),
-
-"state"
-
-);
-
+districtSelect.onclick = function() {
+    if (!selectedState) {
+        showPopup("Select State", "Please select state first", "error");
+        return;
+    }
+    openSelect(districtData[selectedState], "district");
 };
 
-
-districtSelect.onclick=()=>{
-
-if(!selectedState){
-
-showPopup(
-
-"Select State",
-
-"Please select state first",
-
-"error"
-
-);
-
-return;
-
-}
-
-openSelect(
-
-districtData[
-selectedState
-],
-
-"district"
-
-);
-
+/* close popup on outside click */
+selectPopup.onclick = function(e) {
+    if (e.target === selectPopup) {
+        selectPopup.style.display = "none";
+    }
 };
-
-
-/* close popup outside click */
-
-selectPopup.onclick=(e)=>{
-
-if(
-
-e.target===selectPopup
-
-){
-
-selectPopup.style.display=
-"none";
-
-}
-
-};
-
-
-
-
-
 
 </script>
-
-
-<div
-id="selectPopup"
-class="selectPopup">
-
-<div class="selectBox">
-
-<div
-id="optionList">
-
-</div>
-
-</div>
-
-</div>
 
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 
