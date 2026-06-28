@@ -1,555 +1,590 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-
 <title>My Orders</title>
-
 <style>
 
-*{
-margin:0;
-padding:0;
-box-sizing:border-box;
-font-family:Arial,sans-serif;
-}
+*{ margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI',Arial,sans-serif; }
 
 body{
-background:#f5f5f5;
-padding:15px;
-padding-bottom:90px;
+  background:#f0f4f0;
+  padding:15px;
+  padding-bottom:90px;
 }
 
-.header{
-margin-bottom:20px;
-}
-
-.header h1{
-color:#2e7d32;
-margin-bottom:15px;
-}
+.header{ margin-bottom:20px; }
+.header h1{ color:#2e7d32; margin-bottom:15px; font-size:26px; }
 
 .search-box{
-
-width:100%;
-padding:14px;
-border:none;
-border-radius:12px;
-margin-bottom:10px;
-box-shadow:0 2px 10px rgba(0,0,0,.1);
-
+  width:100%;
+  padding:14px;
+  border:none;
+  border-radius:12px;
+  margin-bottom:10px;
+  box-shadow:0 2px 10px rgba(0,0,0,.1);
+  font-size:15px;
+  outline:none;
 }
 
+/* ── Order Card ── */
 .order-card{
-
-background:white;
-padding:15px;
-margin-bottom:15px;
-border-radius:15px;
-display:flex;
-gap:15px;
-box-shadow:0 2px 10px rgba(0,0,0,.1);
-cursor:pointer;
-
+  background:white;
+  padding:15px;
+  margin-bottom:15px;
+  border-radius:18px;
+  display:flex;
+  gap:15px;
+  box-shadow:0 2px 10px rgba(0,0,0,.08);
+  cursor:pointer;
+  transition:.2s;
 }
-
+.order-card:active{ transform:scale(.98); }
 .order-card img{
+  width:90px; height:90px;
+  object-fit:cover;
+  border-radius:12px;
+  flex-shrink:0;
+}
+.details{ flex:1; }
+.details h3{ margin-bottom:4px; font-size:16px; color:#1a1a1a; }
+.det-price{ font-weight:700; color:#2e7d32; font-size:15px; margin-top:3px; }
+.det-qty{ font-size:13px; color:#777; margin-top:2px; }
 
-width:100px;
-height:100px;
-object-fit:cover;
-border-radius:10px;
+/* Status pill on card */
+.status-pill{
+  display:inline-block;
+  padding:5px 12px;
+  border-radius:20px;
+  margin-top:8px;
+  font-size:13px;
+  font-weight:700;
+}
+.pill-placed    { background:#fff3cd; color:#856404; }
+.pill-accepted  { background:#d4edda; color:#155724; }
+.pill-dispatched{ background:#cce5ff; color:#004085; }
+.pill-received  { background:#d1f0e0; color:#0a5c36; }
 
+/* ── Order Detail Popup ── */
+.popup-overlay{
+  display:none;
+  position:fixed; top:0; left:0;
+  width:100%; height:100%;
+  background:rgba(0,0,0,.5);
+  justify-content:center; align-items:flex-end;
+  z-index:999;
+}
+.popup-sheet{
+  background:white;
+  width:100%;
+  max-height:92vh;
+  overflow-y:auto;
+  border-radius:28px 28px 0 0;
+  padding:20px;
+  animation:slideUp .3s ease;
+}
+@keyframes slideUp{
+  from{ transform:translateY(100%); }
+  to{ transform:translateY(0); }
+}
+.sheet-handle{
+  width:40px; height:4px;
+  background:#ddd; border-radius:2px;
+  margin:0 auto 18px;
+}
+.sheet-close{
+  float:right;
+  font-size:24px;
+  cursor:pointer;
+  color:#999;
+  line-height:1;
+}
+.popup-product-img{
+  width:100%; height:200px;
+  object-fit:cover;
+  border-radius:16px;
+  margin-bottom:16px;
+}
+.popup-name{ font-size:20px; font-weight:700; color:#1a1a1a; margin-bottom:6px; }
+.popup-price{ font-size:18px; font-weight:700; color:#2e7d32; margin-bottom:4px; }
+.popup-meta{ font-size:14px; color:#666; margin-bottom:16px; }
+
+/* ── Step Tracker ── */
+.tracker{ margin:20px 0 10px; }
+.tracker-title{ font-size:16px; font-weight:700; color:#1a1a1a; margin-bottom:16px; }
+.steps{ position:relative; padding-left:28px; }
+
+.step{ position:relative; padding-bottom:24px; }
+.step:last-child{ padding-bottom:0; }
+
+/* Vertical line */
+.step::before{
+  content:"";
+  position:absolute;
+  left:-20px; top:18px;
+  width:2px;
+  bottom:0;
+  background:#e0e0e0;
+}
+.step:last-child::before{ display:none; }
+.step.done::before{ background:#2e7d32; }
+
+/* Circle dot */
+.step-dot{
+  position:absolute;
+  left:-26px; top:4px;
+  width:14px; height:14px;
+  border-radius:50%;
+  border:2px solid #ccc;
+  background:white;
+}
+.step.done  .step-dot{ background:#2e7d32; border-color:#2e7d32; }
+.step.active .step-dot{
+  background:white;
+  border-color:#2e7d32;
+  box-shadow:0 0 0 3px rgba(46,125,50,.2);
 }
 
-.details{
-flex:1;
+.step-label{ font-size:15px; font-weight:600; color:#aaa; }
+.step.done   .step-label{ color:#2e7d32; }
+.step.active .step-label{ color:#1a1a1a; }
+
+.step-date{ font-size:12px; color:#aaa; margin-top:2px; }
+.step.done  .step-date{ color:#777; }
+
+/* ── Tracking ID box ── */
+.tracking-box{
+  display:none;
+  background:#e8f5e9;
+  border:1px solid #c8e6c9;
+  border-radius:14px;
+  padding:14px 16px;
+  margin-top:14px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
 }
-
-.details h3{
-margin-bottom:5px;
+.tracking-box.hidden{ display:none; }
+.tracking-label{ font-size:13px; color:#555; margin-bottom:2px; }
+.tracking-id{ font-size:15px; font-weight:700; color:#1a1a1a; }
+.copy-btn{
+  padding:8px 14px;
+  background:#2e7d32;
+  color:white;
+  border:none;
+  border-radius:10px;
+  font-size:13px;
+  font-weight:600;
+  cursor:pointer;
 }
+.copy-btn:active{ opacity:.8; }
 
-.price{
-
-font-weight:bold;
-color:#2e7d32;
-margin-top:5px;
-
-}
-
-.status{
-
-display:inline-block;
-padding:6px 12px;
-border-radius:20px;
-margin-top:10px;
-font-size:14px;
-font-weight:bold;
-
-}
-
-.pending{
-background:#fff3cd;
-color:#856404;
-}
-
-.approved{
-background:#d4edda;
-color:#155724;
-}
-
-.delivered{
-background:#d1ecf1;
-color:#0c5460;
-}
-
-.track{
-
-margin-top:10px;
-font-size:14px;
-color:#555;
-}
-
+/* ── Review Button ── */
 .review-btn{
+  display:none;
+  width:100%;
+  margin-top:18px;
+  padding:14px;
+  border:none;
+  border-radius:14px;
+  background:linear-gradient(135deg,#f59e0b,#d97706);
+  color:white;
+  font-size:16px;
+  font-weight:700;
+  cursor:pointer;
+}
+.review-btn.visible{ display:block; }
 
-margin-top:10px;
-padding:10px;
-border:none;
-border-radius:10px;
-background:#2e7d32;
-color:white;
-
+/* ── Review Popup ── */
+.review-overlay{
+  display:none;
+  position:fixed; top:0; left:0;
+  width:100%; height:100%;
+  background:rgba(0,0,0,.5);
+  justify-content:center; align-items:center;
+  z-index:1999;
+}
+.review-box{
+  background:white;
+  width:90%;
+  max-width:360px;
+  padding:24px;
+  border-radius:22px;
+  text-align:center;
+}
+.review-box h3{ margin-bottom:14px; color:#1a1a1a; }
+.stars{ display:flex; justify-content:center; gap:8px; margin-bottom:16px; }
+.star{
+  font-size:32px;
+  cursor:pointer;
+  opacity:.3;
+  transition:.15s;
+}
+.star.lit{ opacity:1; }
+.review-textarea{
+  width:100%;
+  height:100px;
+  padding:12px;
+  border:1.5px solid #e0e0e0;
+  border-radius:12px;
+  font-size:14px;
+  resize:none;
+  outline:none;
+  margin-bottom:14px;
+}
+.review-textarea:focus{ border-color:#2e7d32; }
+.submit-review-btn{
+  width:100%;
+  padding:13px;
+  background:#2e7d32;
+  color:white;
+  border:none;
+  border-radius:12px;
+  font-size:15px;
+  font-weight:700;
+  cursor:pointer;
+  margin-bottom:8px;
+}
+.cancel-review-btn{
+  width:100%;
+  padding:11px;
+  background:#f5f5f5;
+  color:#555;
+  border:none;
+  border-radius:12px;
+  font-size:14px;
+  cursor:pointer;
 }
 
-.popup{
-
-display:none;
-position:fixed;
-top:0;
-left:0;
-width:100%;
-height:100%;
-background:rgba(0,0,0,.5);
-justify-content:center;
-align-items:center;
-z-index:999;
-
+/* ── Empty State ── */
+.empty{
+  text-align:center;
+  padding:60px 20px;
+  color:#aaa;
 }
+.empty div{ font-size:48px; margin-bottom:12px; }
 
-.popup-content{
-
-background:white;
-width:90%;
-padding:20px;
-border-radius:20px;
-
-}
-
-.close{
-
-float:right;
-font-size:25px;
-cursor:pointer;
-
-}
-
+/* ── Bottom Nav ── */
 .bottom-nav{
-
-position:fixed;
-bottom:0;
-left:0;
-width:100%;
-background:white;
-display:flex;
-justify-content:space-around;
-padding:15px;
-box-shadow:0 -2px 10px rgba(0,0,0,.1);
-
+  position:fixed; bottom:0; left:0;
+  width:100%;
+  background:white;
+  display:flex;
+  justify-content:space-around;
+  padding:14px;
+  box-shadow:0 -2px 10px rgba(0,0,0,.1);
 }
-
 .bottom-nav a{
-
-text-decoration:none;
-color:black;
-font-size:14px;
-text-align:center;
-
+  text-decoration:none;
+  color:#555;
+  font-size:13px;
+  text-align:center;
 }
+.active{ color:#2e7d32; font-weight:700; }
 
-.active{
-color:#2e7d32;
-font-weight:bold;
+/* Toast */
+.toast{
+  position:fixed; bottom:90px; left:50%; transform:translateX(-50%);
+  background:#333; color:white;
+  padding:10px 22px;
+  border-radius:30px;
+  font-size:14px;
+  opacity:0;
+  pointer-events:none;
+  transition:opacity .3s;
+  z-index:9999;
+  white-space:nowrap;
 }
+.toast.show{ opacity:1; }
 
 </style>
-
 </head>
-
 <body>
 
 <div class="header">
-
-<h1>
-📦 My Orders
-</h1>
-
-<input
-class="search-box"
-id="search"
-placeholder="🔍 Search product">
-
-<input
-class="search-box"
-id="date"
-type="date">
-
+  <h1>📦 My Orders</h1>
+  <input class="search-box" id="search" placeholder="🔍 Search by product name">
+  <input class="search-box" id="date" type="date">
 </div>
 
+<div id="orders">Loading...</div>
 
-<div id="orders">
+<!-- ── Order Detail Sheet ── -->
+<div class="popup-overlay" id="detailOverlay">
+  <div class="popup-sheet">
+    <div class="sheet-handle"></div>
+    <span class="sheet-close" id="sheetClose">✕</span>
 
-Loading...
+    <img class="popup-product-img" id="popImg">
+    <div class="popup-name"  id="popName"></div>
+    <div class="popup-price" id="popPrice"></div>
+    <div class="popup-meta"  id="popMeta"></div>
 
+    <!-- Step Tracker -->
+    <div class="tracker">
+      <div class="tracker-title">📍 Order Tracking</div>
+      <div class="steps" id="stepTrack"></div>
+    </div>
+
+    <!-- Tracking ID -->
+    <div class="tracking-box hidden" id="trackingBox">
+      <div>
+        <div class="tracking-label">Tracking ID</div>
+        <div class="tracking-id" id="trackingIdVal"></div>
+      </div>
+      <button class="copy-btn" id="copyBtn">Copy</button>
+    </div>
+
+    <!-- Review -->
+    <button class="review-btn" id="openReviewBtn">⭐ Write a Review</button>
+  </div>
 </div>
 
-
-<div class="popup" id="popup">
-
-<div class="popup-content">
-
-<span class="close"
-onclick="popup.style.display='none'">
-
-×
-
-</span>
-
-<div id="popupData">
-
+<!-- ── Review Popup ── -->
+<div class="review-overlay" id="reviewOverlay">
+  <div class="review-box">
+    <h3>Rate this product</h3>
+    <div class="stars" id="starRow">
+      <span class="star" data-v="1">★</span>
+      <span class="star" data-v="2">★</span>
+      <span class="star" data-v="3">★</span>
+      <span class="star" data-v="4">★</span>
+      <span class="star" data-v="5">★</span>
+    </div>
+    <textarea class="review-textarea" id="reviewText" placeholder="Share your thoughts..."></textarea>
+    <button class="submit-review-btn" id="submitReview">Submit Review</button>
+    <button class="cancel-review-btn" id="cancelReview">Cancel</button>
+  </div>
 </div>
 
-</div>
-
-</div>
-
+<!-- Toast -->
+<div class="toast" id="toast"></div>
 
 <nav class="bottom-nav">
-
-<a href="index.html">
-
-🏠<br>
-Home
-
-</a>
-
-<a href="products.html">
-
-🛍️<br>
-Products
-
-</a>
-
-<a href="cart.html">
-
-🛒<br>
-Cart
-
-</a>
-
-<a href="profile.html"
-class="active">
-
-👤<br>
-Profile
-
-</a>
-
+  <a href="index.html">🏠<br>Home</a>
+  <a href="products.html">🛍️<br>Products</a>
+  <a href="cart.html">🛒<br>Cart</a>
+  <a href="profile.html" class="active">👤<br>Profile</a>
 </nav>
 
-
 <script type="module">
-
-import {db,auth}
-from "./js/firebase.js";
-
+import { db, auth } from "./js/firebase.js";
 import {
+  collection, query, where, getDocs, addDoc, doc, getDoc
+} from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
 
-collection,
-query,
-where,
-getDocs
-
+/* ── Helpers ── */
+function toast(msg) {
+  const t = document.getElementById("toast");
+  t.innerText = msg;
+  t.classList.add("show");
+  setTimeout(() => t.classList.remove("show"), 2200);
 }
 
-from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
-
-import {
-
-onAuthStateChanged
-
+function fmt(ts) {
+  if (!ts) return "";
+  const d = ts.toDate ? ts.toDate() : new Date(ts);
+  return d.toLocaleDateString("en-IN", { day:"numeric", month:"short", year:"numeric" });
 }
 
-from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
+/* ── Status config ── */
+const STEPS = [
+  { key:"Order Placed", label:"Order Placed",  icon:"🛒" },
+  { key:"Accepted",     label:"Accepted",       icon:"✅" },
+  { key:"Dispatched",   label:"Dispatched",     icon:"🚚" },
+  { key:"Received",     label:"Received",       icon:"📬" }
+];
 
-let allOrders=[];
-
-const orderDiv=
-document.getElementById(
-"orders"
-);
-
-onAuthStateChanged(
-
-auth,
-
-async(user)=>{
-
-if(!user){
-
-window.location=
-"login.html";
-
-return;
-
+function stepIndex(status) {
+  const i = STEPS.findIndex(s => s.key === status);
+  return i === -1 ? 0 : i;
 }
 
-const q=query(
+function pillClass(status) {
+  return {
+    "Order Placed": "pill-placed",
+    "Accepted":     "pill-accepted",
+    "Dispatched":   "pill-dispatched",
+    "Received":     "pill-received"
+  }[status] || "pill-placed";
+}
 
-collection(
-db,
-"Orders"
-),
+/* ── State ── */
+let allOrders = [];
+let currentUser = null;
+let activeOrderId = null;   // for review submission
 
-where(
-"uid",
-"==",
-user.uid
-)
+/* ── Auth ── */
+onAuthStateChanged(auth, async (user) => {
+  if (!user) { window.location = "login.html"; return; }
+  currentUser = user;
 
-);
+  const q = query(collection(db, "Orders"), where("uid", "==", user.uid));
+  const snap = await getDocs(q);
 
-const snapshot=
-await getDocs(q);
+  allOrders = [];
+  snap.forEach(d => allOrders.push({ id: d.id, ...d.data() }));
 
-allOrders=[];
+  // Newest first
+  allOrders.sort((a, b) => {
+    const ta = a.createdAt?.toDate?.() || new Date(a.createdAt || 0);
+    const tb = b.createdAt?.toDate?.() || new Date(b.createdAt || 0);
+    return tb - ta;
+  });
 
-snapshot.forEach((doc)=>{
-
-allOrders.push({
-
-id:doc.id,
-...doc.data()
-
+  showOrders();
 });
 
-});
+/* ── Render list ── */
+function showOrders() {
+  const search = document.getElementById("search").value.toLowerCase();
+  const date   = document.getElementById("date").value;
+  const div    = document.getElementById("orders");
 
-showOrders();
+  const filtered = allOrders.filter(item => {
+    const matchName = (item.name || "").toLowerCase().includes(search);
+    const matchDate = !date || fmt(item.createdAt).includes(date);
+    return matchName && matchDate;
+  });
 
+  if (filtered.length === 0) {
+    div.innerHTML = `<div class="empty"><div>📦</div>No orders found</div>`;
+    return;
+  }
+
+  div.innerHTML = filtered.map(item => `
+    <div class="order-card" onclick="openDetail('${item.id}')">
+      <img src="${item.image || 'logo.png'}" onerror="this.src='logo.png'">
+      <div class="details">
+        <h3>${item.name || "Product"}</h3>
+        <div class="det-price">₹${item.grandTotal || item.price || 0}</div>
+        <div class="det-qty">Qty: ${item.quantity || 1} &nbsp;|&nbsp; ${item.pack || item.selectedSize || ""}</div>
+        <span class="status-pill ${pillClass(item.status || 'Order Placed')}">
+          ${item.status || "Order Placed"}
+        </span>
+      </div>
+    </div>
+  `).join("");
 }
 
-);
-
-
-function showOrders(){
-
-const searchText=
-
-document.getElementById(
-"search"
-)
-
-.value.toLowerCase();
-
-const date=
-
-document.getElementById(
-"date"
-)
-
-.value;
-
-orderDiv.innerHTML="";
-
-allOrders.forEach(item=>{
-
-if(
-
-item.name.toLowerCase()
-.includes(searchText)
-
-&&
-
-(
-
-date=="" ||
-
-item.orderDate?.includes(date)
-
-)
-
-){
-
-let statusClass="pending";
-
-if(item.status==="Approved")
-statusClass="approved";
-
-if(item.status==="Delivered")
-statusClass="delivered";
-
-
-orderDiv.innerHTML+=`
-
-<div class="order-card"
-
-onclick='showPopup(${JSON.stringify(item)})'>
-
-<img src="${item.image}">
-
-<div class="details">
-
-<h3>
-
-${item.name}
-
-</h3>
-
-<div class="price">
-
-₹${item.price}
-
-</div>
-
-<p>
-
-Qty : ${item.quantity}
-
-</p>
-
-<div class="status ${statusClass}">
-
-${item.status||"Pending"}
-
-</div>
-
-${
-item.trackingId ?
-
-`<div class="track">
-
-Tracking ID:
-${item.trackingId}
-
-</div>`
-
-:
-
-""
-
-}
-
-${
-item.status==="Delivered"
-
-?
-
-`<button
-class="review-btn">
-
-⭐ Give Review
-
-</button>`
-
-:
-
-""
-
-}
-
-</div>
-
-</div>
-
-`;
-
-}
-
-});
-
-}
-
-
-window.showPopup=
-(item)=>{
-
-popup.style.display=
-"flex";
-
-document.getElementById(
-"popupData"
-)
-
-.innerHTML=`
-
-<img src="${item.image}"
-
-style="
-width:100%;
-height:200px;
-border-radius:15px;
-object-fit:cover">
-
-<h2>
-
-${item.name}
-
-</h2>
-
-<p>
-
-Price:
-₹${item.price}
-
-</p>
-
-<p>
-
-Quantity:
-${item.quantity}
-
-</p>
-
-<p>
-
-Status:
-${item.status}
-
-</p>
-
-<p>
-
-Address:
-${item.address||"Not available"}
-
-</p>
-
-`;
-
+/* ── Open detail sheet ── */
+window.openDetail = (id) => {
+  const item = allOrders.find(o => o.id === id);
+  if (!item) return;
+  activeOrderId = id;
+
+  document.getElementById("popImg").src   = item.image || "logo.png";
+  document.getElementById("popName").innerText  = item.name || "Product";
+  document.getElementById("popPrice").innerText = `₹${item.grandTotal || item.price || 0}`;
+  document.getElementById("popMeta").innerText  =
+    `Qty: ${item.quantity || 1}  |  Pack: ${item.pack || item.selectedSize || "—"}  |  Ordered: ${fmt(item.createdAt)}`;
+
+  /* Step tracker */
+  const currentStep = stepIndex(item.status || "Order Placed");
+  document.getElementById("stepTrack").innerHTML = STEPS.map((s, i) => {
+    let cls = "";
+    if (i < currentStep)  cls = "done";
+    if (i === currentStep) cls = "done active";
+    return `
+      <div class="step ${cls}">
+        <div class="step-dot"></div>
+        <div class="step-label">${s.icon} ${s.label}</div>
+        ${i === currentStep ? `<div class="step-date">${fmt(item.createdAt)}</div>` : ""}
+      </div>
+    `;
+  }).join("");
+
+  /* Tracking ID */
+  const trackBox = document.getElementById("trackingBox");
+  if (item.trackingId && item.status === "Dispatched" || item.status === "Received") {
+    if (item.trackingId) {
+      trackBox.classList.remove("hidden");
+      document.getElementById("trackingIdVal").innerText = item.trackingId;
+    } else {
+      trackBox.classList.add("hidden");
+    }
+  } else {
+    trackBox.classList.add("hidden");
+  }
+
+  /* Review button — only when Received */
+  const reviewBtn = document.getElementById("openReviewBtn");
+  if (item.status === "Received") {
+    reviewBtn.classList.add("visible");
+  } else {
+    reviewBtn.classList.remove("visible");
+  }
+
+  document.getElementById("detailOverlay").style.display = "flex";
 };
 
+/* Close sheet */
+document.getElementById("sheetClose").onclick = () => {
+  document.getElementById("detailOverlay").style.display = "none";
+};
+document.getElementById("detailOverlay").onclick = (e) => {
+  if (e.target === document.getElementById("detailOverlay"))
+    document.getElementById("detailOverlay").style.display = "none";
+};
 
-search.oninput=
-showOrders;
+/* Copy tracking ID */
+document.getElementById("copyBtn").onclick = () => {
+  const val = document.getElementById("trackingIdVal").innerText;
+  navigator.clipboard.writeText(val).then(() => toast("Tracking ID copied!"));
+};
 
-date.onchange=
-showOrders;
+/* ── Review ── */
+let selectedRating = 0;
 
+document.getElementById("openReviewBtn").onclick = () => {
+  selectedRating = 0;
+  document.getElementById("reviewText").value = "";
+  document.querySelectorAll(".star").forEach(s => s.classList.remove("lit"));
+  document.getElementById("reviewOverlay").style.display = "flex";
+};
+
+document.getElementById("cancelReview").onclick = () => {
+  document.getElementById("reviewOverlay").style.display = "none";
+};
+
+document.querySelectorAll(".star").forEach(star => {
+  star.onclick = () => {
+    selectedRating = Number(star.dataset.v);
+    document.querySelectorAll(".star").forEach(s => {
+      s.classList.toggle("lit", Number(s.dataset.v) <= selectedRating);
+    });
+  };
+});
+
+document.getElementById("submitReview").onclick = async () => {
+  const comment = document.getElementById("reviewText").value.trim();
+  if (!selectedRating) { toast("Please select a star rating"); return; }
+  if (!comment)        { toast("Please write a comment"); return; }
+
+  const order = allOrders.find(o => o.id === activeOrderId);
+  if (!order) return;
+
+  try {
+    await addDoc(collection(db, "Reviews"), {
+      productId: order.productId || activeOrderId,
+      uid:       currentUser.uid,
+      rating:    selectedRating,
+      comment,
+      createdAt: new Date()
+    });
+    document.getElementById("reviewOverlay").style.display = "none";
+    toast("Review submitted! Thank you ⭐");
+  } catch (e) {
+    toast("Error submitting review");
+    console.error(e);
+  }
+};
+
+/* Search / date filter */
+document.getElementById("search").oninput = showOrders;
+document.getElementById("date").onchange  = showOrders;
 </script>
-
 </body>
 </html>
