@@ -243,10 +243,11 @@ padding:12px;
 border-radius:15px;
 text-align:center;
 box-shadow:0 2px 10px rgba(0,0,0,.1);
+cursor:pointer;
 }
 
 
-/* Products */
+/* Products — 2-column grid, vertical scroll */
 
 .section{
 padding:12px;
@@ -259,13 +260,9 @@ margin-bottom:12px;
 }
 
 .products{
-display:flex;
-overflow:auto;
-gap:15px;
-}
-
-.products::-webkit-scrollbar{
-display:none;
+display:grid;
+grid-template-columns:repeat(2, 1fr);
+gap:13px;
 }
 
 
@@ -438,8 +435,7 @@ class="cart-btn">
 Products
 </div>
 
-<div class="products"
-id="products"></div>
+<div class="products" id="products"></div>
 
 </section>
 
