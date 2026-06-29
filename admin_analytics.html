@@ -1,4 +1,4 @@
-DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -84,7 +84,6 @@ body{background:#f0f4f0;min-height:100vh;padding:16px 14px 40px;}
 @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.25;}}
 .empty-msg{color:#bbb;font-size:13px;text-align:center;padding:16px;}
 
-/* ── Error box ── */
 .error-box{
   background:#fff3f3;border:1px solid #ffcdd2;border-radius:12px;
   padding:14px 16px;margin-top:12px;font-size:12px;color:#c62828;
@@ -214,7 +213,6 @@ body{background:#f0f4f0;min-height:100vh;padding:16px 14px 40px;}
   <div class="empty-msg loading-val">Loading…</div>
 </div>
 
-<!-- Error display box — visible only when something goes wrong -->
 <div class="error-box" id="errorBox"></div>
 
 <button class="refresh-btn" onclick="loadAll()">
@@ -222,34 +220,35 @@ body{background:#f0f4f0;min-height:100vh;padding:16px 14px 40px;}
 </button>
 <div class="last-updated" id="lastUpdated"></div>
 
+<!-- ════════════════════════════════════════════════
+     ALL Firebase imports use v12.0.0 — same as firebase.js
+     This is the KEY fix: version mismatch was causing
+     silent failures so nothing would display.
+     ════════════════════════════════════════════════ -->
 <script type="module">
-// Updated to a stable v10/v11 version to ensure compatibility
-import { auth, db } from "./firebase.js";
-import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { auth, db } from "./js/firebase.js";
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
 import {
-  collection, getDocs, Timestamp
-} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+  collection, getDocs
+} from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
-/* ══════════════════════════════════════════
-   KEY FIX: safeGet — never throws on empty
-   or missing Firestore collections
-   ══════════════════════════════════════════ */
+/* ── safeGet: never throws on empty/missing collections ── */
 async function safeGet(col) {
   try {
     const snap = await getDocs(collection(db, col));
-    return snap.docs;          // [] if empty, real docs if exists
+    return snap.docs;
   } catch (e) {
     console.warn(`[analytics] could not read "${col}":`, e.message);
-    return [];                 // treat missing collection as 0 records
+    return [];
   }
 }
 
 /* ── Auth guard ── */
 onAuthStateChanged(auth, (user) => {
-  if (!user) { window.location = "index.html"; return; }
+  if (!user) { window.location.href = "index.html"; return; }
   if (user.email !== "kodaihillsspot@gmail.com") {
     alert("Access denied");
-    window.location = "home.html";
+    window.location.href = "index.html";
     return;
   }
   loadAll();
@@ -265,44 +264,38 @@ window.setPeriod = (days, btn) => {
   loadAll();
 };
 
-/* ── Filter docs array by timestamp field ── */
+/* ── Filter docs by timestamp field ── */
 function filterByPeriod(docs, days, tsField = "timestamp") {
   if (days === 0) return docs;
   const from = Date.now() - days * 86400000;
   return docs.filter(d => {
     const data = d.data();
     const ts = data[tsField];
-    if (!ts) return true; // no timestamp = include it (older data)
-    
-    // Handle Firestore Timestamp or Date object or String
+    if (!ts) return true; // no timestamp = include (older data)
     let t;
-    if (ts.toDate) {
+    if (ts && typeof ts.toDate === "function") {
       t = ts.toDate().getTime();
     } else if (ts instanceof Date) {
       t = ts.getTime();
-    } else if (typeof ts === 'number') {
+    } else if (typeof ts === "number") {
       t = ts;
     } else {
       t = new Date(ts).getTime();
     }
-    
     return !isNaN(t) && t >= from;
   });
 }
 
-/* ══════════════════
-   Main load
-   ══════════════════ */
+/* ── Main load ── */
 window.loadAll = async () => {
   const days  = activeDays;
   const label = days === 0 ? "All Time" : `Last ${days} Days`;
 
-  // Hide old errors
   const errBox = document.getElementById("errorBox");
   errBox.style.display = "none";
   errBox.textContent   = "";
 
-  // Reset to loading
+  // Reset to loading spinners
   ["siteVisits","instaClicks","productViews","ordersPlaced","revValue",
    "fVal1","fVal2","fVal3","fVal4","fVal5"].forEach(id => {
     const el = document.getElementById(id);
@@ -312,7 +305,7 @@ window.loadAll = async () => {
     `<div class="empty-msg loading-val">Loading…</div>`;
 
   try {
-    /* ── Fetch each collection independently — no Promise.all crash ── */
+    // Fetch all collections in parallel — safeGet never throws
     const [visitDocs, instaDocs, pvDocs_all, cartDocs, buyDocs, orderDocs] =
       await Promise.all([
         safeGet("analytics_visits"),
@@ -323,15 +316,15 @@ window.loadAll = async () => {
         safeGet("Orders"),
       ]);
 
-    /* ── Period filter ── */
-    const visits   = filterByPeriod(visitDocs,   days).length;
-    const insta    = filterByPeriod(instaDocs,   days).length;
-    const pvDocs   = filterByPeriod(pvDocs_all,  days);
+    // Apply period filter
+    const visits   = filterByPeriod(visitDocs,  days).length;
+    const insta    = filterByPeriod(instaDocs,  days).length;
+    const pvDocs   = filterByPeriod(pvDocs_all, days);
     const pvTotal  = pvDocs.length;
-    const cartAdds = filterByPeriod(cartDocs,    days).length;
-    const buyClks  = filterByPeriod(buyDocs,     days).length;
+    const cartAdds = filterByPeriod(cartDocs,   days).length;
+    const buyClks  = filterByPeriod(buyDocs,    days).length;
 
-    /* ── Orders (use createdAt field) ── */
+    // Orders use "createdAt" field
     const ordersFiltered = filterByPeriod(orderDocs, days, "createdAt");
     const orderCount     = ordersFiltered.length;
     const revenue        = ordersFiltered.reduce((sum, d) => {
@@ -339,18 +332,18 @@ window.loadAll = async () => {
       return sum + Number(data.grandTotal ?? data.totalAmount ?? data.price ?? 0);
     }, 0);
 
-    /* ── All-time totals for sub-labels ── */
+    // All-time totals for sub-labels
     const totalVisitsAll = visitDocs.length;
     const totalPvAll     = pvDocs_all.length;
 
-    /* ── Revenue card ── */
+    // Revenue card
     document.getElementById("revLabel").textContent  = `${label} Revenue`;
     document.getElementById("revValue").textContent  = `₹${revenue.toLocaleString("en-IN")}`;
     document.getElementById("revSub").textContent    = "";
     document.getElementById("revOrders").textContent =
       `${orderCount} order${orderCount !== 1 ? "s" : ""} completed`;
 
-    /* ── Stat cards ── */
+    // Stat cards
     setText("siteVisits",   visits);
     setText("instaClicks",  insta);
     setText("productViews", pvTotal);
@@ -363,12 +356,12 @@ window.loadAll = async () => {
     document.getElementById("instaClicksSub").textContent  = "";
     document.getElementById("ordersPlacedSub").textContent = "";
 
-    /* ── Funnel ── */
+    // Conversion funnel
     const funnelVals = [visits, pvTotal, cartAdds, buyClks, orderCount];
-    const fIds       = ["fVal1","fVal2","fVal3","fVal4","fVal5"];
-    const bIds       = ["fBar1","fBar2","fBar3","fBar4","fBar5"];
-    const pIds       = [null,"fPct2","fPct3","fPct4","fPct5"];
-    const base       = Math.max(visits, 1);
+    const fIds = ["fVal1","fVal2","fVal3","fVal4","fVal5"];
+    const bIds = ["fBar1","fBar2","fBar3","fBar4","fBar5"];
+    const pIds = [null,"fPct2","fPct3","fPct4","fPct5"];
+    const base = Math.max(visits, 1);
 
     funnelVals.forEach((val, i) => {
       document.getElementById(fIds[i]).textContent = val;
@@ -380,7 +373,7 @@ window.loadAll = async () => {
       }
     });
 
-    /* ── Top Products ── */
+    // Top Products
     const prodMap = {};
     pvDocs.forEach(d => {
       const data  = d.data();
@@ -412,21 +405,16 @@ window.loadAll = async () => {
         </div>`).join("");
     }
 
-    /* ── Timestamp ── */
     document.getElementById("lastUpdated").textContent =
       "Updated " + new Date().toLocaleTimeString("en-IN",
-        {hour:"2-digit", minute:"2-digit"});
+        { hour:"2-digit", minute:"2-digit" });
 
   } catch (e) {
     console.error("Analytics fatal error:", e);
-    // Show error on screen so you can debug
     errBox.textContent   = "⚠️ Error: " + e.message;
     errBox.style.display = "block";
 
-    // Still show zeros so UI doesn't hang on "…"
-    ["siteVisits","instaClicks","productViews","ordersPlaced"].forEach(id => {
-      setText(id, "—");
-    });
+    ["siteVisits","instaClicks","productViews","ordersPlaced"].forEach(id => setText(id, "—"));
     ["fVal1","fVal2","fVal3","fVal4","fVal5"].forEach(id => {
       document.getElementById(id).textContent = "—";
     });
