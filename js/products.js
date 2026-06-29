@@ -5,6 +5,11 @@ import {
 } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
 
+// ── ANALYTICS ──────────────────────────────────────────────
+import { trackVisit, trackProductView, trackCartAdd, trackBuyClick }
+  from "./analytics.js";
+// ───────────────────────────────────────────────────────────
+
 /* ─────────────── Elements ─────────────── */
 const productsDiv    = document.getElementById("products");
 const searchInput    = document.getElementById("searchInput");
@@ -17,13 +22,12 @@ const categoryScroll = document.getElementById("categoryScroll");
 let allProducts      = [];
 let currentUser      = null;
 let priceFilter      = "";
-let selectedCategory = "All"; // "All" = no category filter
+let selectedCategory = "All";
 
-/*
- * inCartIds — tracks which productIds are already in cart
- * so the button stays "Buy Now" even after filter/search re-renders.
- */
 const inCartIds = new Set();
+
+/* ─── Track this page visit (once per session) ─── */
+trackVisit("products");
 
 /* ─────────────── Category emoji map ─────────────── */
 const CAT_EMOJI = {
@@ -48,7 +52,6 @@ onAuthStateChanged(auth, async (user) => {
         profileNav.href      = "profile.html";
         profileNav.innerHTML = "👤<br>Yours";
 
-        /* Pre-load which products this user already has in Firebase cart */
         try {
             const q        = query(collection(db, "Cart"), where("uid", "==", user.uid));
             const snapshot = await getDocs(q);
@@ -60,16 +63,14 @@ onAuthStateChanged(auth, async (user) => {
         profileNav.href      = "login.html";
         profileNav.innerHTML = "🔐<br>Login";
 
-        /* Pre-load from local guest cart */
         const local = JSON.parse(localStorage.getItem("guestCart")) || [];
         local.forEach(item => inCartIds.add(item.productId));
     }
 
-    /* Re-render so existing cart items show Buy Now immediately */
     applyFilters();
 });
 
-/* ─────────────── Load categories (Firestore, with fallback) ─────────────── */
+/* ─────────────── Load categories ─────────────── */
 async function loadCategories() {
     const DEFAULT = ["Chocolate", "Honey", "Herbs", "Oils", "Fruits", "Organic Products"];
     let cats = DEFAULT;
@@ -85,14 +86,12 @@ async function loadCategories() {
 
     categoryScroll.innerHTML = "";
 
-    /* "All" chip */
     const allChip = document.createElement("div");
     allChip.className = "category-card active";
     allChip.textContent = "🏠 All";
     allChip.dataset.category = "All";
     categoryScroll.appendChild(allChip);
 
-    /* One chip per category */
     cats.forEach(cat => {
         const chip = document.createElement("div");
         chip.className = "category-card";
@@ -102,8 +101,6 @@ async function loadCategories() {
     });
 }
 
-/* Delegated click handler — works even though chips are created
-   dynamically AFTER this listener is attached */
 categoryScroll.addEventListener("click", (e) => {
     const chip = e.target.closest(".category-card");
     if (!chip) return;
@@ -166,12 +163,13 @@ function showProducts(products) {
           }
         `;
 
-        /* Card click → product details */
+        // ── Track product view when card is rendered ──
+        trackProductView(product.id, product.name, currentUser?.uid);
+
         div.addEventListener("click", () => {
             window.location = `product-details.html?id=${product.id}`;
         });
 
-        /* Button logic */
         const btn = div.querySelector(".add-btn, .buy-btn");
         btn.addEventListener("click", (e) => {
             e.stopPropagation();
@@ -192,7 +190,9 @@ async function handleAddToCart(product, btn) {
     btn.disabled    = true;
     btn.textContent = "Adding…";
 
-    /* 1 ─ Local guest cart (dedup) */
+    // ── Track add to cart ──
+    trackCartAdd(product.id, product.name, currentUser?.uid);
+
     const cart     = JSON.parse(localStorage.getItem("guestCart")) || [];
     const existing = cart.find(item => item.productId === product.id);
 
@@ -212,7 +212,6 @@ async function handleAddToCart(product, btn) {
     }
     localStorage.setItem("guestCart", JSON.stringify(cart));
 
-    /* 2 ─ Firebase cart (dedup) */
     if (currentUser) {
         try {
             const q        = query(
@@ -251,29 +250,30 @@ async function handleAddToCart(product, btn) {
         }
     }
 
-    /* 3 ─ Mark as in-cart */
     inCartIds.add(product.id);
 
-    /* 4 ─ Swap button to "Buy Now" */
     btn.disabled = false;
     btn.className   = "buy-btn";
     btn.textContent = "⚡ Buy Now";
 
-    /* Re-attach click for buy now */
     btn.addEventListener("click", (e) => {
         e.stopPropagation();
         goToCheckout(product);
     });
 
-    /* 5 ─ Feedback */
     showToast(`${product.name} added to cart!`);
     const cartBtn = document.querySelector(".cart-btn");
-    cartBtn.style.transform = "scale(1.3)";
-    setTimeout(() => { cartBtn.style.transform = "scale(1)"; }, 300);
+    if (cartBtn) {
+        cartBtn.style.transform = "scale(1.3)";
+        setTimeout(() => { cartBtn.style.transform = "scale(1)"; }, 300);
+    }
 }
 
 /* ─────────────── Buy Now → Checkout ─────────────── */
 function goToCheckout(product) {
+    // ── Track buy click ──
+    trackBuyClick(product.id, product.name, currentUser?.uid);
+
     const buyNowItem = {
         productId:  product.id,
         name:       product.name,
