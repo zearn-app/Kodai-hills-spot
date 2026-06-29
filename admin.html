@@ -48,6 +48,8 @@ body{background:#f0f4f0;min-height:100vh;padding:20px 16px 40px;}
 .nav-icon.green{background:#e8f5e9;}
 .nav-icon.blue{background:#e3f2fd;}
 .nav-icon.orange{background:#fff3e0;}
+.nav-icon.pink{background:#fce4ec;}
+.nav-icon.purple{background:#f3e5f5;}
 
 .nav-info{text-align:left;flex:1;}
 .nav-info h2{font-size:16px;font-weight:700;color:#1a1a1a;margin-bottom:2px;}
@@ -77,6 +79,7 @@ body{background:#f0f4f0;min-height:100vh;padding:20px 16px 40px;}
 <p class="section-title">Manage</p>
 
 <div class="nav-cards">
+
   <a class="nav-card" href="admin_product.html">
     <div class="nav-icon green">🛒</div>
     <div class="nav-info">
@@ -103,6 +106,17 @@ body{background:#f0f4f0;min-height:100vh;padding:20px 16px 40px;}
     </div>
     <span class="nav-arrow">›</span>
   </a>
+
+  <!-- ── NEW: Analytics Dashboard ── -->
+  <a class="nav-card" href="admin_analytics.html">
+    <div class="nav-icon pink">📊</div>
+    <div class="nav-info">
+      <h2>Analytics</h2>
+      <p>Visits, views, conversions & revenue</p>
+    </div>
+    <span class="nav-arrow">›</span>
+  </a>
+
 </div>
 
 <script type="module">
@@ -118,7 +132,6 @@ onAuthStateChanged(auth, async (user) => {
     return;
   }
 
-  // Fetch counts using getDocs — works with standard Firestore rules
   try {
     const [pSnap, oSnap] = await Promise.all([
       getDocs(collection(db, "Products")),
