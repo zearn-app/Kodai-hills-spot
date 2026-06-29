@@ -5,6 +5,11 @@ import {
 } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
 
+// ── ANALYTICS ──────────────────────────────────────────────
+import { trackVisit, trackProductView, trackCartAdd, trackBuyClick }
+  from "./analytics.js";
+// ───────────────────────────────────────────────────────────
+
 const productsDiv   = document.getElementById("products");
 const profileNav    = document.getElementById("profileNav");
 const searchInput   = document.querySelector(".search input");
@@ -15,6 +20,9 @@ let currentUser = null;
 let activeCategory = "All";
 
 const inCartIds = new Set();
+
+/* ─── Track this page visit (once per session) ─── */
+trackVisit("home");
 
 /* ─── Category emoji map ─── */
 const CAT_EMOJI = {
@@ -156,17 +164,14 @@ async function loadCategories() {
     console.warn("Could not load categories:", e);
   }
 
-  // Clear old hardcoded chips
   categoryScroll.innerHTML = "";
 
-  // "All" chip
   const allChip = document.createElement("div");
   allChip.className = "category-card active";
   allChip.textContent = "🏠 All";
   allChip.dataset.cat = "All";
   categoryScroll.appendChild(allChip);
 
-  // One chip per category
   cats.forEach(cat => {
     const chip = document.createElement("div");
     chip.className = "category-card";
@@ -175,7 +180,6 @@ async function loadCategories() {
     categoryScroll.appendChild(chip);
   });
 
-  // Click handler
   categoryScroll.addEventListener("click", (e) => {
     const chip = e.target.closest(".category-card");
     if (!chip) return;
@@ -272,6 +276,9 @@ function renderProducts(products) {
         : `<button class="btn">🛒 Add Cart</button>`}
     `;
 
+    // ── Track product view when card is rendered ──
+    trackProductView(data.id, data.name, currentUser?.uid);
+
     div.addEventListener("click", () => {
       window.location = `product-details.html?id=${data.id}`;
     });
@@ -291,6 +298,9 @@ async function handleAddToCart(product, btn) {
   if (btn.disabled) return;
   btn.disabled    = true;
   btn.textContent = "Adding…";
+
+  // ── Track add to cart ──
+  trackCartAdd(product.id, product.name, currentUser?.uid);
 
   const cart     = JSON.parse(localStorage.getItem("guestCart")) || [];
   const existing = cart.find(item => item.productId === product.id);
@@ -348,6 +358,9 @@ async function handleAddToCart(product, btn) {
 
 /* ─── Buy Now ─── */
 function goToCheckout(product) {
+  // ── Track buy click ──
+  trackBuyClick(product.id, product.name, currentUser?.uid);
+
   sessionStorage.setItem("buyNowItem", JSON.stringify({
     productId: product.id, name: product.name,
     image: product.Image || "logo.png", quantity: 1,
