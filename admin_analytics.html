@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Kodai Hills Spot — Analytics</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif;}
+body{background:#f0f4f0;min-height:100vh;padding:16px 14px 40px;}
+
+/* ── Navbar ── */
+.navbar{
+  background:white;padding:14px 16px;border-radius:16px;
+  display:flex;align-items:center;gap:12px;margin-bottom:20px;
+  box-shadow:0 2px 10px rgba(0,0,0,.08);
+}
+.logo-img{width:44px;height:44px;border-radius:50%;object-fit:cover;border:2px solid #2e7d32;}
+.logo-text{font-size:17px;font-weight:700;color:#2e7d32;flex:1;}
+.back-btn{
+  text-decoration:none;background:#e8f5e9;color:#2e7d32;
+  padding:8px 14px;border-radius:10px;font-size:13px;font-weight:600;
+}
+
+/* ── Period toggle ── */
+.period-row{
+  display:flex;gap:8px;margin-bottom:18px;
+}
+.period-btn{
+  flex:1;padding:10px;border:2px solid #e0e0e0;background:white;
+  border-radius:12px;font-size:13px;font-weight:600;color:#888;cursor:pointer;
+  transition:all .2s;
+}
+.period-btn.active{border-color:#2e7d32;color:#2e7d32;background:#e8f5e9;}
+
+/* ── Section label ── */
+.section-label{
+  font-size:11px;font-weight:700;color:#aaa;text-transform:uppercase;
+  letter-spacing:.8px;margin-bottom:10px;margin-top:18px;
+}
+
+/* ── Big stat cards (2 col) ── */
+.stats-grid{
+  display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:4px;
+}
+.stat-card{
+  background:white;border-radius:14px;padding:16px 12px;
+  box-shadow:0 2px 8px rgba(0,0,0,.07);text-align:center;
+}
+.stat-card .icon{font-size:22px;margin-bottom:6px;}
+.stat-card .label{font-size:10px;color:#999;font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;}
+.stat-card .value{font-size:30px;font-weight:800;color:#2e7d32;line-height:1;}
+.stat-card .sub{font-size:10px;color:#bbb;margin-top:4px;}
+
+/* ── Revenue card (full width) ── */
+.revenue-card{
+  background:linear-gradient(135deg,#2e7d32,#43a047);
+  border-radius:16px;padding:20px 18px;color:white;
+  box-shadow:0 4px 16px rgba(46,125,50,.35);margin-bottom:4px;
+}
+.revenue-card .r-label{font-size:12px;opacity:.8;font-weight:600;text-transform:uppercase;letter-spacing:.6px;}
+.revenue-card .r-value{font-size:42px;font-weight:800;margin:6px 0 2px;}
+.revenue-card .r-sub{font-size:12px;opacity:.75;}
+.revenue-card .r-orders{font-size:13px;opacity:.9;margin-top:8px;font-weight:600;}
+
+/* ── Funnel ── */
+.funnel-card{
+  background:white;border-radius:16px;padding:18px 16px;
+  box-shadow:0 2px 8px rgba(0,0,0,.07);
+}
+.funnel-row{
+  display:flex;align-items:center;gap:12px;padding:10px 0;
+  border-bottom:1px solid #f5f5f5;
+}
+.funnel-row:last-child{border-bottom:none;}
+.funnel-icon{font-size:20px;width:36px;text-align:center;}
+.funnel-info{flex:1;}
+.funnel-info .f-label{font-size:13px;font-weight:600;color:#333;}
+.funnel-info .f-bar-wrap{background:#f0f4f0;border-radius:6px;height:6px;margin-top:5px;overflow:hidden;}
+.funnel-info .f-bar{background:#2e7d32;height:100%;border-radius:6px;transition:width .8s ease;}
+.funnel-count{font-size:18px;font-weight:800;color:#2e7d32;min-width:48px;text-align:right;}
+.funnel-pct{font-size:10px;color:#bbb;text-align:right;}
+
+/* ── Top products ── */
+.product-row{
+  display:flex;align-items:center;gap:12px;padding:10px 0;
+  border-bottom:1px solid #f5f5f5;
+}
+.product-row:last-child{border-bottom:none;}
+.prod-rank{font-size:12px;font-weight:700;color:#bbb;width:20px;}
+.prod-info{flex:1;}
+.prod-info .p-name{font-size:13px;font-weight:600;color:#222;}
+.prod-info .p-views{font-size:11px;color:#999;margin-top:2px;}
+.prod-views-count{font-size:16px;font-weight:800;color:#2e7d32;}
+
+/* ── Loading / empty ── */
+.loading-val{color:#ccc;animation:pulse 1s infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.25;}}
+.empty-msg{color:#bbb;font-size:13px;text-align:center;padding:16px;}
+
+/* ── Refresh btn ── */
+.refresh-btn{
+  width:100%;padding:14px;margin-top:20px;border:2px solid #2e7d32;
+  background:white;color:#2e7d32;border-radius:14px;font-size:14px;
+  font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;
+}
+.refresh-btn:active{background:#e8f5e9;}
+
+/* ── Last updated ── */
+.last-updated{text-align:center;font-size:11px;color:#bbb;margin-top:10px;}
+</style>
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="navbar">
+  <img src="logo.png" class="logo-img" onerror="this.style.display='none'">
+  <div class="logo-text">Analytics</div>
+  <a href="admin.html" class="back-btn">← Admin</a>
+</nav>
+
+<!-- Period Toggle -->
+<div class="period-row">
+  <button class="period-btn active" onclick="setPeriod(7,this)">7 Days</button>
+  <button class="period-btn" onclick="setPeriod(30,this)">30 Days</button>
+  <button class="period-btn" onclick="setPeriod(0,this)">All Time</button>
+</div>
+
+<!-- Revenue -->
+<p class="section-label">💰 Revenue</p>
+<div class="revenue-card">
+  <div class="r-label" id="revLabel">Last 7 Days Revenue</div>
+  <div class="r-value" id="revValue"><span class="loading-val">…</span></div>
+  <div class="r-sub" id="revSub"></div>
+  <div class="r-orders" id="revOrders"></div>
+</div>
+
+<!-- Traffic stats -->
+<p class="section-label">📊 Traffic & Actions</p>
+<div class="stats-grid">
+  <div class="stat-card">
+    <div class="icon">🌐</div>
+    <div class="label">Site Visits</div>
+    <div class="value" id="siteVisits"><span class="loading-val">…</span></div>
+    <div class="sub" id="siteVisitsSub"></div>
+  </div>
+  <div class="stat-card">
+    <div class="icon">📸</div>
+    <div class="label">Instagram Clicks</div>
+    <div class="value" id="instaClicks"><span class="loading-val">…</span></div>
+    <div class="sub" id="instaClicksSub"></div>
+  </div>
+  <div class="stat-card">
+    <div class="icon">👁️</div>
+    <div class="label">Product Views</div>
+    <div class="value" id="productViews"><span class="loading-val">…</span></div>
+    <div class="sub" id="productViewsSub"></div>
+  </div>
+  <div class="stat-card">
+    <div class="icon">📦</div>
+    <div class="label">Orders Placed</div>
+    <div class="value" id="ordersPlaced"><span class="loading-val">…</span></div>
+    <div class="sub" id="ordersPlacedSub"></div>
+  </div>
+</div>
+
+<!-- Conversion Funnel -->
+<p class="section-label">🔀 Conversion Funnel</p>
+<div class="funnel-card">
+  <div class="funnel-row">
+    <div class="funnel-icon">🌐</div>
+    <div class="funnel-info">
+      <div class="f-label">Website Visits</div>
+      <div class="f-bar-wrap"><div class="f-bar" id="fBar1" style="width:100%"></div></div>
+    </div>
+    <div>
+      <div class="funnel-count" id="fVal1">…</div>
+      <div class="funnel-pct">100%</div>
+    </div>
+  </div>
+  <div class="funnel-row">
+    <div class="funnel-icon">👁️</div>
+    <div class="funnel-info">
+      <div class="f-label">Product Viewed</div>
+      <div class="f-bar-wrap"><div class="f-bar" id="fBar2" style="width:0%"></div></div>
+    </div>
+    <div>
+      <div class="funnel-count" id="fVal2">…</div>
+      <div class="funnel-pct" id="fPct2">—</div>
+    </div>
+  </div>
+  <div class="funnel-row">
+    <div class="funnel-icon">🛒</div>
+    <div class="funnel-info">
+      <div class="f-label">Added to Cart</div>
+      <div class="f-bar-wrap"><div class="f-bar" id="fBar3" style="width:0%"></div></div>
+    </div>
+    <div>
+      <div class="funnel-count" id="fVal3">…</div>
+      <div class="funnel-pct" id="fPct3">—</div>
+    </div>
+  </div>
+  <div class="funnel-row">
+    <div class="funnel-icon">💳</div>
+    <div class="funnel-info">
+      <div class="f-label">Clicked Buy</div>
+      <div class="f-bar-wrap"><div class="f-bar" id="fBar4" style="width:0%"></div></div>
+    </div>
+    <div>
+      <div class="funnel-count" id="fVal4">…</div>
+      <div class="funnel-pct" id="fPct4">—</div>
+    </div>
+  </div>
+  <div class="funnel-row">
+    <div class="funnel-icon">✅</div>
+    <div class="funnel-info">
+      <div class="f-label">Order Placed</div>
+      <div class="f-bar-wrap"><div class="f-bar" id="fBar5" style="width:0%"></div></div>
+    </div>
+    <div>
+      <div class="funnel-count" id="fVal5">…</div>
+      <div class="funnel-pct" id="fPct5">—</div>
+    </div>
+  </div>
+</div>
+
+<!-- Top Products -->
+<p class="section-label">🏆 Top Viewed Products</p>
+<div class="funnel-card" id="topProductsCard">
+  <div class="empty-msg loading-val">Loading…</div>
+</div>
+
+<!-- Refresh -->
+<button class="refresh-btn" onclick="loadAll()">
+  <span>🔄</span> Refresh Data
+</button>
+<div class="last-updated" id="lastUpdated"></div>
+
+<!-- ══════════════════════════════════════════
+     Firebase + Analytics Logic
+════════════════════════════════════════════ -->
+<script type="module">
+import { auth, db } from "./firebase.js";
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
+import {
+  collection, getDocs, query, where,
+  orderBy, limit, Timestamp
+} from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
+
+/* ── Auth guard ── */
+onAuthStateChanged(auth, (user) => {
+  if (!user) { window.location = "index.html"; return; }
+  if (user.email !== "kodaihillsspot@gmail.com") {
+    alert("Access denied");
+    window.location = "home.html";
+    return;
+  }
+  loadAll();
+});
+
+/* ── Period state ── */
+let activeDays = 7;
+
+window.setPeriod = (days, btn) => {
+  activeDays = days;
+  document.querySelectorAll(".period-btn").forEach(b => b.classList.remove("active"));
+  btn.classList.add("active");
+  loadAll();
+};
+
+/* ── Date cutoff helper ── */
+function cutoff(days) {
+  if (days === 0) return null; // all time
+  const d = new Date();
+  d.setDate(d.getDate() - days);
+  return Timestamp.fromDate(d);
+}
+
+/* ── Filter array by period ── */
+function filterByPeriod(docs, days) {
+  if (days === 0) return docs;
+  const from = Date.now() - days * 86400000;
+  return docs.filter(d => {
+    const ts = d.data().timestamp;
+    if (!ts) return false;
+    const t = ts.toDate ? ts.toDate().getTime() : new Date(ts).getTime();
+    return t >= from;
+  });
+}
+
+/* ── Filter orders by period ── */
+function filterOrdersByPeriod(docs, days) {
+  if (days === 0) return docs;
+  const from = Date.now() - days * 86400000;
+  return docs.filter(d => {
+    const ts = d.data().createdAt;
+    if (!ts) return false;
+    const t = ts.toDate ? ts.toDate().getTime() : new Date(ts).getTime();
+    return t >= from;
+  });
+}
+
+/* ══════════════════════
+   Main load function
+══════════════════════ */
+window.loadAll = async () => {
+  const days = activeDays;
+  const label = days === 0 ? "All Time" : `Last ${days} Days`;
+
+  // Reset UI to loading state
+  ["siteVisits","instaClicks","productViews","ordersPlaced","revValue",
+   "fVal1","fVal2","fVal3","fVal4","fVal5"].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.innerHTML = `<span class="loading-val">…</span>`;
+  });
+
+  try {
+    /* ── Fetch all analytics collections in parallel ── */
+    const [
+      visitsSnap, instaSnap, pvSnap, cartSnap, buySnap,
+      ordersSnap, allVisitsSnap, allPvSnap
+    ] = await Promise.all([
+      getDocs(collection(db, "analytics_visits")),
+      getDocs(collection(db, "analytics_insta")),
+      getDocs(collection(db, "analytics_product_views")),
+      getDocs(collection(db, "analytics_cart_adds")),
+      getDocs(collection(db, "analytics_buy_clicks")),
+      getDocs(collection(db, "Orders")),
+      getDocs(collection(db, "analytics_visits")),
+      getDocs(collection(db, "analytics_product_views")),
+    ]);
+
+    /* ── Filter by period ── */
+    const visits   = filterByPeriod(visitsSnap.docs, days).length;
+    const insta    = filterByPeriod(instaSnap.docs, days).length;
+    const pvDocs   = filterByPeriod(pvSnap.docs, days);
+    const pvTotal  = pvDocs.length;
+    const cartAdds = filterByPeriod(cartSnap.docs, days).length;
+    const buyClks  = filterByPeriod(buySnap.docs, days).length;
+
+    /* ── Orders & Revenue ── */
+    const ordersFiltered = filterOrdersByPeriod(ordersSnap.docs, days);
+    const orderCount     = ordersFiltered.length;
+    const revenue        = ordersFiltered.reduce((sum, d) => {
+      return sum + (d.data().grandTotal ?? d.data().price ?? 0);
+    }, 0);
+
+    /* ── All-time counts for sub-labels ── */
+    const totalVisitsAll = allVisitsSnap.size;
+    const totalPvAll     = allPvSnap.size;
+
+    /* ══ Update Revenue card ══ */
+    document.getElementById("revLabel").textContent  = `${label} Revenue`;
+    document.getElementById("revValue").textContent  = `₹${revenue.toLocaleString("en-IN")}`;
+    document.getElementById("revSub").textContent    = "";
+    document.getElementById("revOrders").textContent = `${orderCount} order${orderCount !== 1 ? "s" : ""} completed`;
+
+    /* ══ Update stat cards ══ */
+    set("siteVisits",  visits,    days ? `${totalVisitsAll} total all-time` : "");
+    set("instaClicks", insta,     "");
+    set("productViews",pvTotal,   days ? `${totalPvAll} total all-time` : "");
+    set("ordersPlaced",orderCount,"");
+
+    document.getElementById("siteVisitsSub").textContent   = days ? `${totalVisitsAll} total all-time` : "";
+    document.getElementById("instaClicksSub").textContent  = "";
+    document.getElementById("productViewsSub").textContent = days ? `${totalPvAll} total all-time` : "";
+    document.getElementById("ordersPlacedSub").textContent = "";
+
+    /* ══ Funnel ══ */
+    const funnelData = [visits, pvTotal, cartAdds, buyClks, orderCount];
+    const funnelIds  = ["fVal1","fVal2","fVal3","fVal4","fVal5"];
+    const barIds     = ["fBar1","fBar2","fBar3","fBar4","fBar5"];
+    const pctIds     = [null,"fPct2","fPct3","fPct4","fPct5"];
+    const base       = visits || 1;
+
+    funnelData.forEach((val, i) => {
+      document.getElementById(funnelIds[i]).textContent = val;
+      const pct = Math.round((val / base) * 100);
+      document.getElementById(barIds[i]).style.width = Math.min(pct, 100) + "%";
+      if (pctIds[i]) {
+        document.getElementById(pctIds[i]).textContent =
+          visits > 0 ? pct + "%" : "—";
+      }
+    });
+
+    /* ══ Top Products ══ */
+    const prodViewMap = {};
+    pvDocs.forEach(d => {
+      const pid   = d.data().productId || "unknown";
+      const pname = d.data().productName || pid;
+      if (!prodViewMap[pid]) prodViewMap[pid] = { name: pname, count: 0 };
+      prodViewMap[pid].count++;
+    });
+
+    const topProds = Object.values(prodViewMap)
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 8);
+
+    const card = document.getElementById("topProductsCard");
+    if (topProds.length === 0) {
+      card.innerHTML = `<div class="empty-msg">No product views tracked yet.<br>
+        <small>Add tracking to products.js & home.js</small></div>`;
+    } else {
+      const maxV = topProds[0].count || 1;
+      card.innerHTML = topProds.map((p, i) => `
+        <div class="product-row">
+          <div class="prod-rank">#${i+1}</div>
+          <div class="prod-info">
+            <div class="p-name">${escHtml(p.name)}</div>
+            <div class="f-bar-wrap" style="margin-top:5px;">
+              <div class="f-bar" style="width:${Math.round(p.count/maxV*100)}%"></div>
+            </div>
+          </div>
+          <div class="prod-views-count">${p.count}</div>
+        </div>`).join("");
+    }
+
+    /* ══ Timestamp ══ */
+    document.getElementById("lastUpdated").textContent =
+      "Updated " + new Date().toLocaleTimeString("en-IN", {hour:"2-digit",minute:"2-digit"});
+
+  } catch(e) {
+    console.error("Analytics error:", e);
+    document.getElementById("revValue").textContent = "Error";
+    document.getElementById("topProductsCard").innerHTML =
+      `<div class="empty-msg">⚠️ Could not load data.<br><small>${e.message}</small></div>`;
+  }
+};
+
+/* ── Helpers ── */
+function set(id, value, sub) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = value;
+  const subEl = document.getElementById(id + "Sub");
+  if (subEl && sub !== undefined) subEl.textContent = sub;
+}
+function escHtml(s) {
+  return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+}
+</script>
+</body>
+</html>
