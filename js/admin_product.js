@@ -5,10 +5,18 @@ import {
   doc, setDoc, getDoc
 } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
-const DEFAULT_CATEGORIES = ["Chocolate","Honey","Herbs","Oils","Fruits","Organic Products"];
+/* ── HTML escape — prevents XSS when rendering Firestore data ── */
+function esc(s) {
+  return String(s ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+}
+
+const DEFAULT_CATEGORIES = ["Chocolate", "Honey", "Herbs", "Oils", "Fruits", "Organic Products"];
 const CAT_DOC_PATH       = () => doc(db, "Categories", "list");
 
-/* ─── Auth ─── */
+/* ── Auth guard ── */
 onAuthStateChanged(auth, (user) => {
   if (!user) { window.location.replace("index.html"); return; }
   if (user.email !== "kodaihillsspot@gmail.com") {
@@ -19,7 +27,7 @@ onAuthStateChanged(auth, (user) => {
   init();
 });
 
-/* ═══════════════════════════════════════════════════════ */
+/* ════════════════════════════════════════════════════════ */
 function init() {
 
   /* ── Category helpers ── */
@@ -27,7 +35,7 @@ function init() {
     try {
       const snap = await getDoc(CAT_DOC_PATH());
       if (snap.exists() && snap.data().items?.length) return snap.data().items;
-    } catch(e) {
+    } catch (e) {
       console.warn("getCategories failed:", e);
     }
     return [...DEFAULT_CATEGORIES];
@@ -37,12 +45,12 @@ function init() {
     await setDoc(CAT_DOC_PATH(), { items });
   }
 
-  // Populate any <select> with categories; optionally pre-select one
   async function populateCategorySelect(el, selected = "") {
     if (!el) return;
     const cats = await getCategories();
+    /* FIX: escape category names before inserting into option innerHTML */
     el.innerHTML = cats.map(c =>
-      `<option value="${c}" ${c === selected ? "selected" : ""}>${c}</option>`
+      `<option value="${esc(c)}" ${c === selected ? "selected" : ""}>${esc(c)}</option>`
     ).join("");
   }
 
@@ -52,19 +60,21 @@ function init() {
     chips.innerHTML = "";
     cats.forEach(cat => {
       const isBuiltin = DEFAULT_CATEGORIES.map(d => d.toLowerCase()).includes(cat.toLowerCase());
-      const chip = document.createElement("span");
-      chip.className = `chip${isBuiltin ? " builtin" : ""}`;
-      chip.innerHTML = isBuiltin
-        ? cat
-        : `${cat}<button class="chip-del" data-cat="${cat}">✕</button>`;
+      const chip      = document.createElement("span");
+      chip.className  = `chip${isBuiltin ? " builtin" : ""}`;
+      /* FIX: use esc() for category name; data-cat keeps the raw value for logic */
+      if (isBuiltin) {
+        chip.textContent = cat;
+      } else {
+        chip.innerHTML =
+          `${esc(cat)}<button class="chip-del" data-cat="${esc(cat)}">✕</button>`;
+      }
       chips.appendChild(chip);
     });
-    // Refresh both selects after chips load
     await populateCategorySelect(document.getElementById("category"));
     await populateCategorySelect(document.getElementById("editCategory"));
   }
 
-  // Delegate chip-delete clicks (avoids inline onclick issues)
   document.getElementById("categoryChips").addEventListener("click", async (e) => {
     const btn = e.target.closest(".chip-del");
     if (!btn) return;
@@ -113,11 +123,11 @@ function init() {
   document.getElementById("addVariantBtn").onclick = () => {
     const div = document.createElement("div");
     div.className = "variant-row";
+    /* Safe: no Firestore data here, just a static template */
     div.innerHTML = `
       <input class="variantQty"   placeholder="500g / 1kg">
       <input class="variantPrice" placeholder="Price" type="number">
-      <button type="button" onclick="this.parentElement.remove()">✖</button>
-    `;
+      <button type="button" onclick="this.parentElement.remove()">✖</button>`;
     variantFields.appendChild(div);
   };
 
@@ -136,14 +146,15 @@ function init() {
         const d   = item.data();
         const pid = item.id;
 
-        // Quantity display
         let qtyHtml = "";
         if (d.quantityVariants?.length) {
           qtyHtml = d.quantityVariants.map(q =>
-            `<span style="display:inline-block;padding:3px 9px;background:#f5f5f5;margin:2px;border-radius:8px;font-size:12px;">${q.qty} — ₹${q.price}</span>`
+            `<span style="display:inline-block;padding:3px 9px;background:#f5f5f5;margin:2px;border-radius:8px;font-size:12px;">
+               ${esc(q.qty)} — ₹${Number(q.price)}
+             </span>`
           ).join("");
         } else {
-          qtyHtml = `<span style="font-size:13px;color:#555;">${d.packQty || "—"}</span>`;
+          qtyHtml = `<span style="font-size:13px;color:#555;">${esc(d.packQty || "—")}</span>`;
         }
 
         const delivBadge = d.freeDelivery
@@ -154,31 +165,33 @@ function init() {
           ? `<span style="padding:3px 10px;background:#fff3e0;color:#e65100;border-radius:20px;font-size:11px;font-weight:700;margin-left:5px;">⚠️ Few Stock</span>`
           : "";
 
-        // Use data-id attribute instead of inline onclick string to avoid ID escaping issues
+        /* FIX: escape all Firestore strings with esc() before inserting into innerHTML */
         div.innerHTML += `
-          <div class="product-card" data-id="${pid}">
-            <img src="${d.Image || ''}" onerror="this.src='logo.png'">
-            <h3>${d.name || "Unnamed"}</h3>
+          <div class="product-card" data-id="${esc(pid)}">
+            <img src="${esc(d.Image || "")}" onerror="this.src='logo.png'" alt="${esc(d.name || "")}">
+            <h3>${esc(d.name || "Unnamed")}</h3>
             <p style="color:#2e7d32;font-weight:700;font-size:14px;margin:4px 0;">
-              ₹${d.price}
-              ${d.oldPrice ? `<span style="color:#bbb;font-weight:400;text-decoration:line-through;font-size:12px;margin-left:5px;">₹${d.oldPrice}</span>` : ""}
+              ₹${Number(d.price)}
+              ${d.oldPrice
+                ? `<span style="color:#bbb;font-weight:400;text-decoration:line-through;font-size:12px;margin-left:5px;">₹${Number(d.oldPrice)}</span>`
+                : ""}
             </p>
             <p style="margin:4px 0;">${qtyHtml}</p>
-            <p style="font-size:12px;color:#aaa;margin:4px 0;">📂 ${d.category || "—"}</p>
+            <p style="font-size:12px;color:#aaa;margin:4px 0;">📂 ${esc(d.category || "—")}</p>
             ${delivBadge}${stockBadge}
             <div class="card-actions">
-              <button class="edit-btn" data-action="edit" data-id="${pid}">✏️ Edit</button>
-              <button class="del-btn"  data-action="delete" data-id="${pid}">🗑️ Delete</button>
+              <button class="edit-btn" data-action="edit"   data-id="${esc(pid)}">✏️ Edit</button>
+              <button class="del-btn"  data-action="delete" data-id="${esc(pid)}">🗑️ Delete</button>
             </div>
           </div>`;
       });
-    } catch(e) {
+    } catch (e) {
       console.error("loadProducts error:", e);
-      div.innerHTML = `<p style='color:red;padding:10px;'>Failed to load: ${e.message}</p>`;
+      div.innerHTML = `<p style='color:red;padding:10px;'>Failed to load: ${esc(e.message)}</p>`;
     }
   }
 
-  // Single event delegate for edit / delete buttons
+  /* FIX: event delegation — no inline onclick, safe with any product ID */
   document.getElementById("products").addEventListener("click", async (e) => {
     const btn = e.target.closest("button[data-action]");
     if (!btn) return;
@@ -194,7 +207,7 @@ function init() {
     try {
       await deleteDoc(doc(db, "Products", id));
       loadProducts();
-    } catch(e) {
+    } catch (e) {
       alert("Delete failed: " + e.message);
     }
   }
@@ -205,7 +218,6 @@ function init() {
   async function handleEdit(id) {
     currentEditId = id;
     try {
-      // Use getDoc (single doc) — much faster & simpler than getDocs on whole collection
       const snap = await getDoc(doc(db, "Products", id));
       if (!snap.exists()) { alert("Product not found."); return; }
       const data = snap.data();
@@ -221,7 +233,7 @@ function init() {
 
       await populateCategorySelect(document.getElementById("editCategory"), data.category || "");
       document.getElementById("editPopup").style.display = "flex";
-    } catch(e) {
+    } catch (e) {
       alert("Failed to load product: " + e.message);
     }
   }
@@ -231,7 +243,6 @@ function init() {
     currentEditId = "";
   };
 
-  // Close popup on overlay click
   document.getElementById("editPopup").addEventListener("click", (e) => {
     if (e.target === document.getElementById("editPopup")) window.closeEdit();
   });
@@ -245,7 +256,7 @@ function init() {
       await updateDoc(doc(db, "Products", currentEditId), {
         name,
         price:        Number(price),
-        oldPrice:     Number(document.getElementById("editOldPrice").value)    || null,
+        oldPrice:     Number(document.getElementById("editOldPrice").value) || null,
         packQty:      document.getElementById("editPackQty").value.trim(),
         Image:        document.getElementById("editImage").value.trim(),
         description:  document.getElementById("editDescription").value.trim(),
@@ -256,7 +267,7 @@ function init() {
       alert("✅ Product updated!");
       window.closeEdit();
       loadProducts();
-    } catch(e) {
+    } catch (e) {
       alert("Save failed: " + e.message);
     }
   };
@@ -278,7 +289,6 @@ function init() {
       return;
     }
 
-    // Collect variants
     const quantityVariants = [];
     if (enableVariants.checked) {
       const qtyInputs   = document.querySelectorAll(".variantQty");
@@ -297,31 +307,30 @@ function init() {
     try {
       await addDoc(collection(db, "Products"), {
         name,
-        price:             Number(price),
-        oldPrice:          oldPrice ? Number(oldPrice) : null,
-        packQty:           enableVariants.checked ? "" : packQty,
+        price:           Number(price),
+        oldPrice:        oldPrice ? Number(oldPrice) : null,
+        packQty:         enableVariants.checked ? "" : packQty,
         quantityVariants,
         category,
-        Image:             image,
+        Image:           image,
         description,
         fewStock,
         freeDelivery,
-        createdAt:         new Date()
+        createdAt:       new Date()
       });
       alert("✅ Product Added!");
 
-      // Reset form
-      ["name","price","oldPrice","packQty","image","description"].forEach(id => {
+      ["name", "price", "oldPrice", "packQty", "image", "description"].forEach(id => {
         document.getElementById(id).value = "";
       });
-      document.getElementById("fewStock").checked    = false;
-      document.getElementById("freeDelivery").checked= false;
-      enableVariants.checked         = false;
-      variantFields.innerHTML        = "";
-      variantSection.style.display   = "none";
-      packQtyInput.style.display     = "block";
+      document.getElementById("fewStock").checked     = false;
+      document.getElementById("freeDelivery").checked = false;
+      enableVariants.checked       = false;
+      variantFields.innerHTML      = "";
+      variantSection.style.display = "none";
+      packQtyInput.style.display   = "block";
       loadProducts();
-    } catch(e) {
+    } catch (e) {
       alert("Add failed: " + e.message);
       console.error("addDoc error:", e);
     }
