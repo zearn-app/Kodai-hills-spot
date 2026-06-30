@@ -4,9 +4,18 @@ import {
     collection, query, where, getDocs, addDoc, doc, getDoc, setDoc
 } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
-let currentUser   = null;
-let checkoutItems = [];
-let totalAmount   = 0;
+/* ── HTML escape helper — prevents XSS when rendering Firestore data ── */
+function esc(s) {
+    return String(s ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+}
+
+let currentUser    = null;
+let checkoutItems  = [];
+let totalAmount    = 0;
 let deliveryCharge = 0;
 
 /* Holds the resolved delivery address for the order */
@@ -51,26 +60,23 @@ async function loadSavedAddress(user) {
             const data = userSnap.data();
             const addr = data.address || {};
 
-            /* Trim all fields — empty strings ("") count as missing */
             const s = (v) => (v || "").toString().trim();
             const hasAddress =
                 s(addr.state) && s(addr.district) &&
                 s(addr.area)  && s(addr.street)   && s(addr.pincode);
 
             if (hasAddress) {
-                /* Show saved address card */
                 document.getElementById("savedName").innerText =
                     s(data.name) || user.displayName || "—";
                 document.getElementById("savedPhone").innerText =
                     "📞 " + (s(data.phone) || "—");
                 document.getElementById("savedLines").innerHTML =
-                    `${s(addr.area)}, ${s(addr.street)}<br>
-                     ${s(addr.district)}, ${s(addr.state)} – ${s(addr.pincode)}`;
+                    `${esc(s(addr.area))}, ${esc(s(addr.street))}<br>
+                     ${esc(s(addr.district))}, ${esc(s(addr.state))} – ${esc(s(addr.pincode))}`;
 
                 savedCard.style.display = "block";
                 form.style.display = "none";
 
-                /* Cache as resolved address */
                 resolvedAddress = {
                     name:     s(data.name)  || user.displayName || "",
                     phone:    s(data.phone) || "",
@@ -84,13 +90,13 @@ async function loadSavedAddress(user) {
                 return;
             }
 
-            /* Address exists but is incomplete — pre-fill what we have */
-            const nameField  = document.getElementById("name");
-            const phoneField = document.getElementById("phone");
-            const emailField = document.getElementById("email");
-            const areaField  = document.getElementById("area");
-            const streetField= document.getElementById("street");
-            const pinField   = document.getElementById("pincode");
+            /* Address incomplete — pre-fill what we have */
+            const nameField   = document.getElementById("name");
+            const phoneField  = document.getElementById("phone");
+            const emailField  = document.getElementById("email");
+            const areaField   = document.getElementById("area");
+            const streetField = document.getElementById("street");
+            const pinField    = document.getElementById("pincode");
 
             if (nameField  && s(data.name))   nameField.value   = s(data.name);
             if (phoneField && s(data.phone))   phoneField.value  = s(data.phone);
@@ -99,7 +105,6 @@ async function loadSavedAddress(user) {
             if (streetField&& s(addr.street))  streetField.value = s(addr.street);
             if (pinField   && s(addr.pincode)) pinField.value    = s(addr.pincode);
 
-            /* Pre-select state & district dropdowns if saved */
             if (s(addr.state)) {
                 window.selectedState = s(addr.state);
                 const stateEl = document.getElementById("stateSelect");
@@ -112,7 +117,6 @@ async function loadSavedAddress(user) {
             }
         }
 
-        /* No complete saved address — show form */
         savedCard.style.display = "none";
         form.style.display      = "block";
 
@@ -210,7 +214,6 @@ async function loadCheckout() {
             checkoutItems = await Promise.all(fetchPromises);
         }
 
-        /* ── Render items ── */
         if (checkoutItems.length === 0) {
             orderItems.innerHTML = `
               <div style="text-align:center;padding:30px 10px;">
@@ -229,19 +232,20 @@ async function loadCheckout() {
             const itemTotal = Number(item.totalPrice || unitPrice * qty);
             totalAmount    += itemTotal;
 
+            /* FIX: escape all Firestore strings before inserting into innerHTML */
             html += `
             <div class="product-card">
               <div class="product-img-wrap">
-                <img src="${item.image || 'logo.png'}"
+                <img src="${esc(item.image || "logo.png")}"
                      onerror="this.src='logo.png'"
-                     alt="${item.name || ''}">
+                     alt="${esc(item.name || "")}">
               </div>
               <div class="product-info">
-                <div class="product-name">${item.name || "Product"}</div>
+                <div class="product-name">${esc(item.name || "Product")}</div>
                 <div class="product-price">₹${itemTotal}</div>
                 <div class="product-meta">
                   <span>Unit Price: ₹${unitPrice}</span>
-                  <span>Qty: ${qty} &nbsp;|&nbsp; Pack: ${item.pack || item.selectedSize || "-"}</span>
+                  <span>Qty: ${qty} &nbsp;|&nbsp; Pack: ${esc(item.pack || item.selectedSize || "-")}</span>
                 </div>
               </div>
             </div>`;
@@ -265,7 +269,6 @@ onAuthStateChanged(auth, async (user) => {
     if (!user) { window.location = "login.html"; return; }
     currentUser = user;
 
-    /* Load address first, then items in parallel */
     await loadSavedAddress(user);
     loadCheckout();
 });
@@ -273,17 +276,14 @@ onAuthStateChanged(auth, async (user) => {
 /* ─────────────── Place Order ─────────────── */
 document.getElementById("placeOrder").onclick = async () => {
 
-    /* Decide which address to use */
-    const form      = document.getElementById("addressForm");
+    const form       = document.getElementById("addressForm");
     const formVisible = form && form.style.display !== "none";
 
     let addr;
     if (formVisible || window.usingNewAddress) {
-        /* User filled in the form (new or changed address) */
         addr = collectFormAddress();
-        if (!addr) return; /* validation failed */
+        if (!addr) return;
     } else {
-        /* Use cached saved address */
         addr = resolvedAddress;
         if (!addr) {
             showPopup("Missing Information", "Please provide a delivery address.", "error");
@@ -317,6 +317,9 @@ document.getElementById("placeOrder").onclick = async () => {
         console.warn("Could not save address:", e);
     }
 
+    /* NOTE: This is currently the TEST Razorpay key.
+       Before going live, replace with your live key on a backend server
+       and verify payment signatures server-side before saving orders. */
     const options = {
         key:         "rzp_test_T5tWAjBQVPNBI4",
         amount:      grandTotal * 100,
@@ -330,6 +333,8 @@ document.getElementById("placeOrder").onclick = async () => {
         handler: async function(response) {
             try {
                 for (const item of checkoutItems) {
+                    /* FIX: status was "Pending" — changed to "Order Placed"
+                       to match the admin panel's STATUS_OPTIONS list */
                     await addDoc(collection(db, "Orders"), {
                         uid:           currentUser.uid,
                         name:          item.name,
@@ -348,7 +353,7 @@ document.getElementById("placeOrder").onclick = async () => {
                         deliveryCharge,
                         grandTotal,
                         paymentId:     response.razorpay_payment_id,
-                        status:        "Pending",
+                        status:        "Order Placed",   // FIX: was "Pending"
                         createdAt:     new Date()
                     });
                 }
