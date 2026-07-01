@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Kodai Hills Spot — Banners</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif;}
+body{background:#f0f4f0;min-height:100vh;padding:20px 16px 60px;}
+
+.navbar{
+  background:white;padding:14px 16px;border-radius:16px;
+  display:flex;align-items:center;gap:12px;margin-bottom:20px;
+  box-shadow:0 2px 10px rgba(0,0,0,.08);
+}
+.back-btn{
+  font-size:22px;text-decoration:none;color:#2e7d32;font-weight:700;
+  width:36px;height:36px;display:flex;align-items:center;justify-content:center;
+}
+.logo-text{font-size:18px;font-weight:700;color:#2e7d32;}
+
+.card{
+  background:white;border-radius:16px;padding:18px;margin-bottom:18px;
+  box-shadow:0 2px 8px rgba(0,0,0,.07);
+}
+.card h2{font-size:15px;margin-bottom:12px;color:#1a1a1a;}
+
+.add-row{display:flex;gap:10px;}
+.add-row input{
+  flex:1;padding:12px;border:1px solid #ddd;border-radius:10px;font-size:14px;outline:none;
+}
+.add-row input:focus{border-color:#2e7d32;}
+.add-row button{
+  padding:12px 18px;background:#2e7d32;color:white;border:none;
+  border-radius:10px;font-weight:700;cursor:pointer;font-size:14px;white-space:nowrap;
+}
+.add-row button:active{transform:scale(.97);}
+
+.hint{font-size:12px;color:#999;margin-top:8px;}
+
+.slide-item{
+  display:flex;align-items:center;gap:12px;background:#fafafa;
+  border-radius:12px;padding:10px;margin-bottom:10px;border:1px solid #eee;
+}
+.slide-item img{
+  width:70px;height:48px;object-fit:cover;border-radius:8px;flex-shrink:0;background:#eee;
+}
+.slide-url{
+  flex:1;font-size:12px;color:#666;word-break:break-all;
+}
+.slide-actions{display:flex;flex-direction:column;gap:4px;}
+.slide-actions button{
+  width:32px;height:26px;border:none;border-radius:6px;background:#e3f2fd;
+  color:#1565c0;font-size:13px;cursor:pointer;
+}
+.slide-actions .del-btn{background:#fce4ec;color:#c62828;}
+.slide-actions button:disabled{opacity:.3;cursor:default;}
+
+.empty{
+  text-align:center;color:#aaa;padding:30px 10px;font-size:14px;
+}
+
+.save-note{
+  font-size:12px;color:#2e7d32;text-align:center;margin-top:6px;
+  opacity:0;transition:.3s;
+}
+.save-note.show{opacity:1;}
+</style>
+</head>
+<body>
+
+<nav class="navbar">
+  <a class="back-btn" href="admin.html">←</a>
+  <div class="logo-text">Manage Banners</div>
+</nav>
+
+<div class="card">
+  <h2>Add Slide Image</h2>
+  <div class="add-row">
+    <input id="newSlideUrl" placeholder="Paste image URL (e.g. https://...)">
+    <button id="addSlideBtn">Add</button>
+  </div>
+  <p class="hint">These images appear in the rotating slider on the home page, in the order shown below. Upload your image somewhere (e.g. Firebase Storage, imgbb, etc.) and paste the link here.</p>
+</div>
+
+<div class="card">
+  <h2>Current Slides</h2>
+  <div id="slideList"></div>
+  <p class="save-note" id="saveNote">✓ Saved</p>
+</div>
+
+<script type="module">
+import { auth, db } from "./firebase.js";
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
+import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
+
+const DEFAULT_SLIDES = ["im1.png", "im2.png", "im3.png"];
+const SLIDER_DOC = doc(db, "Settings", "slider");
+
+const slideList  = document.getElementById("slideList");
+const newUrlInput= document.getElementById("newSlideUrl");
+const addBtn     = document.getElementById("addSlideBtn");
+const saveNote   = document.getElementById("saveNote");
+
+let slides = [];
+
+onAuthStateChanged(auth, async (user) => {
+  if (!user) { window.location = "index.html"; return; }
+  if (user.email !== "kodaihillsspot@gmail.com") {
+    alert("Access denied");
+    window.location = "home.html";
+    return;
+  }
+  await loadSlides();
+});
+
+async function loadSlides() {
+  try {
+    const snap = await getDoc(SLIDER_DOC);
+    if (snap.exists() && snap.data().images?.length) {
+      slides = snap.data().images;
+    } else {
+      slides = [...DEFAULT_SLIDES];
+    }
+  } catch (e) {
+    console.error("loadSlides error:", e);
+    slides = [...DEFAULT_SLIDES];
+  }
+  render();
+}
+
+async function saveSlides() {
+  try {
+    await setDoc(SLIDER_DOC, { images: slides });
+    flashSaved();
+  } catch (e) {
+    alert("Failed to save: " + e.message);
+  }
+}
+
+function flashSaved() {
+  saveNote.classList.add("show");
+  setTimeout(() => saveNote.classList.remove("show"), 1500);
+}
+
+function render() {
+  slideList.innerHTML = "";
+
+  if (!slides.length) {
+    slideList.innerHTML = `<div class="empty">No slides yet. Add one above.</div>`;
+    return;
+  }
+
+  slides.forEach((url, i) => {
+    const row = document.createElement("div");
+    row.className = "slide-item";
+    row.innerHTML = `
+      <img src="${url}" onerror="this.src='logo.png'">
+      <div class="slide-url">${url}</div>
+      <div class="slide-actions">
+        <button class="up-btn" ${i === 0 ? "disabled" : ""}>↑</button>
+        <button class="down-btn" ${i === slides.length - 1 ? "disabled" : ""}>↓</button>
+        <button class="del-btn">✕</button>
+      </div>
+    `;
+
+    row.querySelector(".up-btn").onclick = () => {
+      if (i === 0) return;
+      [slides[i - 1], slides[i]] = [slides[i], slides[i - 1]];
+      render();
+      saveSlides();
+    };
+    row.querySelector(".down-btn").onclick = () => {
+      if (i === slides.length - 1) return;
+      [slides[i + 1], slides[i]] = [slides[i], slides[i + 1]];
+      render();
+      saveSlides();
+    };
+    row.querySelector(".del-btn").onclick = () => {
+      if (!confirm("Remove this slide?")) return;
+      slides.splice(i, 1);
+      render();
+      saveSlides();
+    };
+
+    slideList.appendChild(row);
+  });
+}
+
+addBtn.onclick = () => {
+  const url = newUrlInput.value.trim();
+  if (!url) { alert("Paste an image URL first."); return; }
+  slides.push(url);
+  newUrlInput.value = "";
+  render();
+  saveSlides();
+};
+
+newUrlInput.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") addBtn.click();
+});
+</script>
+</body>
+</html>
