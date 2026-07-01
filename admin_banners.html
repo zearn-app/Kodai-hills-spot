@@ -89,6 +89,19 @@ body{background:#f0f4f0;min-height:100vh;padding:20px 16px 60px;}
   <p class="save-note" id="saveNote">✓ Saved</p>
 </div>
 
+<script>
+  // Catches any error in the module script below and surfaces it on-page,
+  // since module-script errors don't otherwise show up as a visible failure.
+  window.addEventListener("error", (e) => showFatal(e.message));
+  function showFatal(msg) {
+    const box = document.getElementById("fatalError");
+    box.style.display = "block";
+    box.innerText = "⚠️ Page error: " + msg;
+  }
+</script>
+
+<div id="fatalError" style="display:none;background:#fce4ec;color:#c62828;padding:12px 16px;border-radius:12px;margin-bottom:16px;font-size:13px;"></div>
+
 <script type="module">
 import { auth, db } from "./firebase.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
@@ -103,6 +116,21 @@ const addBtn     = document.getElementById("addSlideBtn");
 const saveNote   = document.getElementById("saveNote");
 
 let slides = [];
+
+// Wire the Add button immediately, independent of auth/data loading,
+// so a slow or failed auth/Firestore check can't be why clicking does nothing.
+addBtn.addEventListener("click", () => {
+  const url = newUrlInput.value.trim();
+  if (!url) { alert("Paste an image URL first."); return; }
+  slides.push(url);
+  newUrlInput.value = "";
+  render();
+  saveSlides();
+});
+
+newUrlInput.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") addBtn.click();
+});
 
 onAuthStateChanged(auth, async (user) => {
   if (!user) { window.location = "index.html"; return; }
@@ -124,6 +152,10 @@ async function loadSlides() {
     }
   } catch (e) {
     console.error("loadSlides error:", e);
+    document.getElementById("fatalError").style.display = "block";
+    document.getElementById("fatalError").innerText =
+      "⚠️ Could not load slides from Firestore: " + e.message +
+      " (showing defaults — adding a new slide should still work once this is fixed).";
     slides = [...DEFAULT_SLIDES];
   }
   render();
@@ -134,7 +166,11 @@ async function saveSlides() {
     await setDoc(SLIDER_DOC, { images: slides });
     flashSaved();
   } catch (e) {
-    alert("Failed to save: " + e.message);
+    console.error("saveSlides error:", e);
+    document.getElementById("fatalError").style.display = "block";
+    document.getElementById("fatalError").innerText =
+      "⚠️ Save failed: " + e.message +
+      " — this is almost always a Firestore security-rules issue. Check that your rules allow writes to the 'Settings' collection for the admin account.";
   }
 }
 
@@ -187,18 +223,6 @@ function render() {
   });
 }
 
-addBtn.onclick = () => {
-  const url = newUrlInput.value.trim();
-  if (!url) { alert("Paste an image URL first."); return; }
-  slides.push(url);
-  newUrlInput.value = "";
-  render();
-  saveSlides();
-};
-
-newUrlInput.addEventListener("keydown", (e) => {
-  if (e.key === "Enter") addBtn.click();
-});
 </script>
 </body>
 </html>
