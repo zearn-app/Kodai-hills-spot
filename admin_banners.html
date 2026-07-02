@@ -90,35 +90,28 @@ body{background:#f0f4f0;min-height:100vh;padding:20px 16px 60px;}
 </div>
 
 <script>
-  // Catches any error in the module script below and surfaces it on-page,
-  // since module-script errors don't otherwise show up as a visible failure.
-  window.addEventListener("error", (e) => showFatal(e.message));
-  function showFatal(msg) {
-    const box = document.getElementById("fatalError");
-    box.style.display = "block";
-    box.innerText = "⚠️ Page error: " + msg;
-  }
+function showFatal(msg) {
+  const box = document.getElementById("fatalError");
+  box.style.display = "block";
+  box.innerText = "⚠️ " + msg;
+}
+window.addEventListener("error", (e) => showFatal("Page error: " + e.message));
 </script>
 
 <div id="fatalError" style="display:none;background:#fce4ec;color:#c62828;padding:12px 16px;border-radius:12px;margin-bottom:16px;font-size:13px;"></div>
 
-<script type="module">
-import { auth, db } from "./firebase.js";
-import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
-import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
-
+<script>
 const DEFAULT_SLIDES = ["im1.png", "im2.png", "im3.png"];
-const SLIDER_DOC = doc(db, "Settings", "slider");
 
-const slideList  = document.getElementById("slideList");
-const newUrlInput= document.getElementById("newSlideUrl");
-const addBtn     = document.getElementById("addSlideBtn");
-const saveNote   = document.getElementById("saveNote");
+const slideList   = document.getElementById("slideList");
+const newUrlInput = document.getElementById("newSlideUrl");
+const addBtn      = document.getElementById("addSlideBtn");
+const saveNote    = document.getElementById("saveNote");
 
 let slides = [];
+let fb = null; // { auth, db, doc, getDoc, setDoc } once loaded
 
-// Wire the Add button immediately, independent of auth/data loading,
-// so a slow or failed auth/Firestore check can't be why clicking does nothing.
+// ── UI wiring happens immediately, with zero dependency on Firebase loading ──
 addBtn.addEventListener("click", () => {
   const url = newUrlInput.value.trim();
   if (!url) { alert("Paste an image URL first."); return; }
@@ -131,48 +124,6 @@ addBtn.addEventListener("click", () => {
 newUrlInput.addEventListener("keydown", (e) => {
   if (e.key === "Enter") addBtn.click();
 });
-
-onAuthStateChanged(auth, async (user) => {
-  if (!user) { window.location = "index.html"; return; }
-  if (user.email !== "kodaihillsspot@gmail.com") {
-    alert("Access denied");
-    window.location = "home.html";
-    return;
-  }
-  await loadSlides();
-});
-
-async function loadSlides() {
-  try {
-    const snap = await getDoc(SLIDER_DOC);
-    if (snap.exists() && snap.data().images?.length) {
-      slides = snap.data().images;
-    } else {
-      slides = [...DEFAULT_SLIDES];
-    }
-  } catch (e) {
-    console.error("loadSlides error:", e);
-    document.getElementById("fatalError").style.display = "block";
-    document.getElementById("fatalError").innerText =
-      "⚠️ Could not load slides from Firestore: " + e.message +
-      " (showing defaults — adding a new slide should still work once this is fixed).";
-    slides = [...DEFAULT_SLIDES];
-  }
-  render();
-}
-
-async function saveSlides() {
-  try {
-    await setDoc(SLIDER_DOC, { images: slides });
-    flashSaved();
-  } catch (e) {
-    console.error("saveSlides error:", e);
-    document.getElementById("fatalError").style.display = "block";
-    document.getElementById("fatalError").innerText =
-      "⚠️ Save failed: " + e.message +
-      " — this is almost always a Firestore security-rules issue. Check that your rules allow writes to the 'Settings' collection for the admin account.";
-  }
-}
 
 function flashSaved() {
   saveNote.classList.add("show");
@@ -223,6 +174,77 @@ function render() {
   });
 }
 
+// ── Firebase is loaded separately via dynamic import, wrapped in try/catch,
+//    so a failure here can NEVER take down the Add/reorder/delete UI above. ──
+async function initFirebase() {
+  try {
+    const fbApp   = await import("./firebase.js");
+    const fbAuth  = await import("https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js");
+    const fbStore = await import("https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js");
+
+    fb = {
+      auth: fbApp.auth,
+      db: fbApp.db,
+      onAuthStateChanged: fbAuth.onAuthStateChanged,
+      doc: fbStore.doc,
+      getDoc: fbStore.getDoc,
+      setDoc: fbStore.setDoc
+    };
+
+    fb.onAuthStateChanged(fb.auth, async (user) => {
+      if (!user) { window.location = "index.html"; return; }
+      if (user.email !== "kodaihillsspot@gmail.com") {
+        alert("Access denied");
+        window.location = "home.html";
+        return;
+      }
+      await loadSlides();
+    });
+  } catch (e) {
+    console.error("Firebase init failed:", e);
+    showFatal("Could not load Firebase (" + e.message + "). Showing default slides — " +
+      "changes made here won't be saved until this is fixed. Check that firebase.js is in the same folder as this page, " +
+      "and that it exports both 'auth' and 'db'.");
+    slides = [...DEFAULT_SLIDES];
+    render();
+  }
+}
+
+async function loadSlides() {
+  try {
+    const ref  = fb.doc(fb.db, "Settings", "slider");
+    const snap = await fb.getDoc(ref);
+    if (snap.exists() && snap.data().images?.length) {
+      slides = snap.data().images;
+    } else {
+      slides = [...DEFAULT_SLIDES];
+    }
+  } catch (e) {
+    console.error("loadSlides error:", e);
+    showFatal("Could not load slides from Firestore: " + e.message +
+      " (showing defaults — adding a new slide should still work once this is fixed).");
+    slides = [...DEFAULT_SLIDES];
+  }
+  render();
+}
+
+async function saveSlides() {
+  if (!fb) {
+    showFatal("Not connected to Firebase yet — this slide was added on-screen but NOT saved. Reload and check the error above.");
+    return;
+  }
+  try {
+    const ref = fb.doc(fb.db, "Settings", "slider");
+    await fb.setDoc(ref, { images: slides });
+    flashSaved();
+  } catch (e) {
+    console.error("saveSlides error:", e);
+    showFatal("Save failed: " + e.message +
+      " — this is almost always a Firestore security-rules issue. Check that your rules allow writes to the 'Settings' collection for the admin account.");
+  }
+}
+
+initFirebase();
 </script>
 </body>
 </html>
